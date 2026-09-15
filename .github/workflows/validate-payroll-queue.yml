@@ -1,0 +1,36 @@
+name: Validate Payroll Queue
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - payroll-queue.json
+      - contributor-accounts.json
+      - scripts/validatePayrollQueue.js
+      - .github/workflows/validate-payroll-queue.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - payroll-queue.json
+      - contributor-accounts.json
+      - scripts/validatePayrollQueue.js
+      - .github/workflows/validate-payroll-queue.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate payroll queue
+        run: node scripts/validatePayrollQueue.js

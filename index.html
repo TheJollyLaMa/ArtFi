@@ -14,6 +14,8 @@
         --accent: #7af0c6;
         --accent-2: #8d7cf7;
         --line: rgba(122, 240, 198, 0.22);
+        --danger: #ff6b6b;
+        --ok: #7af0c6;
       }
 
       * {
@@ -35,7 +37,7 @@
         min-height: 100vh;
         display: grid;
         place-items: center;
-        padding: 32px;
+        padding: 32px 28px 92px;
       }
 
       .shell {
@@ -46,7 +48,9 @@
         align-items: center;
       }
 
-      .hero {
+      .hero,
+      .art,
+      .admin-panel {
         padding: 24px;
         background: var(--panel);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -108,12 +112,6 @@
 
       .art {
         position: relative;
-        padding: 20px;
-        border-radius: 32px;
-        background:
-          radial-gradient(circle at center, rgba(122, 240, 198, 0.12), transparent 42%),
-          rgba(7, 10, 18, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.08);
         overflow: hidden;
       }
 
@@ -162,18 +160,372 @@
         color: var(--text);
       }
 
-      @media (max-width: 860px) {
-        .shell {
+      .wallet-dock {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        z-index: 50;
+        width: 188px;
+        height: 188px;
+        pointer-events: none;
+      }
+
+      .wallet-orbit {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .wallet-rail {
+        position: absolute;
+        inset: 20px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.03);
+      }
+
+      .wallet-orbit-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center;
+        transform: translate(-50%, -124px);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(5, 8, 16, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text);
+        white-space: nowrap;
+        box-shadow: 0 0 20px rgba(122, 240, 198, 0.12);
+        animation: orbit 12s linear infinite;
+      }
+
+      .wallet-orbit-label .mm-mini {
+        width: 13px;
+        height: 13px;
+        display: inline-block;
+        background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'%3E%3Cpath fill='%23f6851b' d='M48.4 9 31.1 21.9l3.2-7.6z'/%3E%3Cpath fill='%23e2761b' d='M7.6 9 24.7 22.1l-3.1-7.8z'/%3E%3Cpath fill='%23e4761b' d='m42.7 37.8-4.6 7.1 9.8 2.7 2.8-9.5z'/%3E%3Cpath fill='%23e4761b' d='m5.7 38.1 2.8 9.5 9.8-2.7-4.6-7.1z'/%3E%3Cpath fill='%23e4761b' d='m18.9 24.4-2.7 4.1 9.7.4-.4-10.4z'/%3E%3Cpath fill='%23e4761b' d='m37.1 24.4-6.6-5.9-.2 10.4 9.7-.4z'/%3E%3Cpath fill='%23d7c1b3' d='m18.9 28.5 6.7 12.8.3-8.9z'/%3E%3Cpath fill='%23d7c1b3' d='m31.1 28.5-.2 3.9.3 8.9 6.6-12.8z'/%3E%3Cpath fill='%23233447' d='m18.9 41.3 6.4 5.5.3-8.6z'/%3E%3Cpath fill='%23233447' d='m31.1 38.2.3 8.6 6.4-5.5z'/%3E%3C/svg%3E");
+      }
+
+      .wallet-action {
+        position: absolute;
+        inset: 50% auto auto 50%;
+        width: 74px;
+        height: 74px;
+        transform: translate(-50%, -50%);
+        border: 0;
+        border-radius: 50%;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        color: var(--text);
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03));
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.45);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        pointer-events: auto;
+      }
+
+      .wallet-action:hover {
+        transform: translate(-50%, -50%) scale(1.04);
+      }
+
+      .wallet-action:active {
+        transform: translate(-50%, -50%) scale(0.97);
+      }
+
+      .wallet-action::before {
+        content: "";
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--ring-glow, rgba(255, 107, 107, 0.55)) 0%, transparent 62%);
+        filter: blur(6px);
+        z-index: -1;
+      }
+
+      .wallet-action[data-state="connected"] {
+        --ring-glow: rgba(122, 240, 198, 0.78);
+        box-shadow:
+          0 0 0 2px rgba(122, 240, 198, 0.12),
+          0 0 28px rgba(122, 240, 198, 0.42),
+          0 10px 30px rgba(0, 0, 0, 0.45);
+      }
+
+      .wallet-action[data-state="disconnected"] {
+        --ring-glow: rgba(255, 107, 107, 0.75);
+        box-shadow:
+          0 0 0 2px rgba(255, 107, 107, 0.12),
+          0 0 28px rgba(255, 107, 107, 0.36),
+          0 10px 30px rgba(0, 0, 0, 0.45);
+      }
+
+      .wallet-action svg {
+        width: 34px;
+        height: 34px;
+        display: block;
+      }
+
+      .wallet-account {
+        position: absolute;
+        inset: 50% auto auto 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.66rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text);
+        padding-top: 132px;
+        text-align: center;
+        width: 100%;
+        line-height: 1.1;
+        pointer-events: none;
+      }
+
+      .account-hidden {
+        opacity: 0;
+      }
+
+      .orbit-line {
+        animation: orbitLine 10s linear infinite;
+      }
+
+      @keyframes orbit {
+        from {
+          transform: translate(-50%, -124px) rotate(0deg);
+        }
+        to {
+          transform: translate(-50%, -124px) rotate(360deg);
+        }
+      }
+
+      @keyframes orbitLine {
+        from {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      .admin-panel {
+        width: min(1120px, 100%);
+        margin-top: 24px;
+        display: none;
+      }
+
+      .admin-panel[data-visible="true"] {
+        display: block;
+      }
+
+      .admin-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .admin-head h2 {
+        margin: 0;
+        font-size: 1.7rem;
+      }
+
+      .status-pill {
+        align-self: flex-start;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(122, 240, 198, 0.2);
+        background: rgba(122, 240, 198, 0.08);
+        color: var(--accent);
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .admin-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 18px;
+      }
+
+      .card {
+        padding: 18px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 0.82rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(6, 9, 18, 0.72);
+        color: var(--text);
+        font: inherit;
+      }
+
+      .field textarea {
+        min-height: 88px;
+        resize: vertical;
+      }
+
+      .admin-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 12px 16px;
+        font: inherit;
+        color: #071018;
+        background: linear-gradient(135deg, var(--accent), #adffe8);
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .btn.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .btn:disabled,
+      .field input:disabled,
+      .field select:disabled,
+      .field textarea:disabled {
+        opacity: 0.48;
+        cursor: not-allowed;
+      }
+
+      .queue-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .queue-item {
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.03);
+        cursor: pointer;
+      }
+
+      .queue-item strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .queue-item small {
+        color: var(--muted);
+      }
+
+      .empty-state {
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px dashed rgba(255, 255, 255, 0.14);
+        color: var(--muted);
+      }
+
+      .note {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      @media (max-width: 980px) {
+        .shell,
+        .admin-grid {
           grid-template-columns: 1fr;
         }
 
-        .points {
+        .wallet-dock {
+          transform: scale(0.9);
+          transform-origin: top right;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .points,
+        .field-grid {
           grid-template-columns: 1fr;
+        }
+
+        .admin-head {
+          flex-direction: column;
         }
       }
     </style>
   </head>
   <body>
+    <div class="wallet-dock" aria-label="Wallet connect controls">
+      <div class="wallet-orbit">
+        <div class="wallet-rail"></div>
+        <div class="wallet-orbit-label" id="account-orbit" aria-live="polite">
+          <span id="account-prefix">0x0000</span>
+          <span class="mm-mini" aria-hidden="true"></span>
+          <span class="mm-mini" aria-hidden="true"></span>
+          <span class="mm-mini" aria-hidden="true"></span>
+          <span class="mm-mini" aria-hidden="true"></span>
+          <span id="account-suffix">0000</span>
+        </div>
+        <button id="wallet-button" class="wallet-action" data-state="disconnected" type="button" aria-label="Connect MetaMask">
+          <svg viewBox="0 0 56 56" role="img" aria-hidden="true">
+            <path fill="#f6851b" d="M48.4 9 31.1 21.9l3.2-7.6z"></path>
+            <path fill="#e2761b" d="M7.6 9 24.7 22.1l-3.1-7.8z"></path>
+            <path fill="#e4761b" d="m42.7 37.8-4.6 7.1 9.8 2.7 2.8-9.5z"></path>
+            <path fill="#e4761b" d="m5.7 38.1 2.8 9.5 9.8-2.7-4.6-7.1z"></path>
+            <path fill="#e4761b" d="m18.9 24.4-2.7 4.1 9.7.4-.4-10.4z"></path>
+            <path fill="#e4761b" d="m37.1 24.4-6.6-5.9-.2 10.4 9.7-.4z"></path>
+            <path fill="#d7c1b3" d="m18.9 28.5 6.7 12.8.3-8.9z"></path>
+            <path fill="#d7c1b3" d="m31.1 28.5-.2 3.9.3 8.9 6.6-12.8z"></path>
+            <path fill="#233447" d="m18.9 41.3 6.4 5.5.3-8.6z"></path>
+            <path fill="#233447" d="m31.1 38.2.3 8.6 6.4-5.5z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <main>
       <section class="shell" aria-label="ArtFi landing page">
         <div class="hero">
@@ -197,11 +549,287 @@
             alt="ArtFi branding coin artwork"
           />
           <div class="caption">
-            <strong>Coin reference:</strong> the landing page palette and circular
-            framing follow the artwork’s minted, futuristic look.
+            <strong>MetaMask admin access:</strong> connect the wallet in the upper
+            right to reveal the payroll controls and finalize payouts.
+          </div>
+        </div>
+      </section>
+
+      <section id="admin-panel" class="admin-panel" data-visible="false" aria-label="Payroll admin panel">
+        <div class="admin-head">
+          <div>
+            <h2>Payroll Admin</h2>
+            <p class="muted">Connected wallets can review the queue and finalize payments from here.</p>
+          </div>
+          <div class="status-pill" id="admin-status">Wallet disconnected</div>
+        </div>
+
+        <div class="admin-grid">
+          <div class="card">
+            <h3>Finalize payout</h3>
+            <p class="muted">
+              Use the connected MetaMask account to call the settlement router and complete a payout.
+            </p>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="router-address">Settlement router</label>
+                <input id="router-address" placeholder="0x..." />
+              </div>
+              <div class="field">
+                <label for="creator-address">Creator wallet</label>
+                <input id="creator-address" placeholder="0x..." />
+              </div>
+              <div class="field">
+                <label for="gross-amount">Gross payout (USDC)</label>
+                <input id="gross-amount" placeholder="250.00" inputmode="decimal" />
+              </div>
+              <div class="field">
+                <label for="queue-select">Queue entry</label>
+                <select id="queue-select">
+                  <option value="">Choose a pending payout</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="admin-actions">
+              <button id="finalize-button" class="btn" type="button" disabled>Finalize payout</button>
+              <button id="refresh-button" class="btn secondary" type="button">Refresh queue</button>
+            </div>
+
+            <p class="note" id="tx-note">Connect a wallet to unlock the settlement controls.</p>
+          </div>
+
+          <div class="card">
+            <h3>Pending payroll queue</h3>
+            <p class="muted">Click an entry to prefill the payout form.</p>
+            <div id="queue-list" class="queue-list">
+              <div class="empty-state">Loading payroll queue…</div>
+            </div>
           </div>
         </div>
       </section>
     </main>
+
+    <script type="module">
+      import { BrowserProvider, Contract, parseUnits } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
+
+      const routerAbi = [
+        "function executeDisbursement(address _creator, uint256 _grossMatchAmount)",
+      ];
+
+      const walletButton = document.getElementById("wallet-button");
+      const accountOrbit = document.getElementById("account-orbit");
+      const accountPrefix = document.getElementById("account-prefix");
+      const accountSuffix = document.getElementById("account-suffix");
+      const adminPanel = document.getElementById("admin-panel");
+      const adminStatus = document.getElementById("admin-status");
+      const queueList = document.getElementById("queue-list");
+      const queueSelect = document.getElementById("queue-select");
+      const routerAddress = document.getElementById("router-address");
+      const creatorAddress = document.getElementById("creator-address");
+      const grossAmount = document.getElementById("gross-amount");
+      const finalizeButton = document.getElementById("finalize-button");
+      const refreshButton = document.getElementById("refresh-button");
+      const txNote = document.getElementById("tx-note");
+
+      const state = {
+        provider: null,
+        signer: null,
+        account: "",
+        connected: false,
+        queue: [],
+      };
+
+      const shortAccount = (value) => {
+        if (!value) return ["0x0000", "0000"];
+        return [value.slice(0, 6), value.slice(-4)];
+      };
+
+      const setAccountOrbit = (value) => {
+        const [prefix, suffix] = shortAccount(value);
+        accountPrefix.textContent = prefix;
+        accountSuffix.textContent = suffix;
+        accountOrbit.style.opacity = value ? "1" : "0.25";
+      };
+
+      const setWalletUI = (connected) => {
+        walletButton.dataset.state = connected ? "connected" : "disconnected";
+        walletButton.setAttribute("aria-label", connected ? "Disconnect wallet" : "Connect MetaMask");
+        finalizeButton.disabled = !connected;
+        adminPanel.dataset.visible = connected ? "true" : "false";
+        adminStatus.textContent = connected ? `Connected ${shortAccount(state.account).join(" • ")}` : "Wallet disconnected";
+        txNote.textContent = connected
+          ? "Connected. You can now queue and finalize payroll settlements."
+          : "Connect a wallet to unlock the settlement controls.";
+      };
+
+      const setQueueOptions = () => {
+        queueSelect.innerHTML = '<option value="">Choose a pending payout</option>';
+        if (!state.queue.length) {
+          queueSelect.innerHTML += '<option value="" disabled>No pending entries</option>';
+          return;
+        }
+
+        for (const entry of state.queue) {
+          const option = document.createElement("option");
+          option.value = JSON.stringify(entry);
+          option.textContent = `${entry.contributorGithub} • ${entry.amount} ${entry.currency || "USDC"} • #${String(entry.issueRef || "").split("#").pop()}`;
+          queueSelect.appendChild(option);
+        }
+      };
+
+      const renderQueue = () => {
+        queueList.innerHTML = "";
+        if (!state.queue.length) {
+          queueList.innerHTML = '<div class="empty-state">No pending payouts found in payroll-queue.json.</div>';
+          return;
+        }
+
+        for (const entry of state.queue) {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "queue-item";
+          item.innerHTML = `
+            <strong>@${entry.contributorGithub} — ${entry.amount} ${entry.currency || "USDC"}</strong>
+            <small>${entry.issueRef} • ${entry.contributor?.slice(0, 10) || "wallet unknown"}…</small>
+          `;
+          item.addEventListener("click", () => {
+            creatorAddress.value = entry.contributor || "";
+            grossAmount.value = entry.amount || "";
+            queueSelect.value = JSON.stringify(entry);
+          });
+          queueList.appendChild(item);
+        }
+      };
+
+      const loadQueue = async () => {
+        try {
+          const response = await fetch("./payroll-queue.json", { cache: "no-store" });
+          const queue = await response.json();
+          state.queue = Array.isArray(queue.pending) ? queue.pending : [];
+        } catch (_) {
+          state.queue = [];
+        }
+
+        renderQueue();
+        setQueueOptions();
+      };
+
+      const connectWallet = async () => {
+        if (!window.ethereum) {
+          txNote.textContent = "MetaMask is not available in this browser.";
+          return;
+        }
+
+        if (state.connected) {
+          state.connected = false;
+          state.signer = null;
+          state.provider = null;
+          state.account = "";
+          setAccountOrbit("");
+          setWalletUI(false);
+          return;
+        }
+
+        const provider = new BrowserProvider(window.ethereum);
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        const signer = await provider.getSigner();
+        const account = (accounts?.[0] || (await signer.getAddress())).toLowerCase();
+
+        state.provider = provider;
+        state.signer = signer;
+        state.account = account;
+        state.connected = true;
+
+        setAccountOrbit(account);
+        setWalletUI(true);
+      };
+
+      const restoreWallet = async () => {
+        if (!window.ethereum) return;
+
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_accounts" });
+          const account = (accounts?.[0] || "").toLowerCase();
+          if (!account) return;
+
+          state.provider = new BrowserProvider(window.ethereum);
+          state.signer = await state.provider.getSigner();
+          state.account = account;
+          state.connected = true;
+          setAccountOrbit(account);
+          setWalletUI(true);
+        } catch (_) {}
+      };
+
+      const finalizePayout = async () => {
+        if (!state.connected || !state.signer) return;
+
+        const router = routerAddress.value.trim();
+        const creator = creatorAddress.value.trim();
+        const amount = grossAmount.value.trim();
+
+        if (!router || !creator || !amount) {
+          txNote.textContent = "Fill in the router, creator, and amount first.";
+          return;
+        }
+
+        try {
+          finalizeButton.disabled = true;
+          txNote.textContent = "Submitting payout transaction…";
+          const contract = new Contract(router, routerAbi, state.signer);
+          const payout = parseUnits(amount, 6);
+          const tx = await contract.executeDisbursement(creator, payout);
+          txNote.textContent = `Transaction sent: ${tx.hash}`;
+          await tx.wait();
+          txNote.textContent = `Payout finalized for ${creator}.`;
+        } catch (error) {
+          txNote.textContent = error?.shortMessage || error?.message || "Payout failed.";
+        } finally {
+          finalizeButton.disabled = !state.connected;
+        }
+      };
+
+      const applyQueueSelection = () => {
+        if (!queueSelect.value) return;
+        try {
+          const entry = JSON.parse(queueSelect.value);
+          creatorAddress.value = entry.contributor || "";
+          grossAmount.value = entry.amount || "";
+        } catch (_) {}
+      };
+
+      walletButton.addEventListener("click", connectWallet);
+      finalizeButton.addEventListener("click", finalizePayout);
+      refreshButton.addEventListener("click", loadQueue);
+      queueSelect.addEventListener("change", applyQueueSelection);
+
+      if (window.ethereum) {
+        window.ethereum.on?.("accountsChanged", (accounts) => {
+          const account = (accounts?.[0] || "").toLowerCase();
+          state.account = account;
+          state.connected = !!account;
+          state.signer = null;
+          state.provider = null;
+          setAccountOrbit(account);
+          setWalletUI(!!account);
+        });
+
+        window.ethereum.on?.("disconnect", () => {
+          state.account = "";
+          state.connected = false;
+          state.signer = null;
+          state.provider = null;
+          setAccountOrbit("");
+          setWalletUI(false);
+        });
+      }
+
+      setAccountOrbit("");
+      setWalletUI(false);
+      restoreWallet();
+      loadQueue();
+    </script>
   </body>
 </html>
