@@ -4,6 +4,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const QUEUE_PATH = path.join(ROOT, 'payroll-queue.json');
 const ACCOUNTS_PATH = path.join(ROOT, 'contributor-accounts.json');
+const PAYOUT_CURRENCY = 'ART';
 
 const ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
 const ISSUE_REF_RE = /^[^/]+\/[^/]+#\d+$/;
@@ -71,6 +72,7 @@ const validateEntry = (entry, section, index) => {
   const contributorGithub = String(entry.contributorGithub || '').trim();
   const contributor = String(entry.contributor || '').trim();
   const amount = String(entry.amount || '').trim();
+  const currency = String(entry.currency || '').trim().toUpperCase();
 
   if (!ISSUE_REF_RE.test(issueRef)) fail(`${section}[${index}].issueRef must look like owner/repo#123`);
   if (!contributorGithub) fail(`${section}[${index}].contributorGithub is required`);
@@ -78,6 +80,7 @@ const validateEntry = (entry, section, index) => {
     fail(`${section}[${index}].contributor must be a valid Ethereum address`);
   }
   if (!amount) fail(`${section}[${index}].amount is required`);
+  if (currency !== PAYOUT_CURRENCY) fail(`${section}[${index}].currency must be ${PAYOUT_CURRENCY}`);
 
   const key = `${section}:${issueRef}:${contributorGithub.toLowerCase()}`;
   if (seen.has(key)) fail(`duplicate payroll entry detected for ${issueRef} / ${contributorGithub}`);
