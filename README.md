@@ -2,31 +2,8 @@
 
 ![ArtFi branding](https://github.com/user-attachments/assets/58069599-d5d0-4bf3-a066-a2ac34234ff8)
 
-Zero-profit micro-liquidity protocol for Artizen creators. Features automated grant advances, human-in-the-loop onboarding, and smart contract settlement.
+Zero-to-no-profit micro-liquidity protocol for Artizen creators. Features automated grant advances, human-in-the-loop onboarding, and smart contract settlement.  Need an advance? attend all the classes to show you're accountable and use your boost points and Art tokens for access to loans according to your project momentum.
+First season newcomers only!
 
-## Smart Contracts Implemented
-
-- `ANIVTypes.sol`: shared data schemas and loan status enum
-- `ANIVRegistry.sol`: creator eligibility and welcomer role registry
-- `InitiationVault.sol`: application intake, welcomer approval, disbursement, and season settlement accounting
-- `EscrowSettlementRouter.sol`: payout interception and automated debt recovery routing
-- `MockERC20.sol`: local test token (USDC-like 6 decimals)
-
-## Local Setup
-
-```bash
-npm install
-cp .env.example .env
-```
-
-## Commands
-
-```bash
-npm run compile
-npm test
-npm run deploy:optimism-sepolia
-```
-
-## Notes
-
-The vault calls `recordAdvanceIssued` in `ANIVRegistry`, so deployment/tests grant `ADMIN_ROLE` to the deployed vault after initialization.
+meant for newcomers to have an easier time with the anticipation phase ...
+  and to introduce the community to new ways we can extend/receive agency to/from each other with web3        tools, software, and frame of mind.
