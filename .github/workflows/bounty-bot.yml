@@ -1,0 +1,146 @@
+name: Bounty Bot
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+
+jobs:
+  queue-bounty:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Queue merged PR payout
+        uses: actions/github-script@v7
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            const queuePath = 'payroll-queue.json';
+            const accountsPath = 'contributor-accounts.json';
+            const repoSlug = `${context.repo.owner}/${context.repo.repo}`;
+            const prBody = process.env.PR_BODY || '';
+            const prAuthor = process.env.PR_AUTHOR || '';
+            const prNumber = Number(process.env.PR_NUMBER);
+
+            const loadJson = (filePath, fallback) => {
+              try {
+                return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              } catch (_) {
+                return fallback;
+              }
+            };
+
+            const queue = loadJson(queuePath, { pending: [], settled: [] });
+            const accounts = loadJson(accountsPath, { contributors: [] });
+
+            if (!Array.isArray(queue.pending)) queue.pending = [];
+            if (!Array.isArray(queue.settled)) queue.settled = [];
+            if (!Array.isArray(accounts.contributors)) accounts.contributors = [];
+
+            const contributor = accounts.contributors.find(
+              entry => String(entry.github || '').toLowerCase() === prAuthor.toLowerCase()
+            );
+
+            if (!contributor || !String(contributor.walletAddress || '').trim()) {
+              core.setFailed(`No whitelisted wallet found for @${prAuthor}.`);
+              return;
+            }
+
+            const issueRefs = [...prBody.matchAll(/(?:close[sd]?|fixe[sd]?|resolve[sd]?)\s+(?:[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)?#(\d+)/gi)]
+              .map(match => Number(match[1]))
+              .filter(Number.isFinite);
+
+            if (issueRefs.length === 0) {
+              console.log('No closing issue references found in the PR body.');
+              return;
+            }
+
+            const uniqueIssueRefs = [...new Set(issueRefs)];
+            const queuedEntries = [];
+
+            for (const issueNumber of uniqueIssueRefs) {
+              const { data: issue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+              });
+
+              const bountyLabel = (issue.labels || [])
+                .map(label => label.name)
+                .find(label => /^bounty:\s*\d+(?:\.\d+)?\s*(BNUT|USDC)$/i.test(label));
+
+              if (!bountyLabel) {
+                console.log(`Skipping issue #${issueNumber} because no bounty label was found.`);
+                continue;
+              }
+
+              const [, amount, currency] = bountyLabel.match(/^bounty:\s*(\d+(?:\.\d+)?)\s*(BNUT|USDC)$/i) || [];
+              const issueRef = `${repoSlug}#${issueNumber}`;
+              const duplicate = [...queue.pending, ...queue.settled].some(
+                entry => entry.issueRef === issueRef && String(entry.contributorGithub || '').toLowerCase() === prAuthor.toLowerCase()
+              );
+
+              if (duplicate) {
+                console.log(`Skipping duplicate payroll entry for ${issueRef} / @${prAuthor}.`);
+                continue;
+              }
+
+              const entry = {
+                issueRef,
+                contributor: contributor.walletAddress,
+                contributorGithub: prAuthor,
+                amount,
+                currency: currency.toUpperCase(),
+                queuedAt: new Date().toISOString(),
+                queuedBy: context.actor,
+              };
+
+              queue.pending.push(entry);
+              queuedEntries.push(entry);
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: `✅ Queued ${amount} ${entry.currency} payout for @${prAuthor} from merged PR #${prNumber}.`,
+              });
+            }
+
+            if (queuedEntries.length === 0) {
+              console.log('No new queue entries were added.');
+              return;
+            }
+
+            fs.writeFileSync(queuePath, `${JSON.stringify(queue, null, 2)}\n`);
+
+            core.summary
+              .addHeading('Payroll queue updated')
+              .addRaw(`Queued ${queuedEntries.length} payout entr${queuedEntries.length === 1 ? 'y' : 'ies'} for @${prAuthor}.`)
+              .write();
+
+      - name: Commit queue update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add payroll-queue.json
+          if git diff --cached --quiet; then
+            echo "No queue changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: queue payroll entries from merged PR"
+          git push

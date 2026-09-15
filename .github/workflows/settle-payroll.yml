@@ -1,0 +1,125 @@
+name: Settle Payroll
+
+on:
+  workflow_dispatch:
+    inputs:
+      contributor_github:
+        description: Contributor GitHub username to settle; leave blank to settle all pending entries
+        required: false
+        type: string
+      issue_ref:
+        description: Issue ref to settle (owner/repo#123)
+        required: false
+        type: string
+      tx_hash:
+        description: On-chain transaction hash
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  settle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Move pending entries to settled
+        id: settle
+        uses: actions/github-script@v7
+        env:
+          CONTRIBUTOR_GITHUB: ${{ github.event.inputs.contributor_github }}
+          ISSUE_REF: ${{ github.event.inputs.issue_ref }}
+          TX_HASH: ${{ github.event.inputs.tx_hash }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            const queuePath = 'payroll-queue.json';
+            const loadJson = (filePath, fallback) => {
+              try {
+                return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              } catch (_) {
+                return fallback;
+              }
+            };
+
+            const queue = loadJson(queuePath, { pending: [], settled: [] });
+            if (!Array.isArray(queue.pending)) queue.pending = [];
+            if (!Array.isArray(queue.settled)) queue.settled = [];
+
+            const contributorGithub = String(process.env.CONTRIBUTOR_GITHUB || '').trim().toLowerCase();
+            const issueRef = String(process.env.ISSUE_REF || '').trim();
+            const txHash = String(process.env.TX_HASH || '').trim();
+            const settleAll = !contributorGithub;
+            const settledAt = new Date().toISOString();
+
+            const matchesEntry = (entry) => {
+              if (settleAll) return true;
+              const sameContributor = String(entry.contributorGithub || '').trim().toLowerCase() === contributorGithub;
+              const sameIssue = !issueRef || String(entry.issueRef || '').trim() === issueRef;
+              return sameContributor && sameIssue;
+            };
+
+            const toSettle = queue.pending.filter(matchesEntry);
+            if (toSettle.length === 0) {
+              core.setOutput('count', '0');
+              console.log('No matching pending entries found.');
+              return;
+            }
+
+            queue.pending = queue.pending.filter(entry => !matchesEntry(entry));
+            queue.settled.push(
+              ...toSettle.map(entry => ({
+                ...entry,
+                settledAt,
+                settledBy: context.actor,
+                ...(txHash ? { txHash } : {}),
+              }))
+            );
+
+            fs.writeFileSync(queuePath, `${JSON.stringify(queue, null, 2)}\n`);
+            core.setOutput('count', String(toSettle.length));
+            core.setOutput('issueRef', issueRef);
+
+      - name: Commit queue update
+        if: steps.settle.outputs.count != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add payroll-queue.json
+          git commit -m "chore: settle payroll entries"
+          git push
+
+      - name: Comment on settled issue
+        if: steps.settle.outputs.count != '0' && github.event.inputs.issue_ref != ''
+        uses: actions/github-script@v7
+        env:
+          ISSUE_REF: ${{ github.event.inputs.issue_ref }}
+          TX_HASH: ${{ github.event.inputs.tx_hash }}
+          COUNT: ${{ steps.settle.outputs.count }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueRef = String(process.env.ISSUE_REF || '').trim();
+            const count = process.env.COUNT || '0';
+            const txHash = String(process.env.TX_HASH || '').trim();
+            const match = issueRef.match(/#(\d+)$/);
+            if (!match) return;
+
+            const body = [
+              `✅ Settled ${count} payroll entr${count === '1' ? 'y' : 'ies'} by @${context.actor}.`,
+              txHash ? `🔗 Tx: ${txHash}` : '',
+            ].filter(Boolean).join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(match[1]),
+              body,
+            });
