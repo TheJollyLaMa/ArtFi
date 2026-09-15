@@ -170,6 +170,48 @@
         pointer-events: none;
       }
 
+      .loan-panel {
+        width: min(1120px, 100%);
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 24px;
+      }
+
+      .loan-card {
+        padding: 20px;
+        border-radius: 22px;
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(18px);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      }
+
+      .loan-card h2 {
+        margin: 0 0 8px;
+        font-size: 1.55rem;
+      }
+
+      .loan-card .muted {
+        margin-bottom: 16px;
+      }
+
+      .loan-form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .loan-form .field {
+        gap: 5px;
+      }
+
+      .loan-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+
       .wallet-orbit {
         position: absolute;
         inset: 0;
@@ -211,6 +253,13 @@
         height: 13px;
         display: inline-block;
         background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'%3E%3Cpath fill='%23f6851b' d='M48.4 9 31.1 21.9l3.2-7.6z'/%3E%3Cpath fill='%23e2761b' d='M7.6 9 24.7 22.1l-3.1-7.8z'/%3E%3Cpath fill='%23e4761b' d='m42.7 37.8-4.6 7.1 9.8 2.7 2.8-9.5z'/%3E%3Cpath fill='%23e4761b' d='m5.7 38.1 2.8 9.5 9.8-2.7-4.6-7.1z'/%3E%3Cpath fill='%23e4761b' d='m18.9 24.4-2.7 4.1 9.7.4-.4-10.4z'/%3E%3Cpath fill='%23e4761b' d='m37.1 24.4-6.6-5.9-.2 10.4 9.7-.4z'/%3E%3Cpath fill='%23d7c1b3' d='m18.9 28.5 6.7 12.8.3-8.9z'/%3E%3Cpath fill='%23d7c1b3' d='m31.1 28.5-.2 3.9.3 8.9 6.6-12.8z'/%3E%3Cpath fill='%23233447' d='m18.9 41.3 6.4 5.5.3-8.6z'/%3E%3Cpath fill='%23233447' d='m31.1 38.2.3 8.6 6.4-5.5z'/%3E%3C/svg%3E");
+      }
+
+      .wallet-orbit-label .ens-mini {
+        width: 13px;
+        height: 13px;
+        display: inline-block;
+        background: center / contain no-repeat url("https://github.com/user-attachments/assets/e4f5d159-c4c8-43f9-b64a-03da6302b854");
       }
 
       .wallet-action {
@@ -475,6 +524,7 @@
 
       @media (max-width: 980px) {
         .shell,
+        .loan-panel,
         .admin-grid {
           grid-template-columns: 1fr;
         }
@@ -503,10 +553,10 @@
         <div class="wallet-rail"></div>
         <div class="wallet-orbit-label" id="account-orbit" aria-live="polite">
           <span id="account-prefix">0x0000</span>
-          <span class="mm-mini" aria-hidden="true"></span>
-          <span class="mm-mini" aria-hidden="true"></span>
-          <span class="mm-mini" aria-hidden="true"></span>
-          <span class="mm-mini" aria-hidden="true"></span>
+          <span class="ens-mini" aria-hidden="true"></span>
+          <span class="ens-mini" aria-hidden="true"></span>
+          <span class="ens-mini" aria-hidden="true"></span>
+          <span class="ens-mini" aria-hidden="true"></span>
           <span id="account-suffix">0000</span>
         </div>
         <button id="wallet-button" class="wallet-action" data-state="disconnected" type="button" aria-label="Connect MetaMask">
@@ -530,15 +580,14 @@
       <section class="shell" aria-label="ArtFi landing page">
         <div class="hero">
           <div class="eyebrow">ArtFi</div>
-          <h1>Funding creators with a coin-inspired identity.</h1>
+          <h1>Zero-to-no-profit micro-liquidity for Artizen creators.</h1>
           <p>
-            The ArtFi brand uses the supplied coin artwork as the visual anchor:
-            mint and violet highlights, circular energy, and a crafted vault feel.
+            Automated grant advances, human-in-the-loop onboarding, and smart contract settlement.
           </p>
           <div class="points" aria-label="Key themes">
-            <div class="point">Automated grant advances</div>
-            <div class="point">Human-in-the-loop onboarding</div>
-            <div class="point">Smart contract settlement</div>
+            <div class="point">Need an advance?</div>
+            <div class="point">First season newcomers only!</div>
+            <div class="point">Attend all the quests and classes</div>
           </div>
         </div>
 
@@ -548,9 +597,51 @@
             src="https://github.com/user-attachments/assets/58069599-d5d0-4bf3-a066-a2ac34234ff8"
             alt="ArtFi branding coin artwork"
           />
-          <div class="caption">
-            <strong>MetaMask admin access:</strong> connect the wallet in the upper
-            right to reveal the payroll controls and finalize payouts.
+        </div>
+      </section>
+
+      <section class="loan-panel" aria-label="Loan requests and offers">
+        <div class="loan-card">
+          <h2>Need an advance?</h2>
+          <p class="muted">Ask for help here. Keep it simple and clear.</p>
+          <div class="loan-form">
+            <div class="field">
+              <label for="request-name">Name</label>
+              <input id="request-name" placeholder="Your name" />
+            </div>
+            <div class="field">
+              <label for="request-amount">Amount</label>
+              <input id="request-amount" placeholder="250" inputmode="decimal" />
+            </div>
+            <div class="field">
+              <label for="request-note">Request</label>
+              <textarea id="request-note" placeholder="What do you need the loan for?"></textarea>
+            </div>
+            <div class="loan-actions">
+              <button class="btn" type="button">Send request</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="loan-card">
+          <h2>Want to offer?</h2>
+          <p class="muted">Share what you can lend and the terms you want.</p>
+          <div class="loan-form">
+            <div class="field">
+              <label for="offer-wallet">Wallet</label>
+              <input id="offer-wallet" placeholder="0x..." />
+            </div>
+            <div class="field">
+              <label for="offer-amount">Amount</label>
+              <input id="offer-amount" placeholder="250" inputmode="decimal" />
+            </div>
+            <div class="field">
+              <label for="offer-note">Offer</label>
+              <textarea id="offer-note" placeholder="Terms, timing, or any note you want to add."></textarea>
+            </div>
+            <div class="loan-actions">
+              <button class="btn secondary" type="button">Post offer</button>
+            </div>
           </div>
         </div>
       </section>
@@ -559,7 +650,7 @@
         <div class="admin-head">
           <div>
             <h2>Payroll Admin</h2>
-            <p class="muted">Connected wallets can review the queue and finalize payments from here.</p>
+            <p class="muted">Owner wallet can review the queue and finalize payments from here.</p>
           </div>
           <div class="status-pill" id="admin-status">Wallet disconnected</div>
         </div>
@@ -640,6 +731,7 @@
         connected: false,
         queue: [],
       };
+      const ADMIN_WALLET = "0x807061df657a7697c04045da7d16d941861caabc";
 
       const shortAccount = (value) => {
         if (!value) return ["0x0000", "0000"];
@@ -654,13 +746,20 @@
       };
 
       const setWalletUI = (connected) => {
+        const isAdmin = connected && state.account === ADMIN_WALLET;
         walletButton.dataset.state = connected ? "connected" : "disconnected";
         walletButton.setAttribute("aria-label", connected ? "Disconnect wallet" : "Connect MetaMask");
-        finalizeButton.disabled = !connected;
-        adminPanel.dataset.visible = connected ? "true" : "false";
-        adminStatus.textContent = connected ? `Connected ${shortAccount(state.account).join(" • ")}` : "Wallet disconnected";
+        finalizeButton.disabled = !isAdmin;
+        adminPanel.dataset.visible = isAdmin ? "true" : "false";
+        adminStatus.textContent = connected
+          ? isAdmin
+            ? `Owner ${shortAccount(state.account).join(" • ")}`
+            : "Wallet connected"
+          : "Wallet disconnected";
         txNote.textContent = connected
-          ? "Connected. You can now queue and finalize payroll settlements."
+          ? isAdmin
+            ? "Owner connected. You can now queue and finalize payroll settlements."
+            : "Wallet connected."
           : "Connect a wallet to unlock the settlement controls.";
       };
 
@@ -787,7 +886,7 @@
         } catch (error) {
           txNote.textContent = error?.shortMessage || error?.message || "Payout failed.";
         } finally {
-          finalizeButton.disabled = !state.connected;
+          finalizeButton.disabled = !(state.connected && state.account === ADMIN_WALLET);
         }
       };
 
