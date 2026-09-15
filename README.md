@@ -5,6 +5,24 @@
 Zero-to-no-profit micro-liquidity protocol for Artizen creators. 
 Automated grant advances, human-in-the-loop onboarding, and smart contract settlement.
 
+## Base deployment
+
+ArtFi now targets **Base** for contract deployments and uses the live `$ART` token contract at:
+
+- `0x44c4516768e47cd97cfF2561B81a74699F23f8Ec`
+
+Deployment configuration defaults:
+
+- Hardhat network: `base`
+- RPC env var: `BASE_RPC_URL`
+- Token env var: `ART_TOKEN_ADDRESS`
+
+Deploy with:
+
+```bash
+npm run deploy:base
+```
+
 Need an advance? attend all the quests and classes to show you're accountable and use your boost points and Art tokens for access to loans from last season's successful creators according to your project momentum.
 First season newcomers only!
 
