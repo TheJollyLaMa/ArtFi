@@ -6,7 +6,7 @@
   "scripts": {
     "test": "hardhat test",
     "compile": "hardhat compile",
-    "deploy:optimism-sepolia": "hardhat run scripts/deploy.js --network optimismSepolia"
+    "deploy:base": "hardhat run scripts/deploy.js --network base"
   },
   "repository": {
     "type": "git",

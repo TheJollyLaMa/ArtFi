@@ -58,14 +58,14 @@ jobs:
 
             const bountyLabel = (issue.labels || [])
               .map(label => label.name)
-              .find(label => /^test-bounty:\s*\d+(?:\.\d+)?\s*(BNUT|USDC)$/i.test(label));
+              .find(label => /^test-bounty:\s*\d+(?:\.\d+)?\s*\$ART$/i.test(label));
 
             if (!bountyLabel) {
-              console.log(`Issue #${issueNumber} has no testing bounty label.`);
+              console.log(`Issue #${issueNumber} has no $ART testing bounty label matching "test-bounty: <amount> $ART".`);
               return;
             }
 
-            const [, amount, currency] = bountyLabel.match(/^test-bounty:\s*(\d+(?:\.\d+)?)\s*(BNUT|USDC)$/i) || [];
+            const [, amount] = bountyLabel.match(/^test-bounty:\s*(\d+(?:\.\d+)?)\s*\$ART$/i) || [];
             const issueRef = `${context.repo.owner}/${context.repo.repo}#${issueNumber}`;
 
             if (commentBody.startsWith('/test-complete')) {
@@ -123,7 +123,7 @@ jobs:
               contributor: contributor.walletAddress,
               contributorGithub: String(contributor.github || '').trim(),
               amount,
-              currency: currency.toUpperCase(),
+              currency: 'ART',
               role: 'tester',
               queuedAt: new Date().toISOString(),
               queuedBy: context.actor,
@@ -135,7 +135,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issueNumber,
-              body: `✅ Queued ${amount} ${currency.toUpperCase()} testing bounty for @${contributor.github}.`,
+              body: `✅ Queued ${amount} ART testing bounty for @${contributor.github}.`,
             });
 
       - name: Commit queue update

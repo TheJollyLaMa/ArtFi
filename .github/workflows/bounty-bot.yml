@@ -82,14 +82,14 @@ jobs:
 
               const bountyLabel = (issue.labels || [])
                 .map(label => label.name)
-                .find(label => /^bounty:\s*\d+(?:\.\d+)?\s*(BNUT|USDC)$/i.test(label));
+                .find(label => /^bounty:\s*\d+(?:\.\d+)?\s*\$ART$/i.test(label));
 
               if (!bountyLabel) {
-                console.log(`Skipping issue #${issueNumber} because no bounty label was found.`);
+                console.log(`Skipping issue #${issueNumber} because no $ART bounty label matching "bounty: <amount> $ART" was found.`);
                 continue;
               }
 
-              const [, amount, currency] = bountyLabel.match(/^bounty:\s*(\d+(?:\.\d+)?)\s*(BNUT|USDC)$/i) || [];
+              const [, amount] = bountyLabel.match(/^bounty:\s*(\d+(?:\.\d+)?)\s*\$ART$/i) || [];
               const issueRef = `${repoSlug}#${issueNumber}`;
               const duplicate = [...queue.pending, ...queue.settled].some(
                 entry => entry.issueRef === issueRef && String(entry.contributorGithub || '').toLowerCase() === prAuthor.toLowerCase()
@@ -105,7 +105,7 @@ jobs:
                 contributor: contributor.walletAddress,
                 contributorGithub: prAuthor,
                 amount,
-                currency: currency.toUpperCase(),
+                currency: 'ART',
                 queuedAt: new Date().toISOString(),
                 queuedBy: context.actor,
               };

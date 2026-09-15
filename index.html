@@ -713,7 +713,7 @@
                 <input id="creator-address" placeholder="0x..." />
               </div>
               <div class="field">
-                <label for="gross-amount">Gross payout (USDC)</label>
+                <label for="gross-amount">Gross payout (ART)</label>
                 <input id="gross-amount" placeholder="250.00" inputmode="decimal" />
               </div>
               <div class="field">
@@ -814,7 +814,7 @@
         for (const entry of state.queue) {
           const option = document.createElement("option");
           option.value = JSON.stringify(entry);
-          option.textContent = `${entry.contributorGithub} • ${entry.amount} ${entry.currency || "USDC"} • #${String(entry.issueRef || "").split("#").pop()}`;
+          option.textContent = `${entry.contributorGithub} • ${entry.amount} ${entry.currency || "ART"} • #${String(entry.issueRef || "").split("#").pop()}`;
           queueSelect.appendChild(option);
         }
       };
@@ -831,7 +831,7 @@
           item.type = "button";
           item.className = "queue-item";
           item.innerHTML = `
-            <strong>@${entry.contributorGithub} — ${entry.amount} ${entry.currency || "USDC"}</strong>
+            <strong>@${entry.contributorGithub} — ${entry.amount} ${entry.currency || "ART"}</strong>
             <small>${entry.issueRef} • ${entry.contributor?.slice(0, 10) || "wallet unknown"}…</small>
           `;
           item.addEventListener("click", () => {
