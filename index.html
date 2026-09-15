@@ -165,8 +165,8 @@
         top: 18px;
         right: 18px;
         z-index: 50;
-        width: 188px;
-        height: 188px;
+        width: 206px;
+        height: 206px;
         pointer-events: none;
       }
 
@@ -218,12 +218,46 @@
         pointer-events: none;
       }
 
+      .wallet-orbit::before {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(8, 15, 34, 0.1), rgba(8, 15, 34, 0));
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+      }
+
       .wallet-rail {
         position: absolute;
-        inset: 20px;
+        inset: 18px;
         border-radius: 50%;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.03);
+        border: 2px solid rgba(122, 240, 198, 0.18);
+        box-shadow:
+          inset 0 0 22px rgba(122, 240, 198, 0.05),
+          0 0 30px rgba(122, 240, 198, 0.08);
+        background: radial-gradient(circle at 50% 50%, rgba(10, 15, 30, 0.08), rgba(10, 15, 30, 0));
+      }
+
+      .orbit-spark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 11px;
+        height: 11px;
+        border-radius: 4px;
+        background: linear-gradient(135deg, rgba(141, 124, 247, 0.92), rgba(122, 240, 198, 0.88));
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 10px rgba(141, 124, 247, 0.28);
+        transform:
+          translate(-50%, -50%)
+          rotate(var(--angle))
+          translateY(calc(-1 * var(--distance)))
+          rotate(45deg);
+      }
+
+      .orbit-spark:nth-child(2n) {
+        background: linear-gradient(135deg, rgba(122, 240, 198, 0.92), rgba(141, 124, 247, 0.8));
+        box-shadow: 0 0 12px rgba(122, 240, 198, 0.26);
       }
 
       .wallet-orbit-label {
@@ -234,32 +268,34 @@
         transform: translate(-50%, -124px);
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
+        gap: 7px;
+        padding: 7px 12px 7px 10px;
         border-radius: 999px;
-        background: rgba(5, 8, 16, 0.82);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
+        background: linear-gradient(135deg, rgba(6, 9, 18, 0.88), rgba(8, 14, 28, 0.72));
+        border: 1px solid rgba(122, 240, 198, 0.16);
+        font-size: 0.68rem;
+        letter-spacing: 0.11em;
         text-transform: uppercase;
         color: var(--text);
         white-space: nowrap;
-        box-shadow: 0 0 20px rgba(122, 240, 198, 0.12);
+        box-shadow:
+          0 0 18px rgba(122, 240, 198, 0.14),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.04);
         animation: orbit 12s linear infinite;
       }
 
       .wallet-orbit-label .mm-mini {
-        width: 13px;
-        height: 13px;
+        width: 15px;
+        height: 15px;
         display: inline-block;
         background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'%3E%3Cpath fill='%23f6851b' d='M48.4 9 31.1 21.9l3.2-7.6z'/%3E%3Cpath fill='%23e2761b' d='M7.6 9 24.7 22.1l-3.1-7.8z'/%3E%3Cpath fill='%23e4761b' d='m42.7 37.8-4.6 7.1 9.8 2.7 2.8-9.5z'/%3E%3Cpath fill='%23e4761b' d='m5.7 38.1 2.8 9.5 9.8-2.7-4.6-7.1z'/%3E%3Cpath fill='%23e4761b' d='m18.9 24.4-2.7 4.1 9.7.4-.4-10.4z'/%3E%3Cpath fill='%23e4761b' d='m37.1 24.4-6.6-5.9-.2 10.4 9.7-.4z'/%3E%3Cpath fill='%23d7c1b3' d='m18.9 28.5 6.7 12.8.3-8.9z'/%3E%3Cpath fill='%23d7c1b3' d='m31.1 28.5-.2 3.9.3 8.9 6.6-12.8z'/%3E%3Cpath fill='%23233447' d='m18.9 41.3 6.4 5.5.3-8.6z'/%3E%3Cpath fill='%23233447' d='m31.1 38.2.3 8.6 6.4-5.5z'/%3E%3C/svg%3E");
       }
 
-      .wallet-orbit-label .ens-mini {
-        width: 13px;
+      .wallet-orbit-divider {
+        width: 1px;
         height: 13px;
-        display: inline-block;
-        background: center / contain no-repeat url("https://github.com/user-attachments/assets/e4f5d159-c4c8-43f9-b64a-03da6302b854");
+        background: rgba(255, 255, 255, 0.18);
+        margin: 0 2px;
       }
 
       .wallet-action {
@@ -550,13 +586,18 @@
   <body>
     <div class="wallet-dock" aria-label="Wallet connect controls">
       <div class="wallet-orbit">
-        <div class="wallet-rail"></div>
+        <div class="wallet-rail" aria-hidden="true">
+          <span class="orbit-spark" style="--angle: -58deg; --distance: 80px"></span>
+          <span class="orbit-spark" style="--angle: -18deg; --distance: 92px"></span>
+          <span class="orbit-spark" style="--angle: 22deg; --distance: 96px"></span>
+          <span class="orbit-spark" style="--angle: 64deg; --distance: 82px"></span>
+          <span class="orbit-spark" style="--angle: 128deg; --distance: 88px"></span>
+          <span class="orbit-spark" style="--angle: 182deg; --distance: 94px"></span>
+        </div>
         <div class="wallet-orbit-label" id="account-orbit" aria-live="polite">
           <span id="account-prefix">0x0000</span>
-          <span class="ens-mini" aria-hidden="true"></span>
-          <span class="ens-mini" aria-hidden="true"></span>
-          <span class="ens-mini" aria-hidden="true"></span>
-          <span class="ens-mini" aria-hidden="true"></span>
+          <span class="mm-mini" aria-hidden="true"></span>
+          <span class="wallet-orbit-divider" aria-hidden="true"></span>
           <span id="account-suffix">0000</span>
         </div>
         <button id="wallet-button" class="wallet-action" data-state="disconnected" type="button" aria-label="Connect MetaMask">
