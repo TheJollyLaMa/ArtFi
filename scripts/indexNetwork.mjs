@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Contract, JsonRpcProvider } from "ethers";
 import { writeFile } from "node:fs/promises";
 
@@ -12,19 +13,21 @@ const ABI = [
 
 const rpcUrl = process.env.BASE_RPC_URL;
 const registryAddress = process.env.ARTFI_NETWORK_REGISTRY_ADDRESS;
-const fromBlock = Number(process.env.ARTFI_NETWORK_FROM_BLOCK || 0);
 const output = process.env.ARTFI_NETWORK_INDEX || "artizen-network-index.json";
 
 if (!rpcUrl || !registryAddress) throw new Error("BASE_RPC_URL and ARTFI_NETWORK_REGISTRY_ADDRESS are required");
 
 const registry = new Contract(registryAddress, ABI, new JsonRpcProvider(rpcUrl));
+const latestBlock = await registry.runner.provider.getBlockNumber();
+const fromBlock = Number(process.env.ARTFI_NETWORK_FROM_BLOCK || Math.max(0, latestBlock - 1999));
+const toBlock = Number(process.env.ARTFI_NETWORK_TO_BLOCK || latestBlock);
 const [published, statusUpdates, deactivated, nodes, heartbeats, rewards] = await Promise.all([
-  registry.queryFilter(registry.filters.ContentPublished(), fromBlock),
-  registry.queryFilter(registry.filters.ContentStatusUpdated(), fromBlock),
-  registry.queryFilter(registry.filters.ContentDeactivated(), fromBlock),
-  registry.queryFilter(registry.filters.NodeRegistered(), fromBlock),
-  registry.queryFilter(registry.filters.NodeHeartbeat(), fromBlock),
-  registry.queryFilter(registry.filters.MonthlyNodeRewardRecorded(), fromBlock),
+  registry.queryFilter(registry.filters.ContentPublished(), fromBlock, toBlock),
+  registry.queryFilter(registry.filters.ContentStatusUpdated(), fromBlock, toBlock),
+  registry.queryFilter(registry.filters.ContentDeactivated(), fromBlock, toBlock),
+  registry.queryFilter(registry.filters.NodeRegistered(), fromBlock, toBlock),
+  registry.queryFilter(registry.filters.NodeHeartbeat(), fromBlock, toBlock),
+  registry.queryFilter(registry.filters.MonthlyNodeRewardRecorded(), fromBlock, toBlock),
 ]);
 
 const records = new Map();
@@ -60,6 +63,7 @@ const index = {
   generatedAt: new Date().toISOString(),
   registry: registryAddress,
   fromBlock,
+  toBlock,
   publications: [...records.values()],
   nodes: nodes.map(event => ({
     nodeId: event.args.nodeId.toString(),
@@ -85,4 +89,4 @@ const index = {
 };
 
 await writeFile(output, `${JSON.stringify(index, null, 2)}\n`);
-console.log(`Indexed ${index.publications.length} publications and ${index.nodes.length} nodes from ${fromBlock}.`);
+console.log(`Indexed ${index.publications.length} publications and ${index.nodes.length} nodes from ${fromBlock} to ${toBlock}.`);

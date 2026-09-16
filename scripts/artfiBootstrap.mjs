@@ -85,9 +85,16 @@ function requireHttpsUrl(value, name) {
   return url;
 }
 
+function privateKeyFromEnv() {
+  const value = required(process.env.PRIVATE_KEY, "PRIVATE_KEY");
+  if (/^[a-fA-F0-9]{64}$/.test(value)) return `0x${value}`;
+  if (/^0x[a-fA-F0-9]{64}$/.test(value)) return value;
+  throw new Error("PRIVATE_KEY must be 64 hex characters, optionally prefixed with 0x");
+}
+
 function contracts() {
   const rpcUrl = required(process.env.BASE_RPC_URL, "BASE_RPC_URL");
-  const privateKey = required(process.env.PRIVATE_KEY, "PRIVATE_KEY");
+  const privateKey = privateKeyFromEnv();
   const protocolAddress = required(process.env.ARTFI_PROTOCOL_ADDRESS, "ARTFI_PROTOCOL_ADDRESS");
   const registryAddress = required(process.env.ARTFI_NETWORK_REGISTRY_ADDRESS, "ARTFI_NETWORK_REGISTRY_ADDRESS");
   if (!isAddress(protocolAddress)) throw new Error("ARTFI_PROTOCOL_ADDRESS is not an address");
