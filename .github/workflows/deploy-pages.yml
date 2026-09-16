@@ -10,6 +10,8 @@ on:
       - metamask.png
       - payroll-queue.json
       - scripts/ucanStorage.mjs
+      - .github/workflows/deploy-pages.yml
+      - docs/PAGES.md
   workflow_dispatch:
 
 permissions:
