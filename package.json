@@ -4,7 +4,10 @@
   "description": "Zero-profit micro-liquidity protocol for Artizen creators. Features automated grant advances, human-in-the-loop onboarding, and smart contract settlement.",
   "main": "index.js",
   "scripts": {
-    "test": "hardhat test",
+    "test": "hardhat test && node --test test/payroll.test.js test/commentArt.test.js test/ipfsStorage.test.mjs test/browserEmailAuth.test.mjs",
+    "test:storage": "node --test test/ipfsStorage.test.mjs test/browserEmailAuth.test.mjs",
+    "auth:serve": "node scripts/browserAuthServer.mjs",
+    "auth:keygen": "node scripts/generateUcanServiceKey.mjs",
     "compile": "hardhat compile",
     "deploy:base": "hardhat run scripts/deploy.js --network base"
   },
@@ -22,8 +25,12 @@
     "solc": "^0.8.20"
   },
   "dependencies": {
+    "@ipld/dag-ucan": "^3.4.5",
     "@openzeppelin/contracts": "^5.6.1",
+    "@ucanto/core": "^10.4.6",
+    "@ucanto/principal": "^9.0.3",
     "dotenv": "^17.4.2",
+    "ethers": "^6.17.0",
     "nodemailer": "^7.0.0"
   }
 }
