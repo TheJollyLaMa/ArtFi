@@ -162,6 +162,50 @@
       overflow: clip;
     }
 
+    .header-network-links {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 180px;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .header-network-link {
+      fill: none;
+      stroke: rgba(122, 240, 198, 0.18);
+      stroke-width: 1;
+      stroke-linecap: round;
+    }
+
+    .header-network-link.pulse {
+      stroke: rgba(141, 124, 247, 0.72);
+      stroke-width: 1.35;
+      stroke-dasharray: 3 28;
+      filter: drop-shadow(0 0 4px rgba(141, 124, 247, 0.7));
+      animation: header-link-travel var(--header-link-duration, 6s) linear infinite;
+      animation-delay: var(--header-link-delay, 0s);
+    }
+
+    .header-network-node {
+      fill: var(--accent);
+      opacity: 0.55;
+      filter: drop-shadow(0 0 5px var(--accent));
+      animation: header-node-flicker var(--header-node-duration, 4s) ease-in-out infinite;
+      animation-delay: var(--header-node-delay, 0s);
+    }
+
+    @keyframes header-link-travel {
+      from { stroke-dashoffset: 31; }
+      to { stroke-dashoffset: -31; }
+    }
+
+    @keyframes header-node-flicker {
+      0%, 100% { opacity: 0.25; r: 1.4; }
+      50% { opacity: 0.9; r: 2.6; }
+    }
+
     .site-header::before {
       content: "";
       grid-column: 1;
@@ -1169,6 +1213,7 @@
 </head>
 <body>
   <header class="site-header">
+    <svg id="header-network-links" class="header-network-links" aria-hidden="true"></svg>
     <div class="ipfs-dock" aria-label="IPFS storage controls">
       <div class="ipfs-orbit">
         <svg class="ipfs-links" viewBox="0 0 140 140" aria-hidden="true">
@@ -1362,6 +1407,66 @@
       }
 
       orbit.prepend(svg);
+    })();
+
+    // Header-level curved wiring between the two orbit controls and ArtFi's end symbols.
+    (() => {
+      const header = document.querySelector('.site-header');
+      const network = document.getElementById('header-network-links');
+      const ipfs = document.querySelector('.ipfs-orbit');
+      const wallet = document.querySelector('.wallet-orbit');
+      const symbols = document.querySelectorAll('.site-brand-symbol');
+      if (!header || !network || !ipfs || !wallet || symbols.length < 2) return;
+
+      const draw = () => {
+        const headerBox = header.getBoundingClientRect();
+        network.setAttribute('viewBox', `0 0 ${headerBox.width} 180`);
+        network.innerHTML = '';
+        const point = element => {
+          const box = element.getBoundingClientRect();
+          return { x: box.left - headerBox.left + box.width / 2, y: box.top - headerBox.top + box.height / 2 };
+        };
+        const ipfsPoint = point(ipfs);
+        const walletPoint = point(wallet);
+        const leftEnd = point(symbols[0]);
+        const rightEnd = point(symbols[1]);
+        const links = [
+          [ipfsPoint, leftEnd, -34],
+          [ipfsPoint, rightEnd, -16],
+          [walletPoint, leftEnd, -16],
+          [walletPoint, rightEnd, -34],
+          [ipfsPoint, walletPoint, 48],
+        ];
+        const svgNS = 'http://www.w3.org/2000/svg';
+        links.forEach(([from, to, bend], index) => {
+          const midpoint = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 + bend };
+          const pathData = `M ${from.x} ${from.y} Q ${midpoint.x} ${midpoint.y} ${to.x} ${to.y}`;
+          const base = document.createElementNS(svgNS, 'path');
+          base.setAttribute('class', 'header-network-link');
+          base.setAttribute('d', pathData);
+          network.appendChild(base);
+          const pulse = document.createElementNS(svgNS, 'path');
+          pulse.setAttribute('class', 'header-network-link pulse');
+          pulse.setAttribute('d', pathData);
+          pulse.style.setProperty('--header-link-duration', `${5.2 + index * 0.47}s`);
+          pulse.style.setProperty('--header-link-delay', `${-index * 1.17}s`);
+          network.appendChild(pulse);
+          [0.28, 0.53, 0.76].forEach((ratio, nodeIndex) => {
+            const x = (1 - ratio) ** 2 * from.x + 2 * (1 - ratio) * ratio * midpoint.x + ratio ** 2 * to.x;
+            const y = (1 - ratio) ** 2 * from.y + 2 * (1 - ratio) * ratio * midpoint.y + ratio ** 2 * to.y;
+            const node = document.createElementNS(svgNS, 'circle');
+            node.setAttribute('class', 'header-network-node');
+            node.setAttribute('cx', x);
+            node.setAttribute('cy', y);
+            node.setAttribute('r', '1.6');
+            node.style.setProperty('--header-node-duration', `${3.1 + nodeIndex * 0.8}s`);
+            node.style.setProperty('--header-node-delay', `${-(index + nodeIndex) * 0.73}s`);
+            network.appendChild(node);
+          });
+        });
+      };
+      draw();
+      window.addEventListener('resize', draw, { passive: true });
     })();
 
     const aboutDialog = document.getElementById("about-dialog");
