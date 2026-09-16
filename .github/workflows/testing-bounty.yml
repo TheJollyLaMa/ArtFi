@@ -14,139 +14,40 @@ jobs:
       github.event.issue.pull_request == null &&
       (startsWith(github.event.comment.body, '/test-complete') || startsWith(github.event.comment.body, '/test-approved'))
     runs-on: ubuntu-latest
+    concurrency:
+      group: artfi-payroll-queue
+      cancel-in-progress: false
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global credential.helper store
+          printf 'https://x-access-token:%s@github.com\n' "$GH_TOKEN" > "$HOME/.git-credentials"
+          chmod 600 "$HOME/.git-credentials"
+          git init .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin main
+          git checkout -B main FETCH_HEAD
 
       - name: Process testing bounty command
-        uses: actions/github-script@v7
         env:
-          COMMENT_BODY: ${{ github.event.comment.body }}
-          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/processTestingBounty.js
 
-            const commentBody = process.env.COMMENT_BODY || '';
-            const commenter = process.env.COMMENT_AUTHOR || '';
-            const issueNumber = Number(process.env.ISSUE_NUMBER);
-            const queuePath = 'payroll-queue.json';
-            const accountsPath = 'contributor-accounts.json';
-
-            const loadJson = (filePath, fallback) => {
-              try {
-                return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-              } catch (_) {
-                return fallback;
-              }
-            };
-
-            const queue = loadJson(queuePath, { pending: [], settled: [] });
-            const accounts = loadJson(accountsPath, { contributors: [] });
-            if (!Array.isArray(queue.pending)) queue.pending = [];
-            if (!Array.isArray(queue.settled)) queue.settled = [];
-            if (!Array.isArray(accounts.contributors)) accounts.contributors = [];
-
-            const issue = (await github.rest.issues.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-            })).data;
-
-            const bountyLabel = (issue.labels || [])
-              .map(label => label.name)
-              .find(label => /^test-bounty:\s*\d+(?:\.\d+)?\s*\$ART$/i.test(label));
-
-            if (!bountyLabel) {
-              console.log(`Issue #${issueNumber} has no $ART testing bounty label matching "test-bounty: <amount> $ART".`);
-              return;
-            }
-
-            const [, amount] = bountyLabel.match(/^test-bounty:\s*(\d+(?:\.\d+)?)\s*\$ART$/i) || [];
-            const issueRef = `${context.repo.owner}/${context.repo.repo}#${issueNumber}`;
-
-            if (commentBody.startsWith('/test-complete')) {
-              const assignees = (issue.assignees || []).map(user => user.login.toLowerCase());
-              if (!assignees.includes(commenter.toLowerCase())) {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issueNumber,
-                  body: `⚠️ Only assigned testers can use /test-complete.`,
-                });
-                return;
-              }
-
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                body: `✅ Thanks @${commenter} — your testing work has been noted. Awaiting /test-approved from the maintainer.`,
-              });
-              return;
-            }
-
-            if (commenter.toLowerCase() !== context.repo.owner.toLowerCase()) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                body: `⚠️ Only the repository owner can approve testing payouts.`,
-              });
-              return;
-            }
-
-            const assigneeLogins = (issue.assignees || []).map(user => user.login.toLowerCase());
-            const contributor = accounts.contributors.find(
-              entry => assigneeLogins.includes(String(entry.github || '').trim().toLowerCase())
-            );
-
-            if (!contributor || !String(contributor.walletAddress || '').trim()) {
-              core.setFailed(`No whitelisted wallet found for the assigned tester on issue #${issueNumber}.`);
-              return;
-            }
-
-            const duplicate = [...queue.pending, ...queue.settled].some(
-              entry => entry.issueRef === issueRef && String(entry.contributorGithub || '').toLowerCase() === String(contributor.github || '').trim().toLowerCase()
-            );
-
-            if (duplicate) {
-              console.log(`Payroll entry already exists for ${issueRef}.`);
-              return;
-            }
-
-            queue.pending.push({
-              issueRef,
-              contributor: contributor.walletAddress,
-              contributorGithub: String(contributor.github || '').trim(),
-              amount,
-              currency: 'ART',
-              role: 'tester',
-              queuedAt: new Date().toISOString(),
-              queuedBy: context.actor,
-            });
-
-            fs.writeFileSync(queuePath, `${JSON.stringify(queue, null, 2)}\n`);
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              body: `✅ Queued ${amount} ART testing bounty for @${contributor.github}.`,
-            });
+      - name: Validate updated queue
+        run: node scripts/validatePayrollQueue.js
 
       - name: Commit queue update
-        if: ${{ always() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add payroll-queue.json
+          git add payroll-queue.json contributor-accounts.json
           if git diff --cached --quiet; then
             echo "No queue changes to commit."
             exit 0
           fi
           git commit -m "chore: queue testing bounty payout"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
