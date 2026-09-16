@@ -845,6 +845,14 @@
       margin-top: 4px;
     }
 
+    .metadata-status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
     .network-ledger {
       width: min(1120px, 100%);
       margin-top: 24px;
@@ -1730,11 +1738,6 @@
     </section>
 
     <section class="loan-panel" aria-label="Loan requests and offers">
-      <div class="storage-link">
-        <input id="browser-email" class="storage-email" type="email" autocomplete="email" placeholder="Email for browser authorization" disabled />
-        <button id="browser-link-button" class="btn secondary" type="button" disabled>Authorize browser</button>
-        <span id="browser-link-status" class="status-pill">Wallet required</span>
-      </div>
       <div class="loan-card">
         <h2>Need an advance?</h2>
         <p class="muted">Ask for help here. Keep it simple and clear.</p>
@@ -1758,9 +1761,14 @@
             <label for="request-note">Request</label>
             <textarea id="request-note" placeholder="What do you need the loan for?"></textarea>
           </div>
-          <div class="loan-actions">
-            <button class="btn" type="button">Send request</button>
+          <div class="field">
+            <label for="request-project-urls">Project URLs</label>
+            <textarea id="request-project-urls" placeholder="One project URL per line"></textarea>
           </div>
+          <div class="loan-actions">
+            <button id="request-json-button" class="btn" type="button">Prepare request JSON</button>
+          </div>
+          <p id="request-metadata-status" class="metadata-status">Prepare metadata, then upload it with IPFS storage.</p>
         </div>
       </div>
 
@@ -1787,9 +1795,18 @@
             <label for="offer-note">Offer</label>
             <textarea id="offer-note" placeholder="Terms, timing, or any note you want to add."></textarea>
           </div>
-          <div class="loan-actions">
-            <button class="btn secondary" type="button">Post offer</button>
+          <div class="field">
+            <label for="offer-project-urls">Project URLs</label>
+            <textarea id="offer-project-urls" placeholder="One project URL per line"></textarea>
           </div>
+          <div class="field">
+            <label for="offer-request-cid">Related request CID</label>
+            <input id="offer-request-cid" placeholder="ipfs://..." />
+          </div>
+          <div class="loan-actions">
+            <button id="offer-json-button" class="btn secondary" type="button">Prepare offer JSON</button>
+          </div>
+          <p id="offer-metadata-status" class="metadata-status">Prepare offer metadata and link it to a request CID when available.</p>
         </div>
       </div>
     </section>
@@ -1894,6 +1911,21 @@
     const browserLinkButton = document.getElementById("browser-link-button");
     const browserLinkStatus = document.getElementById("browser-link-status");
     const browserEmail = document.getElementById("browser-email");
+    const requestName = document.getElementById("request-name");
+    const requestAmount = document.getElementById("request-amount");
+    const requestAsset = document.getElementById("request-asset");
+    const requestNote = document.getElementById("request-note");
+    const requestProjectUrls = document.getElementById("request-project-urls");
+    const requestJsonButton = document.getElementById("request-json-button");
+    const requestMetadataStatus = document.getElementById("request-metadata-status");
+    const offerWallet = document.getElementById("offer-wallet");
+    const offerAmount = document.getElementById("offer-amount");
+    const offerAsset = document.getElementById("offer-asset");
+    const offerNote = document.getElementById("offer-note");
+    const offerProjectUrls = document.getElementById("offer-project-urls");
+    const offerRequestCid = document.getElementById("offer-request-cid");
+    const offerJsonButton = document.getElementById("offer-json-button");
+    const offerMetadataStatus = document.getElementById("offer-metadata-status");
     const ipfsButton = document.getElementById("ipfs-button");
     const ipfsPanel = document.getElementById("ipfs-panel");
     const ipfsDesktopProvider = document.getElementById("ipfs-desktop-provider");
@@ -1994,18 +2026,99 @@
       adminPanel.dataset.visible = isAdmin ? "true" : "false";
       adminStatus.textContent = connected ? (isAdmin ? `Owner ${shortAccount(state.account).join(" • ")}` : "Wallet connected") : "Wallet disconnected";
       txNote.textContent = connected ? (isAdmin ? "Owner connected. You can now queue and finalize payroll settlements." : "Wallet connected.") : "Connect a wallet to unlock the settlement controls.";
-      browserLinkButton.disabled = !connected;
-      browserEmail.disabled = !connected;
+      if (browserLinkButton) browserLinkButton.disabled = !connected;
+      if (browserEmail) browserEmail.disabled = !connected;
       const savedBinding = connected ? localStorage.getItem(`artfi-agent:${state.account}`) : null;
       state.browserBinding = savedBinding ? JSON.parse(savedBinding) : null;
-      browserLinkStatus.textContent = state.browserBinding
-        ? `Wallet linked ${state.browserBinding.agentDid.slice(0, 12)}…`
-        : (connected ? "Browser not linked" : "Wallet required");
+      if (browserLinkStatus) {
+        browserLinkStatus.textContent = state.browserBinding
+          ? `Wallet linked ${state.browserBinding.agentDid.slice(0, 12)}…`
+          : (connected ? "Browser not linked" : "Wallet required");
+      }
       if (connected) {
         loadEmailAuthorization().then(authorization => {
-          if (authorization) browserLinkStatus.textContent = "Email authorized";
+          if (authorization && browserLinkStatus) browserLinkStatus.textContent = "Email authorized";
         }).catch(() => {});
       }
+    };
+
+    const parseUrlList = (value) => String(value || "")
+      .split(/\n|,/)
+      .map(url => url.trim())
+      .filter(Boolean);
+
+    const slugify = (value) => String(value || "artfi")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "artfi";
+
+    const downloadJson = (filename, data) => {
+      const blob = new Blob([`${JSON.stringify(data, null, 2)}\n`], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    };
+
+    const prepareRequestMetadata = () => {
+      const projectUrls = parseUrlList(requestProjectUrls.value);
+      if (!requestName.value.trim() || !requestAmount.value.trim() || !requestNote.value.trim() || !projectUrls.length) {
+        requestMetadataStatus.textContent = "Add a name, amount, request, and at least one project URL.";
+        return;
+      }
+      const metadata = {
+        schema: "artfi.request.v1",
+        type: "creator-liquidity-request",
+        title: `${requestName.value.trim()} ArtFi request`,
+        creator: {
+          name: requestName.value.trim(),
+          wallet: state.account || "",
+        },
+        amount: {
+          value: requestAmount.value.trim(),
+          currency: requestAsset.value,
+        },
+        purpose: requestNote.value.trim(),
+        projectUrls,
+        primaryProjectUrl: projectUrls[0],
+        status: "draft",
+        createdAt: new Date().toISOString(),
+      };
+      const filename = `${slugify(requestName.value)}-artfi-request-${requestAmount.value.trim()}-${requestAsset.value.toLowerCase()}.json`;
+      downloadJson(filename, metadata);
+      requestMetadataStatus.textContent = `Downloaded ${filename}. Upload it with IPFS storage, then publish the returned CID.`;
+    };
+
+    const prepareOfferMetadata = () => {
+      const projectUrls = parseUrlList(offerProjectUrls.value);
+      if (!offerWallet.value.trim() || !offerAmount.value.trim() || !offerNote.value.trim() || !projectUrls.length) {
+        offerMetadataStatus.textContent = "Add a wallet, amount, offer, and at least one project URL.";
+        return;
+      }
+      const metadata = {
+        schema: "artfi.offer.v1",
+        type: "creator-liquidity-offer",
+        lender: {
+          wallet: offerWallet.value.trim(),
+        },
+        amount: {
+          value: offerAmount.value.trim(),
+          currency: offerAsset.value,
+        },
+        terms: offerNote.value.trim(),
+        projectUrls,
+        relatedRequestCid: offerRequestCid.value.trim(),
+        status: "draft",
+        createdAt: new Date().toISOString(),
+      };
+      const filename = `artfi-offer-${offerAmount.value.trim()}-${offerAsset.value.toLowerCase()}.json`;
+      downloadJson(filename, metadata);
+      offerMetadataStatus.textContent = `Downloaded ${filename}. Upload it with IPFS storage, then publish it as an offer.`;
     };
 
     const setQueueOptions = () => {
@@ -2245,6 +2358,7 @@
 
     const linkBrowser = async () => {
       if (!state.connected || !state.signer || !state.provider) return;
+      if (!browserEmail || !browserLinkButton || !browserLinkStatus) return;
       try {
         if (!browserEmail.reportValidity()) return;
         if (location.protocol === "file:") throw new Error("Serve ArtFi over HTTPS or localhost to authorize email");
@@ -2315,7 +2429,9 @@
     walletButton.addEventListener("click", connectWallet);
     finalizeButton.addEventListener("click", finalizePayout);
     refreshButton.addEventListener("click", loadQueue);
-    browserLinkButton.addEventListener("click", linkBrowser);
+    browserLinkButton?.addEventListener("click", linkBrowser);
+    requestJsonButton.addEventListener("click", prepareRequestMetadata);
+    offerJsonButton.addEventListener("click", prepareOfferMetadata);
     const setIpfsPanelOpen = (open) => {
       ipfsPanel.dataset.open = open ? "true" : "false";
       ipfsButton.setAttribute("aria-expanded", String(open));
@@ -2364,10 +2480,10 @@
     loadOrCreateBrowserAgent()
       .then(agent => consumeEmailAuthorizationFromLocation({ signer: agent }))
       .then(authorization => {
-        if (authorization) browserLinkStatus.textContent = "Email authorized";
+        if (authorization && browserLinkStatus) browserLinkStatus.textContent = "Email authorized";
       })
       .catch(error => {
-        if (location.hash.startsWith("#artfi-email-auth=")) {
+        if (location.hash.startsWith("#artfi-email-auth=") && browserLinkStatus) {
           browserLinkStatus.textContent = error?.message || "Authorization failed";
         }
       });
