@@ -11,6 +11,11 @@ async function main() {
   await protocol.waitForDeployment();
   console.log("ArtFiProtocol deployed to:", await protocol.getAddress());
 
+  const ArtFiNetworkRegistry = await ethers.getContractFactory("ArtFiNetworkRegistry");
+  const networkRegistry = await ArtFiNetworkRegistry.deploy(await protocol.getAddress(), ADMIN_ADDRESS);
+  await networkRegistry.waitForDeployment();
+  console.log("ArtFiNetworkRegistry deployed to:", await networkRegistry.getAddress());
+
   const configuredAssets = [
     process.env.ART_TOKEN_ADDRESS,
     ...(process.env.SUPPORTED_ASSETS || "").split(",")

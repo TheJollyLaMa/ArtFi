@@ -8,6 +8,7 @@
     "test:storage": "node --test test/ipfsStorage.test.mjs test/browserEmailAuth.test.mjs",
     "auth:serve": "node scripts/browserAuthServer.mjs",
     "auth:keygen": "node scripts/generateUcanServiceKey.mjs",
+    "index:network": "node scripts/indexNetwork.mjs",
     "compile": "hardhat compile",
     "deploy:base": "hardhat run scripts/deploy.js --network base"
   },
