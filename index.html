@@ -397,23 +397,32 @@
       font-size: clamp(2rem, 4.5vw, 3.5rem);
       line-height: 1;
       letter-spacing: 0;
-      text-shadow: 0 0 10px #7300ff, 0 0 20px #00ffff;
+      color: #b7ffd4;
+      text-shadow: 0 0 8px #19d66b, 0 0 18px #39ff91, 0 0 34px rgba(24, 204, 111, 0.8);
     }
 
     .site-brand-symbol {
-      color: var(--accent);
+      color: #8fffc0;
       font-family: ui-monospace, monospace;
       font-size: 0.42em;
       letter-spacing: 0;
       opacity: 0.85;
     }
 
+    .site-brand-artizen-a {
+      width: 0.82em;
+      height: 0.82em;
+      object-fit: contain;
+      filter: drop-shadow(0 0 7px rgba(24, 204, 111, 0.95));
+      opacity: 1;
+    }
+
     .site-brand-subtitle {
-      color: #9b83ff;
+      color: #7dffc0;
       font-family: "Comic Sans MS", cursive, sans-serif;
       font-size: 0.75rem;
       letter-spacing: 0;
-      text-shadow: 0 0 10px #00e5ff;
+      text-shadow: 0 0 8px rgba(24, 204, 111, 0.9);
     }
 
     .site-brand:hover {
@@ -1293,7 +1302,7 @@
     </div>
     <button id="about-open" class="site-brand" type="button" aria-label="About ArtFi" aria-haspopup="dialog" aria-controls="about-dialog">
       <span class="site-brand-title">
-        <span class="site-brand-symbol">::-&#9671;-</span>
+        <img class="site-brand-symbol site-brand-artizen-a" src="./Artizen_LOGO.png" alt="Artizen" />
         <span>ArtFi</span>
         <span class="site-brand-symbol">-&#9671;-::</span>
       </span>
