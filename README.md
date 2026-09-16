@@ -19,36 +19,43 @@ First season newcomers only!
 - meant for newcomers to have an easier time with the anticipation phase until their first payout while coming in hungry from the cold ...
 - introduces the community to new ways we can extend/receive agency to/from each other across borders with web3 tools, software, and frame of mind.
 
-## Contract prototype
+## On-chain advance protocol
 
-`ArtFiAdvance` is the canonical first prototype. The older ANIV contracts remain in the repository as experimental predecessors and are not part of this deployment path.
+`ArtFiProtocol` is the only deployable production contract. It combines request discovery, sponsor escrow, receivable ownership, settlement, outcome attestations, and participant history without a separate registry, vault, or settlement router.
 
-The prototype uses an escrowed sponsor offer:
+### NFT lifecycle
 
-1. A sponsor defines a creator, principal, repayment amount, acceptance deadline, repayment deadline, and hash of the complete terms.
-2. The sponsor's ART principal is transferred into contract escrow when the offer is created.
-3. Only the named creator can accept before the deadline. Acceptance transfers the principal to the creator.
-4. The creator can repay the sponsor directly through the contract.
-5. An address with `SETTLEMENT_ROLE` can instead route a future gross payout through the contract. The sponsor receives the repayment amount and the creator receives any remainder.
-6. A payout below the repayment amount closes the advance as defaulted. An unaccepted offer can be cancelled by its sponsor or expired after its deadline.
+1. A creator links a browser UCAN agent to their wallet, then registers the agent DID hash, an email hash made with a private high-entropy salt, and an IPFS profile URI. Plaintext email, salt, and private agent key never go on-chain.
+2. The creator uploads validated request metadata to Pinata or IPFS Desktop, then mints a non-transferable request NFT containing its `ipfs://` URI plus the asset, principal, repayment, deadlines, terms hash, and canonical Artizen project and fund links.
+3. A registered sponsor uploads offer metadata and funds the request with native currency or an administrator-approved ERC-20. Funding mints one offer NFT representing the sponsor's receivable.
+4. The creator accepts before the funding deadline. Request NFTs stay with their creators; offer NFTs can transfer only while an advance is active and only to another registered profile.
+5. Direct repayment and settlement payout recovery follow the current offer NFT owner. That owner may designate a recipient contract or wallet; transferring the NFT clears that destination.
+6. The original NFT pair remains after repayment, settlement, cancellation, expiry, or default. Each final participant may submit one immutable IPFS outcome document, updating only their corresponding NFT URI while the rating, hash, CID, participant, and timestamp remain on-chain.
 
-Repayment fees are optional and capped at 5% of principal. The ART token address is immutable, important lifecycle state is recorded on-chain, and all token-moving methods use OpenZeppelin `SafeERC20` and `ReentrancyGuard`.
+Both final participants may submit one permanent 1-5 rating with a content hash and IPFS evidence URI. An `OutcomeFinalized` event is emitted when both sides have submitted. Wallet and salted-email-hash indexes retain request, funding, borrowing, repayment, recovery, payout, default, and outcome totals per asset.
 
-### Trust assumptions and open questions
+Rich NFT data is provider-neutral IPFS content. The dapp supports local IPFS Desktop uploads and Pinata through a server-issued short-lived upload URL; Pinata credentials are never exposed to the browser. Email confirmation delegates upload capability to that browser's UCAN agent, while wallet transactions remain authoritative for contract actions. Sensitive attachments can be encrypted locally before upload; public NFT metadata remains intentionally public. See [docs/IPFS_UCAN.md](docs/IPFS_UCAN.md).
 
-- The settlement role is trusted to submit the correct creator payout and transfer that payout into the contract.
-- There is no assumed Artizen API or payout contract. A future integration should receive `SETTLEMENT_ROLE` only after its interface and security model are verified.
-- A short payout is treated as final default rather than creating an open-ended debt claim.
-- Terms outside the numeric on-chain fields are represented by `termsHash`; clients are responsible for retaining and displaying the matching document.
-- The prototype is intentionally non-upgradeable. Contract replacement and role migration must be planned before production use.
+### Asset and escrow safety
+
+- The zero address identifies native currency; every ERC-20 must be explicitly approved by an administrator.
+- ERC-20 paths use `SafeERC20` and reject fee-on-transfer behavior. Native transfers use checked calls.
+- `totalLiabilities(asset)` tracks funded principal still held in escrow. An asset cannot be disabled while it backs escrow.
+- Administrators may recover only balances above recorded liabilities. There is no unrestricted drain.
+- Repayment fees remain capped at 5% of principal. State changes precede external transfers and all value-moving entry points are reentrancy guarded.
+
+The settlement role is trusted to report the correct gross payout. A short payout closes the advance as defaulted rather than preserving indefinite debt. Terms and outcome documents remain on IPFS, while their hashes, CIDs, canonical Artizen links, and financial results are anchored on-chain.
+
+`repaymentDueAt` is visible evidence of timeliness rather than a hard payment cutoff: creators may repay late until the settlement role closes the advance. This preserves a voluntary cure path while the recorded due date, close time, and final status make lateness inspectable. Cancelled and expired offers remain in NFT history but are not counted as completed loans because principal was never disbursed.
 
 ### Local validation
 
 ```bash
 npm test
+npm run test:storage
 ```
 
-The deployment script reads `ART_TOKEN_ADDRESS` and optional `ADMIN_ADDRESS`. It defaults to the current ART token on Base, but this issue does not deploy the contract to any network.
+The deployment script reads optional `ADMIN_ADDRESS`, `ART_TOKEN_ADDRESS`, and comma-separated `SUPPORTED_ASSETS`. Native currency is enabled by default. The script deploys only `ArtFiProtocol`; this work does not deploy it to any network.
 
 ## Payroll bounty labels
 

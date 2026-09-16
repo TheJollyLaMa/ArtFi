@@ -1,0 +1,57 @@
+name: Validate ArtFi Protocol
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - contracts/**
+      - scripts/browserAuthServer.mjs
+      - scripts/browserEmailAuth.mjs
+      - scripts/generateUcanServiceKey.mjs
+      - scripts/ipfsMetadata.mjs
+      - scripts/ucanStorage.mjs
+      - scripts/deploy.js
+      - test/ArtFiProtocol.test.js
+      - test/browserEmailAuth.test.mjs
+      - test/ipfsStorage.test.mjs
+      - hardhat.config.js
+      - package.json
+      - package-lock.json
+      - .github/workflows/validate-protocol.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - contracts/**
+      - scripts/browserAuthServer.mjs
+      - scripts/browserEmailAuth.mjs
+      - scripts/generateUcanServiceKey.mjs
+      - scripts/ipfsMetadata.mjs
+      - scripts/ucanStorage.mjs
+      - scripts/deploy.js
+      - test/ArtFiProtocol.test.js
+      - test/browserEmailAuth.test.mjs
+      - test/ipfsStorage.test.mjs
+      - hardhat.config.js
+      - package.json
+      - package-lock.json
+      - .github/workflows/validate-protocol.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout requested revision
+        run: |
+          git init .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "$GITHUB_REF"
+          git checkout --detach FETCH_HEAD
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test protocol and storage
+        run: npm test

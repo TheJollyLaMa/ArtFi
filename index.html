@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="artfi-auth-endpoint" content="/api/browser-auth/start" />
   <title>ArtFi</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Bungee&display=swap");
@@ -472,6 +473,38 @@
       gap: 18px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       margin-top: 24px;
+    }
+
+    .storage-link {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 14px 18px;
+      border: 1px solid rgba(122, 240, 198, 0.2);
+      background: rgba(6, 9, 18, 0.58);
+    }
+
+    .storage-email {
+      width: min(320px, 100%);
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid rgba(122, 240, 198, 0.22);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(6, 10, 20, 0.7);
+      font: inherit;
+    }
+
+    .storage-email:focus {
+      outline: 2px solid rgba(122, 240, 198, 0.75);
+      outline-offset: 1px;
+    }
+
+    .storage-link .status-pill {
+      margin-left: auto;
     }
 
     .loan-card {
@@ -1104,6 +1137,11 @@
     </section>
 
     <section class="loan-panel" aria-label="Loan requests and offers">
+      <div class="storage-link">
+        <input id="browser-email" class="storage-email" type="email" autocomplete="email" placeholder="Email for browser authorization" disabled />
+        <button id="browser-link-button" class="btn secondary" type="button" disabled>Authorize browser</button>
+        <span id="browser-link-status" class="status-pill">Wallet required</span>
+      </div>
       <div class="loan-card">
         <h2>Need an advance?</h2>
         <p class="muted">Ask for help here. Keep it simple and clear.</p>
@@ -1195,8 +1233,26 @@
     </section>
   </main>
 
+  <script type="importmap">
+    {
+      "imports": {
+        "@ucanto/core": "https://esm.sh/@ucanto/core@10.4.6?bundle",
+        "@ucanto/core/delegation": "https://esm.sh/@ucanto/core@10.4.6/delegation?bundle",
+        "@ucanto/principal": "https://esm.sh/@ucanto/principal@9.0.3?bundle",
+        "@ucanto/principal/ed25519": "https://esm.sh/@ucanto/principal@9.0.3/ed25519?bundle"
+      }
+    }
+  </script>
   <script type="module">
-    import { BrowserProvider, Contract, parseUnits } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
+    import { BrowserProvider, Contract, parseUnits, solidityPackedKeccak256 } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
+    import {
+      consumeEmailAuthorizationFromLocation,
+      createWalletAgentBinding,
+      loadEmailAuthorization,
+      loadOrCreateBrowserAgent,
+      loadOrCreateEmailSalt,
+      requestEmailAuthorization,
+    } from "./scripts/ucanStorage.mjs";
 
     const routerAbi = ["function executeDisbursement(address _creator, uint256 _grossMatchAmount)"];
 
@@ -1215,12 +1271,17 @@
     const finalizeButton = document.getElementById("finalize-button");
     const refreshButton = document.getElementById("refresh-button");
     const txNote = document.getElementById("tx-note");
+    const browserLinkButton = document.getElementById("browser-link-button");
+    const browserLinkStatus = document.getElementById("browser-link-status");
+    const browserEmail = document.getElementById("browser-email");
+    const authEndpoint = document.querySelector('meta[name="artfi-auth-endpoint"]')?.content || "/api/browser-auth/start";
 
     const state = {
       provider: null,
       signer: null,
       account: "",
       connected: false,
+      browserBinding: null,
       queue: []
     };
 
@@ -1245,6 +1306,18 @@
       adminPanel.dataset.visible = isAdmin ? "true" : "false";
       adminStatus.textContent = connected ? (isAdmin ? `Owner ${shortAccount(state.account).join(" • ")}` : "Wallet connected") : "Wallet disconnected";
       txNote.textContent = connected ? (isAdmin ? "Owner connected. You can now queue and finalize payroll settlements." : "Wallet connected.") : "Connect a wallet to unlock the settlement controls.";
+      browserLinkButton.disabled = !connected;
+      browserEmail.disabled = !connected;
+      const savedBinding = connected ? localStorage.getItem(`artfi-agent:${state.account}`) : null;
+      state.browserBinding = savedBinding ? JSON.parse(savedBinding) : null;
+      browserLinkStatus.textContent = state.browserBinding
+        ? `Wallet linked ${state.browserBinding.agentDid.slice(0, 12)}…`
+        : (connected ? "Browser not linked" : "Wallet required");
+      if (connected) {
+        loadEmailAuthorization().then(authorization => {
+          if (authorization) browserLinkStatus.textContent = "Email authorized";
+        }).catch(() => {});
+      }
     };
 
     const setQueueOptions = () => {
@@ -1340,6 +1413,41 @@
       } catch (_) {}
     };
 
+    const linkBrowser = async () => {
+      if (!state.connected || !state.signer || !state.provider) return;
+      try {
+        if (!browserEmail.reportValidity()) return;
+        if (location.protocol === "file:") throw new Error("Serve ArtFi over HTTPS or localhost to authorize email");
+        browserLinkButton.disabled = true;
+        browserLinkStatus.textContent = "Creating agent";
+        const agent = await loadOrCreateBrowserAgent();
+        const emailSalt = await loadOrCreateEmailSalt();
+        const normalizedEmail = browserEmail.value.trim().toLowerCase();
+        const emailHash = solidityPackedKeccak256(["string", "bytes32"], [normalizedEmail, emailSalt]);
+        const network = await state.provider.getNetwork();
+        const binding = await createWalletAgentBinding({
+          walletSigner: state.signer,
+          wallet: state.account,
+          agentDid: agent.did(),
+          emailHash,
+          chainId: network.chainId,
+        });
+        localStorage.setItem(`artfi-agent:${state.account}`, JSON.stringify(binding));
+        state.browserBinding = binding;
+        await requestEmailAuthorization({
+          endpoint: authEndpoint,
+          email: normalizedEmail,
+          binding,
+          returnUrl: `${location.origin}${location.pathname}${location.search}`,
+        });
+        browserLinkStatus.textContent = "Check your email";
+      } catch (error) {
+        browserLinkStatus.textContent = error?.shortMessage || error?.message || "Link failed";
+      } finally {
+        browserLinkButton.disabled = !state.connected;
+      }
+    };
+
     const finalizePayout = async () => {
       if (!state.connected || !state.signer) return;
 
@@ -1382,6 +1490,7 @@
     walletButton.addEventListener("click", connectWallet);
     finalizeButton.addEventListener("click", finalizePayout);
     refreshButton.addEventListener("click", loadQueue);
+    browserLinkButton.addEventListener("click", linkBrowser);
     queueSelect.addEventListener("change", applyQueueSelection);
 
     if (window.ethereum) {
@@ -1407,6 +1516,16 @@
 
     setAccountOrbit("");
     setWalletUI(false);
+    loadOrCreateBrowserAgent()
+      .then(agent => consumeEmailAuthorizationFromLocation({ signer: agent }))
+      .then(authorization => {
+        if (authorization) browserLinkStatus.textContent = "Email authorized";
+      })
+      .catch(error => {
+        if (location.hash.startsWith("#artfi-email-auth=")) {
+          browserLinkStatus.textContent = error?.message || "Authorization failed";
+        }
+      });
     restoreWallet();
     loadQueue();
   </script>
