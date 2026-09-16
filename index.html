@@ -168,6 +168,96 @@
       grid-row: 1;
     }
 
+    .ipfs-dock {
+      grid-column: 1;
+      grid-row: 1;
+      position: relative;
+      width: 165px;
+      height: 165px;
+      pointer-events: none;
+    }
+
+    .ipfs-orbit {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 140px;
+      height: 140px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(141, 124, 247, 0.32);
+      border-radius: 50%;
+      box-shadow: 0 0 28px rgba(141, 124, 247, 0.2), inset 0 0 22px rgba(122, 240, 198, 0.08);
+      animation: ipfs-orbit-spin 16s linear infinite;
+      pointer-events: auto;
+    }
+
+    .ipfs-orbit::before,
+    .ipfs-orbit::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .ipfs-orbit::before { top: 8px; left: 50%; }
+    .ipfs-orbit::after { right: 12px; bottom: 22px; background: var(--accent-2); box-shadow: 0 0 12px var(--accent-2); }
+
+    .ipfs-button {
+      position: relative;
+      z-index: 1;
+      width: 68px;
+      height: 68px;
+      border: 2px solid rgba(141, 124, 247, 0.82);
+      border-radius: 50%;
+      color: var(--text);
+      background: radial-gradient(circle at 35% 30%, rgba(141, 124, 247, 0.4), rgba(6, 9, 18, 0.92));
+      box-shadow: 0 0 18px rgba(141, 124, 247, 0.5);
+      cursor: pointer;
+      pointer-events: auto;
+      font-size: 1.65rem;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .ipfs-button:hover { transform: scale(1.06); border-color: var(--accent); }
+
+    .ipfs-button img {
+      width: 42px;
+      height: 42px;
+      display: block;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(122, 240, 198, 0.65));
+    }
+
+    @keyframes ipfs-orbit-spin { to { transform: rotate(360deg); } }
+
+    .ipfs-panel {
+      position: absolute;
+      top: 126px;
+      left: 0;
+      z-index: 20;
+      display: none;
+      width: min(360px, calc(100vw - 32px));
+      padding: 16px;
+      border: 1px solid rgba(141, 124, 247, 0.4);
+      border-radius: 12px;
+      background: rgba(7, 11, 24, 0.97);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55);
+      pointer-events: auto;
+    }
+
+    .ipfs-panel[data-open="true"] { display: grid; gap: 12px; }
+    .ipfs-panel h3 { margin: 0; font-size: 1rem; }
+    .ipfs-panel p { font-size: 0.82rem; line-height: 1.4; }
+    .ipfs-provider-row, .ipfs-upload-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ipfs-provider-row button[data-selected="true"] { border-color: var(--accent); color: var(--accent); }
+    .ipfs-cid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    .ipfs-cid code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); }
+
     .site-brand {
       grid-column: 2;
       grid-row: 1;
@@ -1010,6 +1100,38 @@
 </head>
 <body>
   <header class="site-header">
+    <div class="ipfs-dock" aria-label="IPFS storage controls">
+      <div class="ipfs-orbit">
+        <button id="ipfs-button" class="ipfs-button" type="button" aria-label="Open IPFS storage controls" aria-expanded="false"><img src="./IPFS_Logo.png" alt="" aria-hidden="true" /></button>
+      </div>
+      <div id="ipfs-panel" class="ipfs-panel" data-open="false" aria-label="IPFS storage panel">
+        <h3>IPFS storage</h3>
+        <p>Choose where your metadata is pinned. The dapp stores only the resulting CID.</p>
+        <div class="ipfs-provider-row" role="group" aria-label="IPFS provider">
+          <button id="ipfs-desktop-provider" class="btn secondary" type="button" data-selected="true">IPFS Desktop</button>
+          <button id="pinata-provider" class="btn secondary" type="button" data-selected="false">My Pinata</button>
+        </div>
+        <input id="pinata-jwt" class="storage-email" type="password" autocomplete="off" placeholder="Optional local Pinata JWT" hidden />
+        <p id="pinata-warning" class="note" hidden>Your JWT stays in memory for this page and is never stored or sent to ArtFi. Use a least-privilege Pinata key.</p>
+        <label class="ipfs-reward-optin"><input id="node-reward-optin" type="checkbox" /> Opt in to node rewards</label>
+        <div id="node-reward-panel" hidden>
+          <input id="network-registry-address" class="storage-email" placeholder="ArtFiNetworkRegistry address" />
+          <input id="node-did-hash" class="storage-email" placeholder="Node DID hash (bytes32)" />
+          <input id="node-peer-id-hash" class="storage-email" placeholder="Peer ID hash (bytes32)" />
+          <input id="node-software-version" class="storage-email" value="kubo/ipfs-desktop" placeholder="Software version" />
+          <button id="register-node-button" class="btn secondary" type="button">Register node</button>
+          <button id="heartbeat-button" class="btn secondary" type="button" disabled>Submit heartbeat</button>
+          <p id="node-reward-status" class="note">Rewards require an approved node, sample CID checks, and 10 ART is recorded monthly after eligibility.</p>
+        </div>
+        <div class="ipfs-upload-row">
+          <input id="ipfs-json-file" type="file" accept="application/json,.json" hidden />
+          <button id="ipfs-upload-button" class="btn" type="button">Upload JSON</button>
+          <button id="ipfs-copy-cid" class="btn secondary" type="button" disabled>Copy CID</button>
+        </div>
+        <div id="ipfs-cid" class="ipfs-cid" hidden><code id="ipfs-cid-value"></code></div>
+        <p id="ipfs-status" class="note">IPFS Desktop selected.</p>
+      </div>
+    </div>
     <button id="about-open" class="site-brand" type="button" aria-label="About ArtFi" aria-haspopup="dialog" aria-controls="about-dialog">
       <span class="site-brand-title">
         <span class="site-brand-symbol">::-&#9671;-</span>
@@ -1289,6 +1411,7 @@
       loadOrCreateEmailSalt,
       requestEmailAuthorization,
     } from "./scripts/ucanStorage.mjs";
+    import { createDirectPinataUploader, createIpfsDesktopUploader, createPinataUploader } from "./scripts/ucanStorage.mjs";
 
     const routerAbi = ["function executeDisbursement(address _creator, uint256 _grossMatchAmount)"];
 
@@ -1309,6 +1432,27 @@
     const browserLinkButton = document.getElementById("browser-link-button");
     const browserLinkStatus = document.getElementById("browser-link-status");
     const browserEmail = document.getElementById("browser-email");
+    const ipfsButton = document.getElementById("ipfs-button");
+    const ipfsPanel = document.getElementById("ipfs-panel");
+    const ipfsDesktopProvider = document.getElementById("ipfs-desktop-provider");
+    const pinataProvider = document.getElementById("pinata-provider");
+    const ipfsJsonFile = document.getElementById("ipfs-json-file");
+    const ipfsUploadButton = document.getElementById("ipfs-upload-button");
+    const ipfsCopyCid = document.getElementById("ipfs-copy-cid");
+    const ipfsCid = document.getElementById("ipfs-cid");
+    const ipfsCidValue = document.getElementById("ipfs-cid-value");
+    const ipfsStatus = document.getElementById("ipfs-status");
+    const pinataJwt = document.getElementById("pinata-jwt");
+    const pinataWarning = document.getElementById("pinata-warning");
+    const nodeRewardOptin = document.getElementById("node-reward-optin");
+    const nodeRewardPanel = document.getElementById("node-reward-panel");
+    const networkRegistryAddress = document.getElementById("network-registry-address");
+    const nodeDidHash = document.getElementById("node-did-hash");
+    const nodePeerIdHash = document.getElementById("node-peer-id-hash");
+    const nodeSoftwareVersion = document.getElementById("node-software-version");
+    const registerNodeButton = document.getElementById("register-node-button");
+    const heartbeatButton = document.getElementById("heartbeat-button");
+    const nodeRewardStatus = document.getElementById("node-reward-status");
     const authEndpoint = document.querySelector('meta[name="artfi-auth-endpoint"]')?.content || "/api/browser-auth/start";
 
     const state = {
@@ -1318,9 +1462,27 @@
       connected: false,
       browserBinding: null,
       queue: []
+      ,ipfsProvider: "desktop"
+      ,lastCid: ""
+    };
+
+    const setIpfsProvider = (provider) => {
+      state.ipfsProvider = provider;
+      ipfsDesktopProvider.dataset.selected = provider === "desktop" ? "true" : "false";
+      pinataProvider.dataset.selected = provider === "pinata" ? "true" : "false";
+      ipfsStatus.textContent = provider === "desktop"
+        ? "IPFS Desktop selected. Keep Kubo running on 127.0.0.1:5001."
+        : "Pinata selected. Configure a signed-upload endpoint first.";
+      pinataJwt.hidden = provider !== "pinata";
+      pinataWarning.hidden = provider !== "pinata";
     };
 
     const ADMIN_WALLET = "0x807061df657a7697c04045da7d16d941861caabc";
+    const networkRegistryAbi = [
+      "function registerNode(bytes32 nodeDidHash,bytes32 peerIdHash,string softwareVersion) returns (uint256)",
+      "function heartbeat(uint256 nodeId,uint256 month,bytes32 challengeHash,bytes32 sampleProofHash,uint256 sampleCount,string softwareVersion)",
+      "function monthChallenges(uint256 month) view returns (bytes32)",
+    ];
 
     const shortAccount = (value) => (!value ? ["0x0000", "0000"] : [value.slice(0, 6), value.slice(-4)]);
 
@@ -1423,6 +1585,71 @@
       renderQueue();
       setQueueOptions();
     };
+
+    const uploadIpfsJson = async () => {
+      ipfsJsonFile.click();
+    };
+
+    ipfsJsonFile.addEventListener("change", async () => {
+      const file = ipfsJsonFile.files?.[0];
+      if (!file) return;
+      try {
+        ipfsUploadButton.disabled = true;
+        ipfsStatus.textContent = "Uploading…";
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const uploader = state.ipfsProvider === "desktop"
+          ? createIpfsDesktopUploader()
+          : pinataJwt.value.trim()
+            ? createDirectPinataUploader({ jwt: pinataJwt.value.trim() })
+            : createPinataUploader({
+                signingEndpoint: document.querySelector('meta[name="artfi-pinata-endpoint"]')?.content,
+                serviceDid: document.querySelector('meta[name="artfi-ucan-service-did"]')?.content,
+              });
+        const uri = await uploader({ bytes, name: file.name });
+        state.lastCid = uri;
+        ipfsCid.hidden = false;
+        ipfsCidValue.textContent = uri;
+        ipfsCopyCid.disabled = false;
+        ipfsStatus.textContent = "Upload complete. Copy the CID into the wallet transaction.";
+      } catch (error) {
+        ipfsStatus.textContent = error?.message || "IPFS upload failed.";
+      } finally {
+        ipfsUploadButton.disabled = false;
+        ipfsJsonFile.value = "";
+      }
+    });
+
+    ipfsCopyCid.addEventListener("click", async () => {
+      if (!state.lastCid) return;
+      await navigator.clipboard.writeText(state.lastCid);
+      ipfsStatus.textContent = "CID copied.";
+    });
+
+    nodeRewardOptin.addEventListener("change", () => {
+      nodeRewardPanel.hidden = !nodeRewardOptin.checked;
+    });
+
+    registerNodeButton.addEventListener("click", async () => {
+      if (!state.signer) return;
+      try {
+        const registry = new Contract(networkRegistryAddress.value.trim(), networkRegistryAbi, state.signer);
+        const transaction = await registry.registerNode(
+          nodeDidHash.value.trim(),
+          nodePeerIdHash.value.trim(),
+          nodeSoftwareVersion.value.trim()
+        );
+        nodeRewardStatus.textContent = `Node registration sent: ${transaction.hash}`;
+        await transaction.wait();
+        nodeRewardStatus.textContent = "Node registered. An administrator must approve it before heartbeats count.";
+        heartbeatButton.disabled = false;
+      } catch (error) {
+        nodeRewardStatus.textContent = error?.shortMessage || error?.message || "Node registration failed.";
+      }
+    });
+
+    heartbeatButton.addEventListener("click", () => {
+      nodeRewardStatus.textContent = "Run npm run node:heartbeat on the node host to sample CIDs and submit the signed heartbeat.";
+    });
 
     const connectWallet = async () => {
       if (!window.ethereum) {
@@ -1544,6 +1771,14 @@
     finalizeButton.addEventListener("click", finalizePayout);
     refreshButton.addEventListener("click", loadQueue);
     browserLinkButton.addEventListener("click", linkBrowser);
+    ipfsButton.addEventListener("click", () => {
+      const open = ipfsPanel.dataset.open !== "true";
+      ipfsPanel.dataset.open = open ? "true" : "false";
+      ipfsButton.setAttribute("aria-expanded", String(open));
+    });
+    ipfsDesktopProvider.addEventListener("click", () => setIpfsProvider("desktop"));
+    pinataProvider.addEventListener("click", () => setIpfsProvider("pinata"));
+    ipfsUploadButton.addEventListener("click", uploadIpfsJson);
     routerAddress.addEventListener("input", updateBatchSummary);
 
     if (window.ethereum) {

@@ -142,3 +142,18 @@ Operators may run a public IPFS node that follows `ContentPublished` events, fet
 The first pilot requires 25 successful checks per month, with checks no more often than every 12 hours. The reward is recorded separately from ordinary payroll; an administrator can manually transfer 10 ART and record its transaction reference. Future work can replace manual recording with a dedicated reward treasury after anti-Sybil and geographic-independence rules are proven.
 
 The heartbeat proves an operator responded to a current challenge and reports sample retrieval evidence; it does not claim that one node is the only copy. Multiple approved operators should pin the same public CIDs. Encrypted private attachments are excluded unless their participants explicitly authorize replication.
+
+### Operator heartbeat command
+
+After an administrator approves the registered node and configures the monthly challenge, run this command from the machine hosting IPFS Desktop/Kubo. Schedule it with cron, launchd, or another local task runner no more than once every 12 hours:
+
+```bash
+BASE_RPC_URL=... \\
+NODE_PRIVATE_KEY=... \\
+ARTFI_NETWORK_REGISTRY_ADDRESS=0x... \\
+ARTFI_NODE_ID=1 \\
+ARTFI_SAMPLE_CIDS=ipfs://bafy...,ipfs://bafy... \\
+npm run node:heartbeat
+```
+
+The keeper retrieves every sample CID through the local Kubo API, hashes the successful retrieval report, reads the current on-chain challenge, and submits one wallet-signed heartbeat. Keep `NODE_PRIVATE_KEY` in the node operator's local secret store; never put it in the browser or repository.

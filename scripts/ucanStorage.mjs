@@ -238,6 +238,25 @@ export function createPinataUploader({ signingEndpoint, serviceDid, fetchImpl = 
   };
 }
 
+export function createDirectPinataUploader({ jwt, apiUrl = "https://uploads.pinata.cloud/v3/files" } = {}) {
+  if (!jwt) throw new Error("A Pinata JWT is required for direct upload");
+  return async function upload({ bytes, name }) {
+    const form = new FormData();
+    form.append("file", new Blob([bytes], { type: "application/json" }), name);
+    form.append("network", "public");
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${jwt}` },
+      body: form,
+    });
+    if (!response.ok) throw new Error(`Pinata upload failed (${response.status})`);
+    const result = await response.json();
+    const cid = result.data?.cid || result.cid || result.IpfsHash;
+    if (!cid) throw new Error("Pinata response did not include a CID");
+    return `ipfs://${cid}`;
+  };
+}
+
 export function createIpfsDesktopUploader({ apiUrl = "http://127.0.0.1:5001", fetchImpl = globalThis.fetch } = {}) {
   return async function upload({ bytes, name }) {
     const form = new FormData();
