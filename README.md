@@ -21,7 +21,7 @@ First season newcomers only!
 
 ## On-chain advance protocol
 
-`ArtFiProtocol` is the only deployable production contract. It combines request discovery, sponsor escrow, receivable ownership, settlement, outcome attestations, and participant history without a separate registry, vault, or settlement router.
+`ArtFiProtocol` is the deployable escrow/NFT contract, and `ArtFiNetworkRegistry` is the separate serverless CID discovery and node-reward registry. Together they combine request discovery, sponsor escrow, receivable ownership, settlement, outcome attestations, participant history, and community replication without an ArtFi-owned database.
 
 ### NFT lifecycle
 

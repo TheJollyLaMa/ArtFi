@@ -106,3 +106,54 @@ Consumed magic links and upload invocations are stored in `.data/artfi-auth-nonc
 ## Pinning portability
 
 NFTs always store `ipfs://CID`, not a Pinata gateway URL. Pinata, IPFS Desktop, another pinning service, or any public gateway can retrieve the same content. Provider migration does not require an NFT or contract migration.
+
+## Serverless Artizen network
+
+ArtFi does not need to own a Pinata account or operate a storage server. Each participant can use their own Pinata account or local IPFS Desktop/Kubo node. The browser uploads the document, receives an `ipfs://CID`, and submits that CID plus its content hash in a wallet-signed transaction.
+
+`ArtFiNetworkRegistry` is the discovery directory. Its `ContentPublished` events contain the publisher wallet, document kind, CID, content hash, browser-agent hash, and required Artizen project/fund links. An indexer can rebuild the complete directory from chain events; no ArtFi database is authoritative.
+
+Run the portable recipe with `BASE_RPC_URL`, `ARTFI_NETWORK_REGISTRY_ADDRESS`, and an optional `ARTFI_NETWORK_FROM_BLOCK`:
+
+```bash
+BASE_RPC_URL=... \\
+ARTFI_NETWORK_REGISTRY_ADDRESS=0x... \\
+ARTFI_NETWORK_FROM_BLOCK=0 \\
+npm run index:network
+```
+
+It writes `artizen-network-index.json`, a disposable local view. Anyone can rebuild the same view from the same chain and registry events.
+
+### Barney-level first run
+
+1. Install [IPFS Desktop](https://docs.ipfs.tech/install/ipfs-desktop/) or create a Pinata account.
+2. If using IPFS Desktop, open **Settings → IPFS → API** and keep the API on `127.0.0.1:5001`. Allow the ArtFi site origin in Kubo CORS settings.
+3. If using Pinata, create a least-privilege upload credential in your own account. Never paste it into GitHub, an NFT, or a chat message. Direct browser JWT use is a user choice with a real credential-exposure risk.
+4. Open ArtFi, connect the wallet, and create the local browser agent. The private agent key stays in that browser's IndexedDB.
+5. Create `profile.json`, `request.json`, `offer.json`, or `outcome.json` with `scripts/ipfsMetadata.mjs`.
+6. Upload with the selected provider and copy the returned `ipfs://CID`.
+7. Register or publish the CID through the wallet transaction. The registry event makes it discoverable to every indexer and node.
+8. Test from another node or gateway by retrieving the CID before considering the record durable.
+
+### Community replicas and reward pilot
+
+Operators may run a public IPFS node that follows `ContentPublished` events, fetches the public metadata CIDs, and pins them. `ArtFiNetworkRegistry` supports an opt-in node record, administrator approval during the pilot, rotating monthly challenges, spaced heartbeats, sample-CID proof hashes, and a separate `MonthlyNodeRewardRecorded` event for the 10 ART monthly reward.
+
+The first pilot requires 25 successful checks per month, with checks no more often than every 12 hours. The reward is recorded separately from ordinary payroll; an administrator can manually transfer 10 ART and record its transaction reference. Future work can replace manual recording with a dedicated reward treasury after anti-Sybil and geographic-independence rules are proven.
+
+The heartbeat proves an operator responded to a current challenge and reports sample retrieval evidence; it does not claim that one node is the only copy. Multiple approved operators should pin the same public CIDs. Encrypted private attachments are excluded unless their participants explicitly authorize replication.
+
+### Operator heartbeat command
+
+After an administrator approves the registered node and configures the monthly challenge, run this command from the machine hosting IPFS Desktop/Kubo. Schedule it with cron, launchd, or another local task runner no more than once every 12 hours:
+
+```bash
+BASE_RPC_URL=... \\
+NODE_PRIVATE_KEY=... \\
+ARTFI_NETWORK_REGISTRY_ADDRESS=0x... \\
+ARTFI_NODE_ID=1 \\
+ARTFI_SAMPLE_CIDS=ipfs://bafy...,ipfs://bafy... \\
+npm run node:heartbeat
+```
+
+The keeper retrieves every sample CID through the local Kubo API, hashes the successful retrieval report, reads the current on-chain challenge, and submits one wallet-signed heartbeat. Keep `NODE_PRIVATE_KEY` in the node operator's local secret store; never put it in the browser or repository.

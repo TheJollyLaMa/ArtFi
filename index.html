@@ -6,7 +6,7 @@
   <meta name="artfi-auth-endpoint" content="/api/browser-auth/start" />
   <title>ArtFi</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Bungee&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Bungee&family=Pacifico&display=swap");
 
     :root {
       color-scheme: dark;
@@ -159,7 +159,53 @@
       grid-template-columns: 165px minmax(0, 1fr) 165px;
       align-items: flex-start;
       gap: 16px;
-      overflow: clip;
+      position: relative;
+      z-index: 50;
+      overflow: visible;
+    }
+
+    .header-network-links {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 180px;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .header-network-link {
+      fill: none;
+      stroke: rgba(122, 240, 198, 0.18);
+      stroke-width: 1;
+      stroke-linecap: round;
+    }
+
+    .header-network-link.pulse {
+      stroke: rgba(141, 124, 247, 0.72);
+      stroke-width: 1.35;
+      stroke-dasharray: 3 28;
+      filter: drop-shadow(0 0 4px rgba(141, 124, 247, 0.7));
+      animation: header-link-travel var(--header-link-duration, 6s) linear infinite;
+      animation-delay: var(--header-link-delay, 0s);
+    }
+
+    .header-network-node {
+      fill: var(--accent);
+      opacity: 0.55;
+      filter: drop-shadow(0 0 5px var(--accent));
+      animation: header-node-flicker var(--header-node-duration, 4s) ease-in-out infinite;
+      animation-delay: var(--header-node-delay, 0s);
+    }
+
+    @keyframes header-link-travel {
+      from { stroke-dashoffset: 31; }
+      to { stroke-dashoffset: -31; }
+    }
+
+    @keyframes header-node-flicker {
+      0%, 100% { opacity: 0.25; r: 1.4; }
+      50% { opacity: 0.9; r: 2.6; }
     }
 
     .site-header::before {
@@ -167,6 +213,201 @@
       grid-column: 1;
       grid-row: 1;
     }
+
+    .ipfs-dock {
+      grid-column: 1;
+      grid-row: 1;
+      position: relative;
+      width: 165px;
+      height: 165px;
+      pointer-events: none;
+    }
+
+    .ipfs-orbit {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 140px;
+      height: 140px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(141, 124, 247, 0.32);
+      border-radius: 50%;
+      box-shadow: 0 0 28px rgba(141, 124, 247, 0.2), inset 0 0 22px rgba(122, 240, 198, 0.08);
+      pointer-events: auto;
+    }
+    .ipfs-space-did {
+      position: absolute;
+      inset: -18px;
+      width: calc(100% + 36px);
+      height: calc(100% + 36px);
+      overflow: visible;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .ipfs-space-did[data-connected="true"] { opacity: 1; }
+
+    .ipfs-space-did text {
+      color: var(--accent);
+      fill: var(--accent);
+      font: 800 11px ui-monospace, monospace;
+      letter-spacing: 3.2px;
+      text-shadow: 0 0 7px rgba(122, 240, 198, 0.85);
+      animation: ipfs-did-spin 18s linear infinite;
+      transform-origin: 90px 90px;
+    }
+
+    .ipfs-space-icons {
+      position: absolute;
+      inset: -18px;
+      width: calc(100% + 36px);
+      height: calc(100% + 36px);
+      pointer-events: none;
+      transform-origin: center;
+    }
+
+    .ipfs-space-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 13px;
+      height: 13px;
+      object-fit: contain;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 6px rgba(122, 240, 198, 0.74));
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-88px) rotate(calc(-1 * var(--angle)));
+      animation: ipfs-icon-sparkle 2.8s ease-in-out infinite;
+      animation-delay: var(--spark-delay, 0s);
+    }
+
+    .ipfs-did-gap-icons {
+      position: absolute;
+      inset: -18px;
+      width: calc(100% + 36px);
+      height: calc(100% + 36px);
+      pointer-events: none;
+      animation: ipfs-did-spin 18s linear infinite;
+      transform-origin: center;
+    }
+
+    .ipfs-did-gap-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 6px rgba(122, 240, 198, 0.78));
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle)));
+      animation: ipfs-gap-icon-upright 18s linear infinite, ipfs-icon-sparkle 2.8s ease-in-out infinite;
+      animation-delay: 0s, var(--spark-delay, 0s);
+    }
+
+    @keyframes ipfs-gap-icon-upright {
+      from { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle))) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle))) rotate(-360deg); }
+    }
+
+    .ipfs-links {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ipfs-link-base {
+      stroke: rgba(122, 240, 198, 0.18);
+      stroke-width: 1;
+    }
+
+    .ipfs-link-pulse {
+      stroke: rgba(141, 124, 247, 0.9);
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-dasharray: 3 22;
+      filter: drop-shadow(0 0 4px rgba(141, 124, 247, 0.85));
+      animation: ipfs-pulse-travel var(--ipfs-pulse-duration, 3.8s) linear infinite;
+      animation-delay: var(--ipfs-pulse-delay, 0s);
+    }
+
+    @keyframes ipfs-pulse-travel {
+      from { stroke-dashoffset: 25; }
+      to { stroke-dashoffset: -25; }
+    }
+
+    @keyframes ipfs-icon-sparkle {
+      0%, 100% {
+        opacity: 0.62;
+        filter: brightness(0.9) drop-shadow(0 0 5px rgba(122, 240, 198, 0.55));
+      }
+      50% {
+        opacity: 1;
+        filter: brightness(1.7) drop-shadow(0 0 13px rgba(122, 240, 198, 1));
+      }
+    }
+
+    .ipfs-button {
+      position: relative;
+      z-index: 1;
+      width: 68px;
+      height: 68px;
+      border: 2px solid rgba(141, 124, 247, 0.82);
+      border-radius: 50%;
+      color: var(--text);
+      background: radial-gradient(circle at 35% 30%, rgba(141, 124, 247, 0.4), rgba(6, 9, 18, 0.92));
+      box-shadow: 0 0 18px rgba(141, 124, 247, 0.5);
+      cursor: pointer;
+      pointer-events: auto;
+      font-size: 1.65rem;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .ipfs-button:hover { transform: scale(1.06); border-color: var(--accent); }
+
+    .ipfs-button img {
+      width: 42px;
+      height: 42px;
+      display: block;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(122, 240, 198, 0.65));
+    }
+
+    @keyframes ipfs-did-spin { to { transform: rotate(360deg); } }
+
+    .ipfs-panel {
+      position: absolute;
+      top: 126px;
+      left: 0;
+      z-index: 20;
+      display: none;
+      width: min(360px, calc(100vw - 32px));
+      padding: 16px;
+      border: 1px solid rgba(141, 124, 247, 0.4);
+      border-radius: 12px;
+      background: rgba(7, 11, 24, 0.97);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55);
+      pointer-events: auto;
+    }
+
+    .ipfs-panel[data-open="true"] { display: grid; gap: 12px; }
+    .ipfs-panel h3 { margin: 0; font-size: 1rem; }
+    .ipfs-panel p {
+      font-size: 0.82rem;
+      line-height: 1.4;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+    .ipfs-provider-row, .ipfs-upload-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ipfs-provider-row button[data-selected="true"] { border-color: var(--accent); color: var(--accent); }
+    .ipfs-cid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    .ipfs-cid code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); }
 
     .site-brand {
       grid-column: 2;
@@ -183,6 +424,8 @@
       color: #00e5ff;
       font: inherit;
       cursor: pointer;
+      position: relative;
+      z-index: 2;
       transition: filter 0.18s ease, transform 0.18s ease;
     }
 
@@ -190,27 +433,44 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      font-family: "Bungee", Impact, sans-serif;
-      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-family: "Pacifico", cursive;
+      font-size: clamp(2.35rem, 5vw, 4rem);
       line-height: 1;
       letter-spacing: 0;
-      text-shadow: 0 0 10px #7300ff, 0 0 20px #00ffff;
+      color: #b7ffd4;
+      text-shadow: 0 0 8px #19d66b, 0 0 18px #39ff91, 0 0 34px rgba(24, 204, 111, 0.8);
     }
 
     .site-brand-symbol {
-      color: var(--accent);
+      color: #8fffc0;
       font-family: ui-monospace, monospace;
       font-size: 0.42em;
       letter-spacing: 0;
       opacity: 0.85;
     }
 
+    .site-brand-endpoint {
+      color: #8fffc0;
+      font-family: ui-monospace, monospace;
+      font-size: 0.42em;
+      letter-spacing: 0;
+      opacity: 0.85;
+    }
+
+    .site-brand-artizen-a {
+      width: 0.82em;
+      height: 0.82em;
+      object-fit: contain;
+      filter: drop-shadow(0 0 7px rgba(24, 204, 111, 0.95));
+      opacity: 1;
+    }
+
     .site-brand-subtitle {
-      color: #9b83ff;
+      color: #7dffc0;
       font-family: "Comic Sans MS", cursive, sans-serif;
       font-size: 0.75rem;
       letter-spacing: 0;
-      text-shadow: 0 0 10px #00e5ff;
+      text-shadow: 0 0 8px rgba(24, 204, 111, 0.9);
     }
 
     .site-brand:hover {
@@ -1010,11 +1270,108 @@
 </head>
 <body>
   <header class="site-header">
+    <svg id="header-network-links" class="header-network-links" aria-hidden="true"></svg>
+    <div class="ipfs-dock" aria-label="IPFS storage controls">
+      <div class="ipfs-orbit">
+        <svg class="ipfs-links" viewBox="0 0 140 140" aria-hidden="true">
+          <g class="ipfs-link-base">
+            <line x1="70" y1="70" x2="70" y2="-18" /><line x1="70" y1="70" x2="132" y2="8" />
+            <line x1="70" y1="70" x2="158" y2="70" /><line x1="70" y1="70" x2="132" y2="132" />
+            <line x1="70" y1="70" x2="70" y2="158" /><line x1="70" y1="70" x2="8" y2="132" />
+            <line x1="70" y1="70" x2="-18" y2="70" /><line x1="70" y1="70" x2="8" y2="8" />
+            <line x1="70" y1="-18" x2="132" y2="8" /><line x1="132" y1="8" x2="158" y2="70" />
+            <line x1="158" y1="70" x2="132" y2="132" /><line x1="132" y1="132" x2="70" y2="158" />
+            <line x1="70" y1="158" x2="8" y2="132" /><line x1="8" y1="132" x2="-18" y2="70" />
+            <line x1="-18" y1="70" x2="8" y2="8" /><line x1="8" y1="8" x2="70" y2="-18" />
+            <line x1="70" y1="-18" x2="158" y2="70" /><line x1="132" y1="8" x2="70" y2="158" />
+          </g>
+          <g class="ipfs-link-pulse">
+            <line x1="70" y1="70" x2="70" y2="-18" style="--ipfs-pulse-duration: 3.1s; --ipfs-pulse-delay: -1.2s" />
+            <line x1="70" y1="70" x2="132" y2="8" style="--ipfs-pulse-duration: 4.2s; --ipfs-pulse-delay: -2.4s" />
+            <line x1="70" y1="70" x2="158" y2="70" style="--ipfs-pulse-duration: 3.7s; --ipfs-pulse-delay: -0.8s" />
+            <line x1="70" y1="70" x2="132" y2="132" style="--ipfs-pulse-duration: 4.8s; --ipfs-pulse-delay: -3.1s" />
+            <line x1="70" y1="70" x2="70" y2="158" style="--ipfs-pulse-duration: 3.5s; --ipfs-pulse-delay: -1.7s" />
+            <line x1="70" y1="70" x2="8" y2="132" style="--ipfs-pulse-duration: 4.4s; --ipfs-pulse-delay: -2.8s" />
+            <line x1="70" y1="70" x2="-18" y2="70" style="--ipfs-pulse-duration: 3.3s; --ipfs-pulse-delay: -0.4s" />
+            <line x1="70" y1="70" x2="8" y2="8" style="--ipfs-pulse-duration: 4.6s; --ipfs-pulse-delay: -2.1s" />
+            <line x1="70" y1="-18" x2="132" y2="8" style="--ipfs-pulse-duration: 5.2s; --ipfs-pulse-delay: -3.7s" />
+            <line x1="132" y1="8" x2="158" y2="70" style="--ipfs-pulse-duration: 4.1s; --ipfs-pulse-delay: -1.9s" />
+            <line x1="158" y1="70" x2="132" y2="132" style="--ipfs-pulse-duration: 5.7s; --ipfs-pulse-delay: -4.4s" />
+            <line x1="132" y1="132" x2="70" y2="158" style="--ipfs-pulse-duration: 3.9s; --ipfs-pulse-delay: -0.6s" />
+            <line x1="70" y1="158" x2="8" y2="132" style="--ipfs-pulse-duration: 4.9s; --ipfs-pulse-delay: -2.7s" />
+            <line x1="8" y1="132" x2="-18" y2="70" style="--ipfs-pulse-duration: 3.6s; --ipfs-pulse-delay: -1.3s" />
+            <line x1="-18" y1="70" x2="8" y2="8" style="--ipfs-pulse-duration: 5.4s; --ipfs-pulse-delay: -3.2s" />
+            <line x1="8" y1="8" x2="70" y2="-18" style="--ipfs-pulse-duration: 4.3s; --ipfs-pulse-delay: -0.9s" />
+            <line x1="70" y1="-18" x2="158" y2="70" style="--ipfs-pulse-duration: 6.1s; --ipfs-pulse-delay: -4.9s" />
+            <line x1="132" y1="8" x2="70" y2="158" style="--ipfs-pulse-duration: 4.7s; --ipfs-pulse-delay: -2.2s" />
+          </g>
+        </svg>
+        <svg id="ipfs-space-did" class="ipfs-space-did" data-connected="false" viewBox="0 0 180 180" aria-label="Connected IPFS space identity">
+          <path id="ipfs-space-did-path" d="M 90, 90 m -82, 0 a 82,82 0 1,0 164,0 a 82,82 0 1,0 -164,0" fill="none" />
+          <text>
+            <textPath id="ipfs-space-did-prefix" href="#ipfs-space-did-path" startOffset="34%" text-anchor="middle">IPFS</textPath>
+          </text>
+          <text>
+            <textPath id="ipfs-space-did-suffix" href="#ipfs-space-did-path" startOffset="66%" text-anchor="middle">NODE</textPath>
+          </text>
+        </svg>
+        <div id="ipfs-did-gap-icons" class="ipfs-did-gap-icons" aria-hidden="true">
+          <img class="ipfs-did-gap-icon" style="--angle: 58deg; --spark-delay: -0.2s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 67deg; --spark-delay: -0.8s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 76deg; --spark-delay: -1.4s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 85deg; --spark-delay: -2s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 95deg; --spark-delay: -2.6s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 104deg; --spark-delay: -3.2s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 113deg; --spark-delay: -3.8s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 122deg; --spark-delay: -4.4s" src="./Artizen_LOGO.png" alt="" />
+        </div>
+        <div id="ipfs-space-icons" class="ipfs-space-icons" aria-hidden="true">
+          <img class="ipfs-space-icon" style="--angle: 0deg; --spark-delay: -0.2s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 45deg; --spark-delay: -0.8s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 90deg; --spark-delay: -1.4s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 135deg; --spark-delay: -2s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 180deg; --spark-delay: -2.6s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 225deg; --spark-delay: -3.2s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 270deg; --spark-delay: -3.8s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 315deg; --spark-delay: -4.4s" src="./Artizen_LOGO.png" alt="" />
+        </div>
+        <button id="ipfs-button" class="ipfs-button" type="button" aria-label="Open IPFS storage controls" aria-expanded="false"><img src="./IPFS_Logo.png" alt="" aria-hidden="true" /></button>
+      </div>
+      <div id="ipfs-panel" class="ipfs-panel" data-open="false" aria-label="IPFS storage panel">
+        <h3>IPFS storage</h3>
+        <p>Choose where your metadata is pinned. The dapp stores only the resulting CID.</p>
+        <div class="ipfs-provider-row" role="group" aria-label="IPFS provider">
+          <button id="ipfs-desktop-provider" class="btn secondary" type="button" data-selected="true">IPFS Desktop</button>
+          <button id="pinata-provider" class="btn secondary" type="button" data-selected="false">My Pinata</button>
+        </div>
+        <input id="pinata-jwt" class="storage-email" type="password" autocomplete="off" placeholder="Optional local Pinata JWT" hidden />
+        <p id="pinata-warning" class="note" hidden>Your JWT stays in memory for this page and is never stored or sent to ArtFi. Use a least-privilege Pinata key.</p>
+        <label class="ipfs-reward-optin"><input id="node-reward-optin" type="checkbox" /> Opt in to node rewards</label>
+        <div id="node-reward-panel" hidden>
+          <input id="network-registry-address" class="storage-email" placeholder="ArtFiNetworkRegistry address" />
+          <input id="node-did-hash" class="storage-email" placeholder="Node DID hash (bytes32)" />
+          <input id="node-peer-id-hash" class="storage-email" placeholder="Peer ID hash (bytes32)" />
+          <input id="node-software-version" class="storage-email" value="kubo/ipfs-desktop" placeholder="Software version" />
+          <button id="register-node-button" class="btn secondary" type="button">Register node</button>
+          <button id="heartbeat-button" class="btn secondary" type="button" disabled>Submit heartbeat</button>
+          <p id="node-reward-status" class="note">Rewards require an approved node, sample CID checks, and 10 ART is recorded monthly after eligibility.</p>
+        </div>
+        <div class="ipfs-upload-row">
+          <input id="ipfs-json-file" type="file" accept="application/json,.json" hidden />
+          <button id="ipfs-upload-button" class="btn" type="button">Upload JSON</button>
+          <button id="ipfs-copy-cid" class="btn secondary" type="button" disabled>Copy CID</button>
+        </div>
+        <div id="ipfs-cid" class="ipfs-cid" hidden><code id="ipfs-cid-value"></code></div>
+        <p id="ipfs-status" class="note">IPFS Desktop selected.</p>
+      </div>
+    </div>
     <button id="about-open" class="site-brand" type="button" aria-label="About ArtFi" aria-haspopup="dialog" aria-controls="about-dialog">
       <span class="site-brand-title">
-        <span class="site-brand-symbol">::-&#9671;-</span>
+        <span class="site-brand-endpoint">::-</span>
+        <img class="site-brand-artizen-a" src="./Artizen_LOGO.png" alt="Artizen" />
         <span>ArtFi</span>
-        <span class="site-brand-symbol">-&#9671;-::</span>
+        <img class="site-brand-artizen-a" src="./Artizen_LOGO.png" alt="Artizen" />
+        <span class="site-brand-endpoint">-::</span>
       </span>
       <span class="site-brand-subtitle">(Another Decent Frankenstein)</span>
     </button>
@@ -1126,6 +1483,75 @@
       }
 
       orbit.prepend(svg);
+    })();
+
+    // Header-level curved wiring between the two orbit controls and ArtFi's end symbols.
+    (() => {
+      const header = document.querySelector('.site-header');
+      const network = document.getElementById('header-network-links');
+      const ipfs = document.querySelector('.ipfs-orbit');
+      const wallet = document.querySelector('.wallet-orbit');
+      const symbols = document.querySelectorAll('.site-brand-endpoint');
+      if (!header || !network || !ipfs || !wallet || symbols.length < 2) return;
+
+      const draw = () => {
+        const headerBox = header.getBoundingClientRect();
+        network.setAttribute('viewBox', `0 0 ${headerBox.width} 180`);
+        network.innerHTML = '';
+        const point = element => {
+          const box = element.getBoundingClientRect();
+          return { x: box.left - headerBox.left + box.width / 2, y: box.top - headerBox.top + box.height / 2 };
+        };
+        const ipfsPoint = point(ipfs);
+        const walletPoint = point(wallet);
+        const leftEnd = point(symbols[0]);
+        const rightEnd = point(symbols[1]);
+        const links = [
+          { from: ipfsPoint, to: leftEnd, bend: 18 },
+          { from: ipfsPoint, to: leftEnd, bend: 48 },
+          { from: walletPoint, to: rightEnd, bend: 18 },
+          { from: walletPoint, to: rightEnd, bend: 48 },
+          { from: ipfsPoint, to: walletPoint, bend: 76 },
+          { from: ipfsPoint, to: walletPoint, bend: 112 },
+          { from: ipfsPoint, to: rightEnd, lane: 206 },
+          { from: walletPoint, to: leftEnd, lane: 206 },
+        ];
+        const svgNS = 'http://www.w3.org/2000/svg';
+        links.forEach(({ from, to, bend, lane }, index) => {
+          const midpoint = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 + (bend || 0) };
+          const pathData = lane === undefined
+            ? `M ${from.x} ${from.y} Q ${midpoint.x} ${midpoint.y} ${to.x} ${to.y}`
+            : `M ${from.x} ${from.y} C ${from.x} ${lane}, ${to.x} ${lane}, ${to.x} ${to.y}`;
+          const base = document.createElementNS(svgNS, 'path');
+          base.setAttribute('class', 'header-network-link');
+          base.setAttribute('d', pathData);
+          network.appendChild(base);
+          const pulse = document.createElementNS(svgNS, 'path');
+          pulse.setAttribute('class', 'header-network-link pulse');
+          pulse.setAttribute('d', pathData);
+          pulse.style.setProperty('--header-link-duration', `${5.2 + index * 0.47}s`);
+          pulse.style.setProperty('--header-link-delay', `${-index * 1.17}s`);
+          network.appendChild(pulse);
+          [0.18, 0.36, 0.54, 0.72, 0.86].forEach((ratio, nodeIndex) => {
+            const x = lane === undefined
+              ? (1 - ratio) ** 2 * from.x + 2 * (1 - ratio) * ratio * midpoint.x + ratio ** 2 * to.x
+              : (1 - ratio) ** 3 * from.x + 3 * (1 - ratio) ** 2 * ratio * from.x + 3 * (1 - ratio) * ratio ** 2 * to.x + ratio ** 3 * to.x;
+            const y = lane === undefined
+              ? (1 - ratio) ** 2 * from.y + 2 * (1 - ratio) * ratio * midpoint.y + ratio ** 2 * to.y
+              : (1 - ratio) ** 3 * from.y + 3 * (1 - ratio) ** 2 * ratio * lane + 3 * (1 - ratio) * ratio ** 2 * lane + ratio ** 3 * to.y;
+            const node = document.createElementNS(svgNS, 'circle');
+            node.setAttribute('class', 'header-network-node');
+            node.setAttribute('cx', x);
+            node.setAttribute('cy', y);
+            node.setAttribute('r', '1.6');
+            node.style.setProperty('--header-node-duration', `${3.1 + nodeIndex * 0.8}s`);
+            node.style.setProperty('--header-node-delay', `${-(index + nodeIndex) * 0.73}s`);
+            network.appendChild(node);
+          });
+        });
+      };
+      draw();
+      window.addEventListener('resize', draw, { passive: true });
     })();
 
     const aboutDialog = document.getElementById("about-dialog");
@@ -1289,6 +1715,7 @@
       loadOrCreateEmailSalt,
       requestEmailAuthorization,
     } from "./scripts/ucanStorage.mjs";
+    import { createDirectPinataUploader, createIpfsDesktopUploader, createPinataUploader } from "./scripts/ucanStorage.mjs";
 
     const routerAbi = ["function executeDisbursement(address _creator, uint256 _grossMatchAmount)"];
 
@@ -1309,6 +1736,30 @@
     const browserLinkButton = document.getElementById("browser-link-button");
     const browserLinkStatus = document.getElementById("browser-link-status");
     const browserEmail = document.getElementById("browser-email");
+    const ipfsButton = document.getElementById("ipfs-button");
+    const ipfsPanel = document.getElementById("ipfs-panel");
+    const ipfsDesktopProvider = document.getElementById("ipfs-desktop-provider");
+    const pinataProvider = document.getElementById("pinata-provider");
+    const ipfsJsonFile = document.getElementById("ipfs-json-file");
+    const ipfsUploadButton = document.getElementById("ipfs-upload-button");
+    const ipfsCopyCid = document.getElementById("ipfs-copy-cid");
+    const ipfsCid = document.getElementById("ipfs-cid");
+    const ipfsCidValue = document.getElementById("ipfs-cid-value");
+    const ipfsStatus = document.getElementById("ipfs-status");
+    const pinataJwt = document.getElementById("pinata-jwt");
+    const pinataWarning = document.getElementById("pinata-warning");
+    const nodeRewardOptin = document.getElementById("node-reward-optin");
+    const nodeRewardPanel = document.getElementById("node-reward-panel");
+    const networkRegistryAddress = document.getElementById("network-registry-address");
+    const nodeDidHash = document.getElementById("node-did-hash");
+    const nodePeerIdHash = document.getElementById("node-peer-id-hash");
+    const nodeSoftwareVersion = document.getElementById("node-software-version");
+    const registerNodeButton = document.getElementById("register-node-button");
+    const heartbeatButton = document.getElementById("heartbeat-button");
+    const nodeRewardStatus = document.getElementById("node-reward-status");
+      const ipfsSpaceDid = document.getElementById("ipfs-space-did");
+      const ipfsSpaceDidPrefix = document.getElementById("ipfs-space-did-prefix");
+      const ipfsSpaceDidSuffix = document.getElementById("ipfs-space-did-suffix");
     const authEndpoint = document.querySelector('meta[name="artfi-auth-endpoint"]')?.content || "/api/browser-auth/start";
 
     const state = {
@@ -1318,9 +1769,49 @@
       connected: false,
       browserBinding: null,
       queue: []
+      ,ipfsProvider: "desktop"
+      ,lastCid: ""
+    };
+
+    const setIpfsSpaceDid = (did) => {
+      const value = String(did || "").trim();
+      ipfsSpaceDidPrefix.textContent = value ? value.slice(0, 6) : "IPFS";
+      ipfsSpaceDidSuffix.textContent = value ? value.slice(-4) : "NODE";
+      ipfsSpaceDid.dataset.connected = value ? "true" : "false";
+    };
+
+    const probeIpfsDesktop = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5001/api/v0/id", { method: "POST" });
+        if (!response.ok) throw new Error(`IPFS Desktop probe failed (${response.status})`);
+        const node = await response.json();
+        setIpfsSpaceDid(node.ID);
+        ipfsStatus.textContent = `IPFS Desktop connected: ${node.ID}`;
+      } catch (_) {
+        setIpfsSpaceDid("");
+        ipfsStatus.textContent = "IPFS Desktop selected. If Kubo is running, allow this localhost origin in its API CORS settings.";
+      }
+    };
+
+    const setIpfsProvider = (provider) => {
+      state.ipfsProvider = provider;
+      ipfsDesktopProvider.dataset.selected = provider === "desktop" ? "true" : "false";
+      pinataProvider.dataset.selected = provider === "pinata" ? "true" : "false";
+      ipfsStatus.textContent = provider === "desktop"
+        ? "IPFS Desktop selected. Keep Kubo running on 127.0.0.1:5001."
+        : "Pinata selected. Paste a local JWT or configure a signed-upload endpoint.";
+      pinataJwt.hidden = provider !== "pinata";
+      pinataWarning.hidden = provider !== "pinata";
+      if (provider === "desktop") probeIpfsDesktop();
+      else setIpfsSpaceDid("");
     };
 
     const ADMIN_WALLET = "0x807061df657a7697c04045da7d16d941861caabc";
+    const networkRegistryAbi = [
+      "function registerNode(bytes32 nodeDidHash,bytes32 peerIdHash,string softwareVersion) returns (uint256)",
+      "function heartbeat(uint256 nodeId,uint256 month,bytes32 challengeHash,bytes32 sampleProofHash,uint256 sampleCount,string softwareVersion)",
+      "function monthChallenges(uint256 month) view returns (bytes32)",
+    ];
 
     const shortAccount = (value) => (!value ? ["0x0000", "0000"] : [value.slice(0, 6), value.slice(-4)]);
 
@@ -1424,6 +1915,71 @@
       setQueueOptions();
     };
 
+    const uploadIpfsJson = async () => {
+      ipfsJsonFile.click();
+    };
+
+    ipfsJsonFile.addEventListener("change", async () => {
+      const file = ipfsJsonFile.files?.[0];
+      if (!file) return;
+      try {
+        ipfsUploadButton.disabled = true;
+        ipfsStatus.textContent = "Uploading…";
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const uploader = state.ipfsProvider === "desktop"
+          ? createIpfsDesktopUploader()
+          : pinataJwt.value.trim()
+            ? createDirectPinataUploader({ jwt: pinataJwt.value.trim() })
+            : createPinataUploader({
+                signingEndpoint: document.querySelector('meta[name="artfi-pinata-endpoint"]')?.content,
+                serviceDid: document.querySelector('meta[name="artfi-ucan-service-did"]')?.content,
+              });
+        const uri = await uploader({ bytes, name: file.name });
+        state.lastCid = uri;
+        ipfsCid.hidden = false;
+        ipfsCidValue.textContent = uri;
+        ipfsCopyCid.disabled = false;
+        ipfsStatus.textContent = "Upload complete. Copy the CID into the wallet transaction.";
+      } catch (error) {
+        ipfsStatus.textContent = error?.message || "IPFS upload failed.";
+      } finally {
+        ipfsUploadButton.disabled = false;
+        ipfsJsonFile.value = "";
+      }
+    });
+
+    ipfsCopyCid.addEventListener("click", async () => {
+      if (!state.lastCid) return;
+      await navigator.clipboard.writeText(state.lastCid);
+      ipfsStatus.textContent = "CID copied.";
+    });
+
+    nodeRewardOptin.addEventListener("change", () => {
+      nodeRewardPanel.hidden = !nodeRewardOptin.checked;
+    });
+
+    registerNodeButton.addEventListener("click", async () => {
+      if (!state.signer) return;
+      try {
+        const registry = new Contract(networkRegistryAddress.value.trim(), networkRegistryAbi, state.signer);
+        const transaction = await registry.registerNode(
+          nodeDidHash.value.trim(),
+          nodePeerIdHash.value.trim(),
+          nodeSoftwareVersion.value.trim()
+        );
+        nodeRewardStatus.textContent = `Node registration sent: ${transaction.hash}`;
+        await transaction.wait();
+        nodeRewardStatus.textContent = "Node registered. An administrator must approve it before heartbeats count.";
+        heartbeatButton.disabled = false;
+      } catch (error) {
+        nodeRewardStatus.textContent = error?.shortMessage || error?.message || "Node registration failed.";
+      }
+    });
+
+    heartbeatButton.addEventListener("click", () => {
+      nodeRewardStatus.textContent = "Run npm run node:heartbeat on the node host to sample CIDs and submit the signed heartbeat.";
+    });
+
     const connectWallet = async () => {
       if (!window.ethereum) {
         txNote.textContent = "MetaMask is not available in this browser.";
@@ -1440,18 +1996,30 @@
         return;
       }
 
-      const provider = new BrowserProvider(window.ethereum);
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const signer = await provider.getSigner();
-      const account = (accounts?.[0] || (await signer.getAddress())).toLowerCase();
+      try {
+        txNote.textContent = "Requesting wallet connection…";
+        const provider = new BrowserProvider(window.ethereum);
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        const account = (accounts?.[0] || "").toLowerCase();
+        if (!account) throw new Error("No wallet account was returned.");
+        const signer = await provider.getSigner(account);
 
-      state.provider = provider;
-      state.signer = signer;
-      state.account = account;
-      state.connected = true;
+        state.provider = provider;
+        state.signer = signer;
+        state.account = account;
+        state.connected = true;
 
-      setAccountOrbit(account);
-      setWalletUI(true);
+        setAccountOrbit(account);
+        setWalletUI(true);
+      } catch (error) {
+        state.provider = null;
+        state.signer = null;
+        state.account = "";
+        state.connected = false;
+        setAccountOrbit("");
+        setWalletUI(false);
+        txNote.textContent = error?.shortMessage || error?.message || "Wallet connection failed.";
+      }
     };
 
     const restoreWallet = async () => {
@@ -1462,7 +2030,7 @@
         if (!account) return;
 
         state.provider = new BrowserProvider(window.ethereum);
-        state.signer = await state.provider.getSigner();
+        state.signer = await state.provider.getSigner(account);
         state.account = account;
         state.connected = true;
 
@@ -1544,6 +2112,25 @@
     finalizeButton.addEventListener("click", finalizePayout);
     refreshButton.addEventListener("click", loadQueue);
     browserLinkButton.addEventListener("click", linkBrowser);
+    const setIpfsPanelOpen = (open) => {
+      ipfsPanel.dataset.open = open ? "true" : "false";
+      ipfsButton.setAttribute("aria-expanded", String(open));
+    };
+
+    ipfsButton.addEventListener("click", () => {
+      setIpfsPanelOpen(ipfsPanel.dataset.open !== "true");
+    });
+    document.addEventListener("click", (event) => {
+      if (ipfsPanel.dataset.open !== "true") return;
+      if (ipfsPanel.contains(event.target) || ipfsButton.contains(event.target)) return;
+      setIpfsPanelOpen(false);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && ipfsPanel.dataset.open === "true") setIpfsPanelOpen(false);
+    });
+    ipfsDesktopProvider.addEventListener("click", () => setIpfsProvider("desktop"));
+    pinataProvider.addEventListener("click", () => setIpfsProvider("pinata"));
+    ipfsUploadButton.addEventListener("click", uploadIpfsJson);
     routerAddress.addEventListener("input", updateBatchSummary);
 
     if (window.ethereum) {
@@ -1581,6 +2168,7 @@
       });
     restoreWallet();
     loadQueue();
+    probeIpfsDesktop();
   </script>
 </body>
 </html>

@@ -4,10 +4,12 @@
   "description": "Zero-profit micro-liquidity protocol for Artizen creators. Features automated grant advances, human-in-the-loop onboarding, and smart contract settlement.",
   "main": "index.js",
   "scripts": {
-    "test": "hardhat test && node --test test/payroll.test.js test/commentArt.test.js test/ipfsStorage.test.mjs test/browserEmailAuth.test.mjs",
+    "test": "hardhat test && node --test test/payroll.test.js test/commentArt.test.js test/ipfsStorage.test.mjs test/browserEmailAuth.test.mjs test/nodeKeeper.test.mjs",
     "test:storage": "node --test test/ipfsStorage.test.mjs test/browserEmailAuth.test.mjs",
     "auth:serve": "node scripts/browserAuthServer.mjs",
     "auth:keygen": "node scripts/generateUcanServiceKey.mjs",
+    "index:network": "node scripts/indexNetwork.mjs",
+    "node:heartbeat": "node scripts/nodeKeeper.mjs",
     "compile": "hardhat compile",
     "deploy:base": "hardhat run scripts/deploy.js --network base"
   },
