@@ -252,11 +252,34 @@
     .ipfs-space-did text {
       color: var(--accent);
       fill: var(--accent);
-      font: 700 8px ui-monospace, monospace;
-      letter-spacing: 2px;
+      font: 800 11px ui-monospace, monospace;
+      letter-spacing: 2.5px;
       text-shadow: 0 0 7px rgba(122, 240, 198, 0.85);
       animation: ipfs-did-spin 18s linear infinite;
       transform-origin: 90px 90px;
+    }
+
+    .ipfs-space-icons {
+      position: absolute;
+      inset: -18px;
+      width: calc(100% + 36px);
+      height: calc(100% + 36px);
+      pointer-events: none;
+      transform-origin: center;
+    }
+
+    .ipfs-space-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 13px;
+      height: 13px;
+      object-fit: contain;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 6px rgba(122, 240, 198, 0.74));
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-88px) rotate(calc(-1 * var(--angle)));
+      animation: ipfs-icon-sparkle 2.8s ease-in-out infinite;
+      animation-delay: var(--spark-delay, 0s);
     }
 
     .ipfs-links {
@@ -288,28 +311,6 @@
       from { stroke-dashoffset: 25; }
       to { stroke-dashoffset: -25; }
     }
-
-    .ipfs-orbit-body {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      object-fit: contain;
-      border-radius: 50%;
-      filter: drop-shadow(0 0 7px rgba(122, 240, 198, 0.9));
-      z-index: 1;
-      transform: translate(-50%, -50%);
-      animation: ipfs-icon-sparkle 2.8s ease-in-out infinite;
-      animation-delay: var(--spark-delay, 0s);
-    }
-
-    .ipfs-orbit-body:nth-of-type(1) { top: 18%; left: 50%; --spark-delay: -0.2s; }
-    .ipfs-orbit-body:nth-of-type(2) { top: 27%; left: 73%; --spark-delay: -1.1s; }
-    .ipfs-orbit-body:nth-of-type(3) { top: 50%; left: 82%; --spark-delay: -2.2s; }
-    .ipfs-orbit-body:nth-of-type(4) { top: 73%; left: 73%; --spark-delay: -0.8s; }
-    .ipfs-orbit-body:nth-of-type(5) { top: 82%; left: 50%; --spark-delay: -1.7s; }
-    .ipfs-orbit-body:nth-of-type(6) { top: 73%; left: 27%; --spark-delay: -2.6s; }
-    .ipfs-orbit-body:nth-of-type(7) { top: 50%; left: 18%; --spark-delay: -1.4s; }
-    .ipfs-orbit-body:nth-of-type(8) { top: 27%; left: 27%; --spark-delay: -2.9s; }
 
     @keyframes ipfs-icon-sparkle {
       0%, 100% {
@@ -1276,22 +1277,25 @@
             <line x1="123" y1="17" x2="55" y2="140" style="--ipfs-pulse-duration: 4.7s; --ipfs-pulse-delay: -2.2s" />
           </g>
         </svg>
-        <img class="ipfs-orbit-body" src="./IPFS_Logo.png" alt="" aria-hidden="true" />
-        <img class="ipfs-orbit-body" src="./Artizen_LOGO.png" alt="" aria-hidden="true" />
-        <img class="ipfs-orbit-body" src="./IPFS_Logo.png" alt="" aria-hidden="true" />
-        <img class="ipfs-orbit-body" src="./Artizen_LOGO.png" alt="" aria-hidden="true" />
-        <img class="ipfs-orbit-body" src="./IPFS_Logo.png" alt="" aria-hidden="true" />
-        <img class="ipfs-orbit-body" src="./Artizen_LOGO.png" alt="" aria-hidden="true" />
-        <img class="ipfs-orbit-body" src="./IPFS_Logo.png" alt="" aria-hidden="true" />
-        <img class="ipfs-orbit-body" src="./Artizen_LOGO.png" alt="" aria-hidden="true" />
         <svg id="ipfs-space-did" class="ipfs-space-did" data-connected="false" viewBox="0 0 180 180" aria-label="Connected IPFS space identity">
           <path id="ipfs-space-did-path" d="M 90, 90 m -82, 0 a 82,82 0 1,0 164,0 a 82,82 0 1,0 -164,0" fill="none" />
           <text>
-            <textPath href="#ipfs-space-did-path" startOffset="50%" text-anchor="middle">
-              <tspan id="ipfs-space-did-text"></tspan>
-            </textPath>
+            <textPath id="ipfs-space-did-prefix" href="#ipfs-space-did-path" startOffset="38%" text-anchor="middle">IPFS</textPath>
+          </text>
+          <text>
+            <textPath id="ipfs-space-did-suffix" href="#ipfs-space-did-path" startOffset="62%" text-anchor="middle">NODE</textPath>
           </text>
         </svg>
+        <div id="ipfs-space-icons" class="ipfs-space-icons" aria-hidden="true">
+          <img class="ipfs-space-icon" style="--angle: 0deg; --spark-delay: -0.2s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 45deg; --spark-delay: -0.8s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 90deg; --spark-delay: -1.4s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 135deg; --spark-delay: -2s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 180deg; --spark-delay: -2.6s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 225deg; --spark-delay: -3.2s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 270deg; --spark-delay: -3.8s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-space-icon" style="--angle: 315deg; --spark-delay: -4.4s" src="./Artizen_LOGO.png" alt="" />
+        </div>
         <button id="ipfs-button" class="ipfs-button" type="button" aria-label="Open IPFS storage controls" aria-expanded="false"><img src="./IPFS_Logo.png" alt="" aria-hidden="true" /></button>
       </div>
       <div id="ipfs-panel" class="ipfs-panel" data-open="false" aria-label="IPFS storage panel">
@@ -1715,7 +1719,8 @@
     const heartbeatButton = document.getElementById("heartbeat-button");
     const nodeRewardStatus = document.getElementById("node-reward-status");
       const ipfsSpaceDid = document.getElementById("ipfs-space-did");
-      const ipfsSpaceDidText = document.getElementById("ipfs-space-did-text");
+      const ipfsSpaceDidPrefix = document.getElementById("ipfs-space-did-prefix");
+      const ipfsSpaceDidSuffix = document.getElementById("ipfs-space-did-suffix");
     const authEndpoint = document.querySelector('meta[name="artfi-auth-endpoint"]')?.content || "/api/browser-auth/start";
 
     const state = {
@@ -1731,8 +1736,8 @@
 
     const setIpfsSpaceDid = (did) => {
       const value = String(did || "").trim();
-      const display = value ? `${value.slice(0, 10)}...${value.slice(-8)}` : "";
-      ipfsSpaceDidText.textContent = display ? `IPFS SPACE  ${display}  •  IPFS SPACE  ${display}  •  ` : "";
+      ipfsSpaceDidPrefix.textContent = value ? value.slice(0, 6) : "IPFS";
+      ipfsSpaceDidSuffix.textContent = value ? value.slice(-4) : "NODE";
       ipfsSpaceDid.dataset.connected = value ? "true" : "false";
     };
 
