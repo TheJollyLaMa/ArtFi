@@ -99,3 +99,5 @@ To enable email delivery, set these repository secrets:
 
 For work intentionally closed without merge, or for an older PR that was not linked correctly, run **Actions → Bounty Bot → Run workflow** with the PR number and optional issue number. Testing bounties use `/test-complete` from an assigned tester followed by `/test-approved` from the repository owner. Finalized payments are moved from pending to settled through **Actions → Settle Payroll**.
 
+The Pages payroll admin panel can select one or more creators and submit their pending ART totals one creator at a time through the current settlement router. Wait for each transaction to confirm, then run **Settle Payroll** with the selected comma-separated GitHub handles. For distinct transaction hashes, provide matching `creator=transaction-hash` pairs in the `tx_hashes` input; a failed creator remains pending and can be retried without disturbing successful creators.
+

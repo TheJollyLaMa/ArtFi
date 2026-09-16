@@ -193,10 +193,13 @@ function applyAccountAccrual(accounts, entries) {
 }
 
 function settleEntries({ queue, accounts, contributorGithub = '', issueRef = '', txHash = '', settledAt, settledBy }) {
-  const contributorFilter = String(contributorGithub).trim().toLowerCase();
+  const contributorFilters = String(contributorGithub)
+    .split(',')
+    .map(value => value.trim().toLowerCase())
+    .filter(Boolean);
   const issueFilter = String(issueRef).trim();
   const matches = entry =>
-    (!contributorFilter || String(entry.contributorGithub || '').trim().toLowerCase() === contributorFilter) &&
+    (contributorFilters.length === 0 || contributorFilters.includes(String(entry.contributorGithub || '').trim().toLowerCase())) &&
     (!issueFilter || String(entry.issueRef || '').trim() === issueFilter);
   const selected = (queue.pending || []).filter(matches);
   queue.pending = (queue.pending || []).filter(entry => !matches(entry));

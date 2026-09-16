@@ -17,6 +17,17 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function parseTransactionHashes(value) {
+  return String(value || '').split(',').reduce((hashes, pair) => {
+    const separator = pair.indexOf('=');
+    if (separator < 1) return hashes;
+    const contributor = pair.slice(0, separator).trim().toLowerCase();
+    const txHash = pair.slice(separator + 1).trim();
+    if (contributor && txHash) hashes[contributor] = txHash;
+    return hashes;
+  }, {});
+}
+
 function buildSettlementComment({ settledCount, actor, txHash, issueNumber }) {
   const body = [
     `✅ Settled ${settledCount} payroll entr${settledCount === 1 ? 'y' : 'ies'} by @${actor}.`,
@@ -27,20 +38,25 @@ function buildSettlementComment({ settledCount, actor, txHash, issueNumber }) {
 
 async function main() {
   const { owner, repo } = repositoryCoordinates();
-  const contributorGithub = String(process.env.INPUT_CONTRIBUTOR_GITHUB || '').trim();
+  const contributorGithub = String(
+    process.env.INPUT_CONTRIBUTORS_GITHUB || process.env.INPUT_CONTRIBUTOR_GITHUB || ''
+  ).trim();
   const issueRef = String(process.env.INPUT_ISSUE_REF || '').trim();
   const txHash = String(process.env.INPUT_TX_HASH || '').trim();
+  const transactionHashes = parseTransactionHashes(process.env.INPUT_TX_HASHES);
   const queue = readJson(QUEUE_PATH);
   const accounts = readJson(ACCOUNTS_PATH);
-  const settled = settleEntries({
+  const contributors = contributorGithub.split(',').map(value => value.trim()).filter(Boolean);
+  const targets = contributors.length ? contributors : [''];
+  const settled = targets.flatMap(contributor => settleEntries({
     queue,
     accounts,
-    contributorGithub,
+    contributorGithub: contributor,
     issueRef,
-    txHash,
+    txHash: transactionHashes[contributor.toLowerCase()] || txHash,
     settledAt: new Date().toISOString(),
     settledBy: process.env.GITHUB_ACTOR || 'github-actions[bot]',
-  });
+  }));
 
   if (settled.length === 0) {
     console.log('No matching pending entries found.');
@@ -75,4 +91,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { buildSettlementComment };
+module.exports = { buildSettlementComment, parseTransactionHashes };
