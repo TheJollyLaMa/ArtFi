@@ -19,6 +19,37 @@ First season newcomers only!
 - meant for newcomers to have an easier time with the anticipation phase until their first payout while coming in hungry from the cold ...
 - introduces the community to new ways we can extend/receive agency to/from each other across borders with web3 tools, software, and frame of mind.
 
+## Contract prototype
+
+`ArtFiAdvance` is the canonical first prototype. The older ANIV contracts remain in the repository as experimental predecessors and are not part of this deployment path.
+
+The prototype uses an escrowed sponsor offer:
+
+1. A sponsor defines a creator, principal, repayment amount, acceptance deadline, repayment deadline, and hash of the complete terms.
+2. The sponsor's ART principal is transferred into contract escrow when the offer is created.
+3. Only the named creator can accept before the deadline. Acceptance transfers the principal to the creator.
+4. The creator can repay the sponsor directly through the contract.
+5. An address with `SETTLEMENT_ROLE` can instead route a future gross payout through the contract. The sponsor receives the repayment amount and the creator receives any remainder.
+6. A payout below the repayment amount closes the advance as defaulted. An unaccepted offer can be cancelled by its sponsor or expired after its deadline.
+
+Repayment fees are optional and capped at 5% of principal. The ART token address is immutable, important lifecycle state is recorded on-chain, and all token-moving methods use OpenZeppelin `SafeERC20` and `ReentrancyGuard`.
+
+### Trust assumptions and open questions
+
+- The settlement role is trusted to submit the correct creator payout and transfer that payout into the contract.
+- There is no assumed Artizen API or payout contract. A future integration should receive `SETTLEMENT_ROLE` only after its interface and security model are verified.
+- A short payout is treated as final default rather than creating an open-ended debt claim.
+- Terms outside the numeric on-chain fields are represented by `termsHash`; clients are responsible for retaining and displaying the matching document.
+- The prototype is intentionally non-upgradeable. Contract replacement and role migration must be planned before production use.
+
+### Local validation
+
+```bash
+npm test
+```
+
+The deployment script reads `ART_TOKEN_ADDRESS` and optional `ADMIN_ADDRESS`. It defaults to the current ART token on Base, but this issue does not deploy the contract to any network.
+
 ## Payroll bounty labels
 
 ArtFi payroll automation now recognizes **$ART-only** payout labels on GitHub issues.
