@@ -31,6 +31,16 @@
       "contributorGithub": "TheJollyLaMa",
       "amount": "5",
       "role": "idea-originator"
+    },
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#31",
+      "currency": "ART",
+      "queuedAt": "2026-09-16T16:32:14.914Z",
+      "queuedBy": "TheJollyLaMa",
+      "prNumber": 34,
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "25"
     }
   ],
   "settled": []
