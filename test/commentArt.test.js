@@ -7,6 +7,7 @@ const {
   ARTWORKS,
   artworkIndex,
   renderArtFiComment,
+  renderArtworkTable,
   selectArtwork,
 } = require('../scripts/commentArt');
 const { buildMergedPayrollComment } = require('../scripts/processMergedBounty');
@@ -35,18 +36,20 @@ test('selects artwork deterministically and rotates across event inputs', () => 
   assert.equal(selected.size, 25);
 });
 
-test('renders both logo assets, operational text, alt text, and one 10x10 grid', () => {
+test('renders a visible 10x10 grid with both logo assets inside artwork cells', () => {
   const rendered = renderArtFiComment('✅ Queued 25 ART.', 30, 'merged-payroll');
   assert.match(rendered, /✅ Queued 25 ART\./);
   assert.match(rendered, new RegExp(ARTIZEN_LOGO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(rendered, new RegExp(ENS_ETH_LOGO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(rendered, /alt="Artizen logo"/);
   assert.match(rendered, /alt="ENS and Ethereum logo"/);
+  assert.doesNotMatch(rendered, /<details>|<summary>|```/);
 
-  const grid = rendered.match(/```text\n([\s\S]+?)\n```/)[1];
-  const rows = grid.split('\n');
-  assert.equal(rows.length, 10);
-  for (const row of rows) assert.equal(row.split(' ').length, 10);
+  const table = renderArtworkTable(selectArtwork(30, 'merged-payroll'));
+  assert.equal((table.match(/<tr>/g) || []).length, 10);
+  assert.equal((table.match(/<td /g) || []).length, 100);
+  assert.match(table, /<td align="center"><img[^>]+Artizen logo[^>]*><\/td>/);
+  assert.match(table, /<td align="center"><img[^>]+ENS and Ethereum logo[^>]*><\/td>/);
 });
 
 test('production builders preserve merged, testing, and settlement messages', () => {

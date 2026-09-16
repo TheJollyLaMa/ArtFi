@@ -62,21 +62,31 @@ function selectArtwork(issueNumber, commentType) {
   return ARTWORKS[artworkIndex(issueNumber, commentType)];
 }
 
+function renderCell(cell) {
+  if (cell === '🟢') {
+    return `<td align="center"><img src="${ARTIZEN_LOGO_URL}" alt="Artizen logo" width="24"></td>`;
+  }
+  if (cell === '💠') {
+    return `<td align="center"><img src="${ENS_ETH_LOGO_URL}" alt="ENS and Ethereum logo" width="24"></td>`;
+  }
+  return `<td align="center">${cell}</td>`;
+}
+
+function renderArtworkTable(artwork) {
+  const rows = artwork.rows
+    .map(row => `<tr>${row.map(renderCell).join('')}</tr>`)
+    .join('\n');
+  return `<table><tbody>\n${rows}\n</tbody></table>`;
+}
+
 function renderArtFiComment(body, issueNumber, commentType) {
   const artwork = selectArtwork(issueNumber, commentType);
-  const grid = artwork.rows.map(row => row.join(' ')).join('\n');
 
   return [
     body,
     '',
-    `<p align="center"><img src="${ARTIZEN_LOGO_URL}" alt="Artizen logo" width="48">&nbsp;&nbsp;<img src="${ENS_ETH_LOGO_URL}" alt="ENS and Ethereum logo" width="48"></p>`,
-    '',
-    `<details><summary>${artwork.name}</summary>`,
-    '',
-    '```text',
-    grid,
-    '```',
-    '</details>',
+    `<strong>${artwork.name}</strong>`,
+    renderArtworkTable(artwork),
   ].join('\n');
 }
 
@@ -86,5 +96,6 @@ module.exports = {
   ARTWORKS,
   artworkIndex,
   renderArtFiComment,
+  renderArtworkTable,
   selectArtwork,
 };
