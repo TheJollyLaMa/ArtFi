@@ -253,7 +253,7 @@
       color: var(--accent);
       fill: var(--accent);
       font: 800 11px ui-monospace, monospace;
-      letter-spacing: 2.5px;
+      letter-spacing: 3.2px;
       text-shadow: 0 0 7px rgba(122, 240, 198, 0.85);
       animation: ipfs-did-spin 18s linear infinite;
       transform-origin: 90px 90px;
@@ -296,14 +296,19 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 11px;
-      height: 11px;
+      width: 14px;
+      height: 14px;
       object-fit: contain;
       border-radius: 50%;
       filter: drop-shadow(0 0 6px rgba(122, 240, 198, 0.78));
       transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle)));
-      animation: ipfs-icon-sparkle 2.8s ease-in-out infinite;
-      animation-delay: var(--spark-delay, 0s);
+      animation: ipfs-gap-icon-upright 18s linear infinite, ipfs-icon-sparkle 2.8s ease-in-out infinite;
+      animation-delay: 0s, var(--spark-delay, 0s);
+    }
+
+    @keyframes ipfs-gap-icon-upright {
+      from { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle))) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle))) rotate(-360deg); }
     }
 
     .ipfs-links {
@@ -1304,21 +1309,21 @@
         <svg id="ipfs-space-did" class="ipfs-space-did" data-connected="false" viewBox="0 0 180 180" aria-label="Connected IPFS space identity">
           <path id="ipfs-space-did-path" d="M 90, 90 m -82, 0 a 82,82 0 1,0 164,0 a 82,82 0 1,0 -164,0" fill="none" />
           <text>
-            <textPath id="ipfs-space-did-prefix" href="#ipfs-space-did-path" startOffset="38%" text-anchor="middle">IPFS</textPath>
+            <textPath id="ipfs-space-did-prefix" href="#ipfs-space-did-path" startOffset="34%" text-anchor="middle">IPFS</textPath>
           </text>
           <text>
-            <textPath id="ipfs-space-did-suffix" href="#ipfs-space-did-path" startOffset="62%" text-anchor="middle">NODE</textPath>
+            <textPath id="ipfs-space-did-suffix" href="#ipfs-space-did-path" startOffset="66%" text-anchor="middle">NODE</textPath>
           </text>
         </svg>
         <div id="ipfs-did-gap-icons" class="ipfs-did-gap-icons" aria-hidden="true">
-          <img class="ipfs-did-gap-icon" style="--angle: 68deg; --spark-delay: -0.2s" src="./IPFS_Logo.png" alt="" />
-          <img class="ipfs-did-gap-icon" style="--angle: 74deg; --spark-delay: -0.8s" src="./Artizen_LOGO.png" alt="" />
-          <img class="ipfs-did-gap-icon" style="--angle: 80deg; --spark-delay: -1.4s" src="./IPFS_Logo.png" alt="" />
-          <img class="ipfs-did-gap-icon" style="--angle: 86deg; --spark-delay: -2s" src="./Artizen_LOGO.png" alt="" />
-          <img class="ipfs-did-gap-icon" style="--angle: 94deg; --spark-delay: -2.6s" src="./IPFS_Logo.png" alt="" />
-          <img class="ipfs-did-gap-icon" style="--angle: 100deg; --spark-delay: -3.2s" src="./Artizen_LOGO.png" alt="" />
-          <img class="ipfs-did-gap-icon" style="--angle: 106deg; --spark-delay: -3.8s" src="./IPFS_Logo.png" alt="" />
-          <img class="ipfs-did-gap-icon" style="--angle: 112deg; --spark-delay: -4.4s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 58deg; --spark-delay: -0.2s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 67deg; --spark-delay: -0.8s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 76deg; --spark-delay: -1.4s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 85deg; --spark-delay: -2s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 95deg; --spark-delay: -2.6s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 104deg; --spark-delay: -3.2s" src="./Artizen_LOGO.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 113deg; --spark-delay: -3.8s" src="./IPFS_Logo.png" alt="" />
+          <img class="ipfs-did-gap-icon" style="--angle: 122deg; --spark-delay: -4.4s" src="./Artizen_LOGO.png" alt="" />
         </div>
         <div id="ipfs-space-icons" class="ipfs-space-icons" aria-hidden="true">
           <img class="ipfs-space-icon" style="--angle: 0deg; --spark-delay: -0.2s" src="./IPFS_Logo.png" alt="" />
