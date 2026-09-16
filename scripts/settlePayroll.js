@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const { renderArtFiComment } = require('./commentArt');
 const { postIssueComment, repositoryCoordinates } = require('./githubApi');
 const { settleEntries } = require('./payroll');
 
@@ -14,6 +15,14 @@ function readJson(filePath) {
 
 function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function buildSettlementComment({ settledCount, actor, txHash, issueNumber }) {
+  const body = [
+    `✅ Settled ${settledCount} payroll entr${settledCount === 1 ? 'y' : 'ies'} by @${actor}.`,
+    txHash ? `🔗 Tx: ${txHash}` : '',
+  ].filter(Boolean).join('\n');
+  return renderArtFiComment(body, issueNumber, 'settlement');
 }
 
 async function main() {
@@ -43,15 +52,27 @@ async function main() {
 
   const issueMatch = issueRef.match(/#(\d+)$/);
   if (issueMatch) {
-    await postIssueComment(owner, repo, Number(issueMatch[1]), [
-      `✅ Settled ${settled.length} payroll entr${settled.length === 1 ? 'y' : 'ies'} by @${process.env.GITHUB_ACTOR}.`,
-      txHash ? `🔗 Tx: ${txHash}` : '',
-    ].filter(Boolean).join('\n'));
+    const issueNumber = Number(issueMatch[1]);
+    await postIssueComment(
+      owner,
+      repo,
+      issueNumber,
+      buildSettlementComment({
+        settledCount: settled.length,
+        actor: process.env.GITHUB_ACTOR,
+        txHash,
+        issueNumber,
+      })
+    );
   }
   console.log(`Settled ${settled.length} payroll entries.`);
 }
 
-main().catch(error => {
-  console.error(error.stack || error.message);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch(error => {
+    console.error(error.stack || error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { buildSettlementComment };
