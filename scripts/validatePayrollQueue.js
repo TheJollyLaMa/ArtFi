@@ -5,6 +5,7 @@ const ROOT = path.resolve(__dirname, '..');
 const QUEUE_PATH = path.join(ROOT, 'payroll-queue.json');
 const ACCOUNTS_PATH = path.join(ROOT, 'contributor-accounts.json');
 const PAYOUT_CURRENCY = 'ART';
+const SUPPORTED_ROLES = new Set(['contributor', 'implementer', 'idea-originator', 'tester']);
 
 const ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
 const ISSUE_REF_RE = /^[^/]+\/[^/]+#\d+$/;
@@ -73,16 +74,20 @@ const validateEntry = (entry, section, index) => {
   const contributor = String(entry.contributor || '').trim();
   const amount = String(entry.amount || '').trim();
   const currency = String(entry.currency || '').trim().toUpperCase();
+  const role = String(entry.role || 'contributor').trim().toLowerCase();
 
   if (!ISSUE_REF_RE.test(issueRef)) fail(`${section}[${index}].issueRef must look like owner/repo#123`);
   if (!contributorGithub) fail(`${section}[${index}].contributorGithub is required`);
   if (!contributor || !ADDRESS_RE.test(contributor)) {
     fail(`${section}[${index}].contributor must be a valid Ethereum address`);
   }
-  if (!amount) fail(`${section}[${index}].amount is required`);
+  if (!amount || !Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+    fail(`${section}[${index}].amount must be a positive number`);
+  }
   if (currency !== PAYOUT_CURRENCY) fail(`${section}[${index}].currency must be ${PAYOUT_CURRENCY}`);
+  if (!SUPPORTED_ROLES.has(role)) fail(`${section}[${index}].role is not supported: ${role}`);
 
-  const key = `${section}:${issueRef}:${contributorGithub.toLowerCase()}`;
+  const key = `${issueRef}:${contributorGithub.toLowerCase()}:${role}`;
   if (seen.has(key)) fail(`duplicate payroll entry detected for ${issueRef} / ${contributorGithub}`);
   seen.add(key);
 
