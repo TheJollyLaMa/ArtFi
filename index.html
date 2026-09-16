@@ -1717,29 +1717,32 @@
       ,lastCid: ""
     };
 
-    const setIpfsProvider = (provider) => {
-          const setIpfsSpaceDid = (did) => {
-            const value = String(did || "").trim();
-            ipfsSpaceDidText.textContent = value ? `IPFS SPACE  ${value}  •  IPFS SPACE  ${value}  •  ` : "";
-            ipfsSpaceDid.dataset.connected = value ? "true" : "false";
-          };
+    const setIpfsSpaceDid = (did) => {
+      const value = String(did || "").trim();
+      ipfsSpaceDidText.textContent = value ? `IPFS SPACE  ${value}  •  IPFS SPACE  ${value}  •  ` : "";
+      ipfsSpaceDid.dataset.connected = value ? "true" : "false";
+    };
 
-          const probeIpfsDesktop = async () => {
-            try {
-              const response = await fetch("http://127.0.0.1:5001/api/v0/id", { method: "POST" });
-              if (!response.ok) return;
-              const node = await response.json();
-              setIpfsSpaceDid(node.ID);
-              ipfsStatus.textContent = `IPFS Desktop connected: ${node.ID}`;
-            } catch (_) {
-              setIpfsSpaceDid("");
-            }
-          };
+    const probeIpfsDesktop = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5001/api/v0/id", { method: "POST" });
+        if (!response.ok) throw new Error(`IPFS Desktop probe failed (${response.status})`);
+        const node = await response.json();
+        setIpfsSpaceDid(node.ID);
+        ipfsStatus.textContent = `IPFS Desktop connected: ${node.ID}`;
+      } catch (_) {
+        setIpfsSpaceDid("");
+        ipfsStatus.textContent = "IPFS Desktop selected. If Kubo is running, allow this localhost origin in its API CORS settings.";
+      }
+    };
+
+    const setIpfsProvider = (provider) => {
       state.ipfsProvider = provider;
       ipfsDesktopProvider.dataset.selected = provider === "desktop" ? "true" : "false";
       pinataProvider.dataset.selected = provider === "pinata" ? "true" : "false";
+      ipfsStatus.textContent = provider === "desktop"
         ? "IPFS Desktop selected. Keep Kubo running on 127.0.0.1:5001."
-        : "Pinata selected. Configure a signed-upload endpoint first.";
+        : "Pinata selected. Paste a local JWT or configure a signed-upload endpoint.";
       pinataJwt.hidden = provider !== "pinata";
       pinataWarning.hidden = provider !== "pinata";
       if (provider === "desktop") probeIpfsDesktop();
@@ -1936,18 +1939,30 @@
         return;
       }
 
-      const provider = new BrowserProvider(window.ethereum);
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const signer = await provider.getSigner();
-      const account = (accounts?.[0] || (await signer.getAddress())).toLowerCase();
+      try {
+        txNote.textContent = "Requesting wallet connection…";
+        const provider = new BrowserProvider(window.ethereum);
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        const account = (accounts?.[0] || "").toLowerCase();
+        if (!account) throw new Error("No wallet account was returned.");
+        const signer = await provider.getSigner(account);
 
-      state.provider = provider;
-      state.signer = signer;
-      state.account = account;
-      state.connected = true;
+        state.provider = provider;
+        state.signer = signer;
+        state.account = account;
+        state.connected = true;
 
-      setAccountOrbit(account);
-      setWalletUI(true);
+        setAccountOrbit(account);
+        setWalletUI(true);
+      } catch (error) {
+        state.provider = null;
+        state.signer = null;
+        state.account = "";
+        state.connected = false;
+        setAccountOrbit("");
+        setWalletUI(false);
+        txNote.textContent = error?.shortMessage || error?.message || "Wallet connection failed.";
+      }
     };
 
     const restoreWallet = async () => {
@@ -1958,7 +1973,7 @@
         if (!account) return;
 
         state.provider = new BrowserProvider(window.ethereum);
-        state.signer = await state.provider.getSigner();
+        state.signer = await state.provider.getSigner(account);
         state.account = account;
         state.connected = true;
 
