@@ -1452,16 +1452,21 @@
         const leftEnd = point(symbols[0]);
         const rightEnd = point(symbols[1]);
         const links = [
-          [ipfsPoint, leftEnd, -34],
-          [ipfsPoint, rightEnd, -16],
-          [walletPoint, leftEnd, -16],
-          [walletPoint, rightEnd, -34],
-          [ipfsPoint, walletPoint, 48],
+          { from: ipfsPoint, to: leftEnd, bend: 18 },
+          { from: ipfsPoint, to: leftEnd, bend: 48 },
+          { from: walletPoint, to: rightEnd, bend: 18 },
+          { from: walletPoint, to: rightEnd, bend: 48 },
+          { from: ipfsPoint, to: walletPoint, bend: 76 },
+          { from: ipfsPoint, to: walletPoint, bend: 112 },
+          { from: ipfsPoint, to: rightEnd, lane: 206 },
+          { from: walletPoint, to: leftEnd, lane: 206 },
         ];
         const svgNS = 'http://www.w3.org/2000/svg';
-        links.forEach(([from, to, bend], index) => {
-          const midpoint = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 + bend };
-          const pathData = `M ${from.x} ${from.y} Q ${midpoint.x} ${midpoint.y} ${to.x} ${to.y}`;
+        links.forEach(({ from, to, bend, lane }, index) => {
+          const midpoint = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 + (bend || 0) };
+          const pathData = lane === undefined
+            ? `M ${from.x} ${from.y} Q ${midpoint.x} ${midpoint.y} ${to.x} ${to.y}`
+            : `M ${from.x} ${from.y} C ${from.x} ${lane}, ${to.x} ${lane}, ${to.x} ${to.y}`;
           const base = document.createElementNS(svgNS, 'path');
           base.setAttribute('class', 'header-network-link');
           base.setAttribute('d', pathData);
@@ -1472,9 +1477,13 @@
           pulse.style.setProperty('--header-link-duration', `${5.2 + index * 0.47}s`);
           pulse.style.setProperty('--header-link-delay', `${-index * 1.17}s`);
           network.appendChild(pulse);
-          [0.28, 0.53, 0.76].forEach((ratio, nodeIndex) => {
-            const x = (1 - ratio) ** 2 * from.x + 2 * (1 - ratio) * ratio * midpoint.x + ratio ** 2 * to.x;
-            const y = (1 - ratio) ** 2 * from.y + 2 * (1 - ratio) * ratio * midpoint.y + ratio ** 2 * to.y;
+          [0.18, 0.36, 0.54, 0.72, 0.86].forEach((ratio, nodeIndex) => {
+            const x = lane === undefined
+              ? (1 - ratio) ** 2 * from.x + 2 * (1 - ratio) * ratio * midpoint.x + ratio ** 2 * to.x
+              : (1 - ratio) ** 3 * from.x + 3 * (1 - ratio) ** 2 * ratio * from.x + 3 * (1 - ratio) * ratio ** 2 * to.x + ratio ** 3 * to.x;
+            const y = lane === undefined
+              ? (1 - ratio) ** 2 * from.y + 2 * (1 - ratio) * ratio * midpoint.y + ratio ** 2 * to.y
+              : (1 - ratio) ** 3 * from.y + 3 * (1 - ratio) ** 2 * ratio * lane + 3 * (1 - ratio) * ratio ** 2 * lane + ratio ** 3 * to.y;
             const node = document.createElementNS(svgNS, 'circle');
             node.setAttribute('class', 'header-network-node');
             node.setAttribute('cx', x);
