@@ -252,6 +252,7 @@
       z-index: 1;
       transform: translate(-50%, -50%);
       animation: ipfs-icon-sparkle 2.8s ease-in-out infinite;
+      animation-delay: var(--spark-delay, 0s);
     }
 
     .ipfs-orbit-body:nth-of-type(1) { top: -3%; left: 42%; --spark-delay: -0.2s; }
@@ -1186,23 +1187,23 @@
       <div class="ipfs-orbit">
         <svg class="ipfs-links" viewBox="0 0 140 140" aria-hidden="true">
           <g class="ipfs-link-base">
-            <line x1="53" y1="25" x2="109" y2="36" /><line x1="109" y1="36" x2="127" y2="73" />
-            <line x1="127" y1="73" x2="104" y2="115" /><line x1="104" y1="115" x2="60" y2="129" />
-            <line x1="60" y1="129" x2="22" y2="106" /><line x1="22" y1="106" x2="11" y2="63" />
-            <line x1="11" y1="63" x2="20" y2="28" /><line x1="20" y1="28" x2="53" y2="25" />
-            <line x1="53" y1="25" x2="127" y2="73" /><line x1="109" y1="36" x2="60" y2="129" />
+            <line x1="59" y1="0" x2="123" y2="17" /><line x1="123" y1="17" x2="140" y2="71" />
+            <line x1="140" y1="71" x2="109" y2="127" /><line x1="109" y1="127" x2="55" y2="140" />
+            <line x1="55" y1="140" x2="0" y2="109" /><line x1="0" y1="109" x2="0" y2="55" />
+            <line x1="0" y1="55" x2="14" y2="14" /><line x1="14" y1="14" x2="59" y2="0" />
+            <line x1="59" y1="0" x2="140" y2="71" /><line x1="123" y1="17" x2="55" y2="140" />
           </g>
           <g class="ipfs-link-pulse">
-            <line x1="53" y1="25" x2="109" y2="36" style="--ipfs-pulse-duration: 3.1s; --ipfs-pulse-delay: -1.2s" />
-            <line x1="109" y1="36" x2="127" y2="73" style="--ipfs-pulse-duration: 4.2s; --ipfs-pulse-delay: -2.4s" />
-            <line x1="127" y1="73" x2="104" y2="115" style="--ipfs-pulse-duration: 3.7s; --ipfs-pulse-delay: -0.8s" />
-            <line x1="104" y1="115" x2="60" y2="129" style="--ipfs-pulse-duration: 4.8s; --ipfs-pulse-delay: -3.1s" />
-            <line x1="60" y1="129" x2="22" y2="106" style="--ipfs-pulse-duration: 3.5s; --ipfs-pulse-delay: -1.7s" />
-            <line x1="22" y1="106" x2="11" y2="63" style="--ipfs-pulse-duration: 4.4s; --ipfs-pulse-delay: -2.8s" />
-            <line x1="11" y1="63" x2="20" y2="28" style="--ipfs-pulse-duration: 3.3s; --ipfs-pulse-delay: -0.4s" />
-            <line x1="20" y1="28" x2="53" y2="25" style="--ipfs-pulse-duration: 4.6s; --ipfs-pulse-delay: -2.1s" />
-            <line x1="53" y1="25" x2="127" y2="73" style="--ipfs-pulse-duration: 5.2s; --ipfs-pulse-delay: -3.7s" />
-            <line x1="109" y1="36" x2="60" y2="129" style="--ipfs-pulse-duration: 4.1s; --ipfs-pulse-delay: -1.9s" />
+            <line x1="59" y1="0" x2="123" y2="17" style="--ipfs-pulse-duration: 3.1s; --ipfs-pulse-delay: -1.2s" />
+            <line x1="123" y1="17" x2="140" y2="71" style="--ipfs-pulse-duration: 4.2s; --ipfs-pulse-delay: -2.4s" />
+            <line x1="140" y1="71" x2="109" y2="127" style="--ipfs-pulse-duration: 3.7s; --ipfs-pulse-delay: -0.8s" />
+            <line x1="109" y1="127" x2="55" y2="140" style="--ipfs-pulse-duration: 4.8s; --ipfs-pulse-delay: -3.1s" />
+            <line x1="55" y1="140" x2="0" y2="109" style="--ipfs-pulse-duration: 3.5s; --ipfs-pulse-delay: -1.7s" />
+            <line x1="0" y1="109" x2="0" y2="55" style="--ipfs-pulse-duration: 4.4s; --ipfs-pulse-delay: -2.8s" />
+            <line x1="0" y1="55" x2="14" y2="14" style="--ipfs-pulse-duration: 3.3s; --ipfs-pulse-delay: -0.4s" />
+            <line x1="14" y1="14" x2="59" y2="0" style="--ipfs-pulse-duration: 4.6s; --ipfs-pulse-delay: -2.1s" />
+            <line x1="59" y1="0" x2="140" y2="71" style="--ipfs-pulse-duration: 5.2s; --ipfs-pulse-delay: -3.7s" />
+            <line x1="123" y1="17" x2="55" y2="140" style="--ipfs-pulse-duration: 4.1s; --ipfs-pulse-delay: -1.9s" />
           </g>
         </svg>
         <svg id="ipfs-space-did" class="ipfs-space-did" data-connected="false" viewBox="0 0 160 160" aria-label="Connected IPFS space identity">
