@@ -407,10 +407,12 @@
       box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.12), 0 0 28px rgba(255, 107, 107, 0.36), 0 10px 30px rgba(0, 0, 0, 0.45);
     }
 
-    .wallet-action svg {
+    .wallet-action svg,
+    .wallet-action img {
       width: 34px;
       height: 34px;
       display: block;
+      object-fit: contain;
     }
 
     .admin-panel {
@@ -624,18 +626,7 @@
       </svg>
 
       <button id="wallet-button" class="wallet-action" data-state="disconnected" type="button" aria-label="Connect MetaMask">
-        <svg viewBox="0 0 56 56" role="img" aria-hidden="true">
-          <path fill="#f6851b" d="M48.4 9 31.1 21.9l3.2-7.6z"></path>
-          <path fill="#e2761b" d="M7.6 9 24.7 22.1l-3.1-7.8z"></path>
-          <path fill="#e4761b" d="m42.7 37.8-4.6 7.1 9.8 2.7 2.8-9.5z"></path>
-          <path fill="#e4761b" d="m5.7 38.1 2.8 9.5 9.8-2.7-4.6-7.1z"></path>
-          <path fill="#e4761b" d="m18.9 24.4-2.7 4.1 9.7.4-.4-10.4z"></path>
-          <path fill="#e4761b" d="m37.1 24.4-6.6-5.9-.2 10.4 9.7-.4z"></path>
-          <path fill="#d7c1b3" d="m18.9 28.5 6.7 12.8.3-8.9z"></path>
-          <path fill="#d7c1b3" d="m31.1 28.5-.2 3.9.3 8.9 6.6-12.8z"></path>
-          <path fill="#233447" d="m18.9 41.3 6.4 5.5.3-8.6z"></path>
-          <path fill="#233447" d="m31.1 38.2.3 8.6 6.4-5.5z"></path>
-        </svg>
+        <img src="./metamask.png" alt="" aria-hidden="true" />
       </button>
     </div>
   </div>
