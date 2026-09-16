@@ -6,6 +6,7 @@ const {
   createBountyEntries,
   extractIssueNumbers,
 } = require('./payroll');
+const { renderArtFiComment } = require('./commentArt');
 const { githubRequest, postIssueComment, repositoryCoordinates } = require('./githubApi');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -18,6 +19,20 @@ function readJson(filePath) {
 
 function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function buildMergedPayrollComment({ entries, isManual, prNumber, issueNumber }) {
+  const lines = entries.map(entry =>
+    `- **${entry.amount} ART** to @${entry.contributorGithub}${entry.role ? ` (${entry.role})` : ''}`
+  );
+  const body = [
+    `✅ Payroll queued from ${isManual ? 'manual recovery for' : 'merged'} PR #${prNumber}:`,
+    '',
+    ...lines,
+    '',
+    'The entries are pending administrator spot-check and settlement.',
+  ].join('\n');
+  return renderArtFiComment(body, issueNumber, 'merged-payroll');
 }
 
 async function linkedIssueNumbers(owner, repo, prNumber) {
@@ -123,16 +138,17 @@ async function main() {
 
   for (const { issueNumber, result } of results) {
     if (result.entries.length === 0) continue;
-    const lines = result.entries.map(entry =>
-      `- **${entry.amount} ART** to @${entry.contributorGithub}${entry.role ? ` (${entry.role})` : ''}`
+    await postIssueComment(
+      owner,
+      repo,
+      issueNumber,
+      buildMergedPayrollComment({
+        entries: result.entries,
+        isManual,
+        prNumber: pr.number,
+        issueNumber,
+      })
     );
-    await postIssueComment(owner, repo, issueNumber, [
-      `✅ Payroll queued from ${isManual ? 'manual recovery for' : 'merged'} PR #${pr.number}:`,
-      '',
-      ...lines,
-      '',
-      'The entries are pending administrator spot-check and settlement.',
-    ].join('\n'));
   }
 
   if (process.env.GITHUB_STEP_SUMMARY) {
@@ -146,7 +162,11 @@ async function main() {
   console.log(`Queued ${planned.length} payout entries from PR #${pr.number}.`);
 }
 
-main().catch(error => {
-  console.error(error.stack || error.message);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch(error => {
+    console.error(error.stack || error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { buildMergedPayrollComment };

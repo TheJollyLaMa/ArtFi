@@ -6,12 +6,14 @@ on:
     paths:
       - payroll-queue.json
       - contributor-accounts.json
+      - scripts/commentArt.js
       - scripts/githubApi.js
       - scripts/payroll.js
       - scripts/processMergedBounty.js
       - scripts/processTestingBounty.js
       - scripts/settlePayroll.js
       - scripts/validatePayrollQueue.js
+      - test/commentArt.test.js
       - test/payroll.test.js
       - .github/workflows/bounty-bot.yml
       - .github/workflows/testing-bounty.yml
@@ -22,12 +24,14 @@ on:
     paths:
       - payroll-queue.json
       - contributor-accounts.json
+      - scripts/commentArt.js
       - scripts/githubApi.js
       - scripts/payroll.js
       - scripts/processMergedBounty.js
       - scripts/processTestingBounty.js
       - scripts/settlePayroll.js
       - scripts/validatePayrollQueue.js
+      - test/commentArt.test.js
       - test/payroll.test.js
       - .github/workflows/bounty-bot.yml
       - .github/workflows/testing-bounty.yml
@@ -53,4 +57,4 @@ jobs:
         run: node scripts/validatePayrollQueue.js
 
       - name: Test payroll automation
-        run: node --test test/payroll.test.js
+        run: node --test test/payroll.test.js test/commentArt.test.js

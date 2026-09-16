@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const { renderArtFiComment } = require('./commentArt');
 const { githubRequest, postIssueComment, repositoryCoordinates } = require('./githubApi');
 const {
   TEST_BOUNTY_LABEL_RE,
@@ -23,6 +24,10 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function buildTestingComment(message, issueNumber, commentType) {
+  return renderArtFiComment(message, issueNumber, commentType);
+}
+
 async function main() {
   const { owner, repo } = repositoryCoordinates();
   const event = readJson(process.env.GITHUB_EVENT_PATH);
@@ -40,21 +45,43 @@ async function main() {
   const assigneeLogins = (issue.assignees || []).map(assignee => normalizeLogin(assignee.login));
   if (comment.startsWith('/test-complete')) {
     if (!assigneeLogins.some(login => login.toLowerCase() === commenter.toLowerCase())) {
-      await postIssueComment(owner, repo, issueNumber, '⚠️ Only assigned testers can use `/test-complete`.');
+      await postIssueComment(
+        owner,
+        repo,
+        issueNumber,
+        buildTestingComment(
+          '⚠️ Only assigned testers can use `/test-complete`.',
+          issueNumber,
+          'test-rejected'
+        )
+      );
       return;
     }
     await postIssueComment(
       owner,
       repo,
       issueNumber,
-      `✅ Thanks @${commenter} — your testing work has been noted. Awaiting \`/test-approved\` from the maintainer.`
+      buildTestingComment(
+        `✅ Thanks @${commenter} — your testing work has been noted. Awaiting \`/test-approved\` from the maintainer.`,
+        issueNumber,
+        'test-complete'
+      )
     );
     return;
   }
 
   if (!comment.startsWith('/test-approved')) return;
   if (commenter.toLowerCase() !== owner.toLowerCase()) {
-    await postIssueComment(owner, repo, issueNumber, '⚠️ Only the repository owner can approve testing payouts.');
+    await postIssueComment(
+      owner,
+      repo,
+      issueNumber,
+      buildTestingComment(
+        '⚠️ Only the repository owner can approve testing payouts.',
+        issueNumber,
+        'test-rejected'
+      )
+    );
     return;
   }
 
@@ -89,11 +116,19 @@ async function main() {
     owner,
     repo,
     issueNumber,
-    `✅ Queued ${entry.amount} ART testing bounty for @${entry.contributorGithub}, pending administrator settlement.`
+    buildTestingComment(
+      `✅ Queued ${entry.amount} ART testing bounty for @${entry.contributorGithub}, pending administrator settlement.`,
+      issueNumber,
+      'test-approved'
+    )
   );
 }
 
-main().catch(error => {
-  console.error(error.stack || error.message);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch(error => {
+    console.error(error.stack || error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { buildTestingComment };
