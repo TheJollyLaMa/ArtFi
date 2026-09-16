@@ -3,8 +3,8 @@ name: Settle Payroll
 on:
   workflow_dispatch:
     inputs:
-      contributor_github:
-        description: Contributor GitHub username to settle; leave blank to settle all pending entries
+      contributors_github:
+        description: Comma-separated creator GitHub usernames; leave blank to settle all pending entries
         required: false
         type: string
       issue_ref:
@@ -13,6 +13,10 @@ on:
         type: string
       tx_hash:
         description: On-chain transaction hash
+        required: false
+        type: string
+      tx_hashes:
+        description: Optional creator=transaction-hash pairs, comma-separated
         required: false
         type: string
 
@@ -43,9 +47,10 @@ jobs:
       - name: Move pending entries to settled
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_CONTRIBUTOR_GITHUB: ${{ github.event.inputs.contributor_github }}
+          INPUT_CONTRIBUTORS_GITHUB: ${{ github.event.inputs.contributors_github }}
           INPUT_ISSUE_REF: ${{ github.event.inputs.issue_ref }}
           INPUT_TX_HASH: ${{ github.event.inputs.tx_hash }}
+          INPUT_TX_HASHES: ${{ github.event.inputs.tx_hashes }}
         run: node scripts/settlePayroll.js
 
       - name: Validate updated queue

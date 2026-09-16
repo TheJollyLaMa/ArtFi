@@ -11,6 +11,7 @@ const {
   pickWhitelistedTester,
   settleEntries,
 } = require('../scripts/payroll');
+const { parseTransactionHashes } = require('../scripts/settlePayroll');
 
 const owner = {
   github: 'TheJollyLaMa',
@@ -236,4 +237,40 @@ test('an issue-only settlement does not settle unrelated pending entries', () =>
   assert.equal(queue.pending[0].issueRef, other.issueRef);
   assert.equal(accounts.contributors[0].artPending, 50);
   assert.equal(accounts.contributors[0].artEarned, 100);
+});
+
+test('settles every pending entry for multiple creators without touching others', () => {
+  const first = { issueRef: 'TheJollyLaMa/ArtFi#1', contributorGithub: 'alice', amount: '10' };
+  const second = { issueRef: 'TheJollyLaMa/ArtFi#2', contributorGithub: 'alice', amount: '5' };
+  const third = { issueRef: 'TheJollyLaMa/ArtFi#3', contributorGithub: 'bob', amount: '7' };
+  const untouched = { issueRef: 'TheJollyLaMa/ArtFi#4', contributorGithub: 'carol', amount: '9' };
+  const queue = { pending: [first, second, third, untouched], settled: [] };
+  const accounts = { contributors: [
+    { github: 'alice', artPending: 15, artEarned: 0 },
+    { github: 'bob', artPending: 7, artEarned: 0 },
+    { github: 'carol', artPending: 9, artEarned: 0 },
+  ] };
+
+  const settled = settleEntries({
+    queue,
+    accounts,
+    contributorGithub: 'alice, bob',
+    settledAt: '2026-09-16T15:00:00.000Z',
+    settledBy: 'TheJollyLaMa',
+  });
+
+  assert.equal(settled.length, 3);
+  assert.deepEqual(queue.pending, [untouched]);
+  assert.equal(accounts.contributors[0].artPending, 0);
+  assert.equal(accounts.contributors[0].artEarned, 15);
+  assert.equal(accounts.contributors[1].artPending, 0);
+  assert.equal(accounts.contributors[1].artEarned, 7);
+  assert.equal(accounts.contributors[2].artPending, 9);
+});
+
+test('parses per-creator transaction hashes for batch settlement', () => {
+  assert.deepEqual(parseTransactionHashes('alice=0xaaa, bob=0xbbb, malformed, alice=0xccc'), {
+    alice: '0xccc',
+    bob: '0xbbb',
+  });
 });

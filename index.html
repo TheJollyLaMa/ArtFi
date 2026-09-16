@@ -507,6 +507,50 @@
       margin-left: auto;
     }
 
+    .batch-summary {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid rgba(122, 240, 198, 0.18);
+      border-radius: 8px;
+      color: var(--accent);
+      background: rgba(122, 240, 198, 0.06);
+      font-size: 0.86rem;
+    }
+
+    .creator-batch-list {
+      display: grid;
+      gap: 8px;
+      max-height: 220px;
+      margin-top: 10px;
+      overflow: auto;
+    }
+
+    .creator-batch-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.035);
+      cursor: pointer;
+    }
+
+    .creator-batch-item input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .creator-batch-item span {
+      display: grid;
+      gap: 3px;
+    }
+
+    .creator-batch-item small {
+      color: var(--muted);
+    }
+
     .loan-card {
       padding: 20px;
       border-radius: 22px;
@@ -1204,21 +1248,13 @@
               <label for="router-address">Settlement router</label>
               <input id="router-address" placeholder="0x..." />
             </div>
-            <div class="field">
-              <label for="creator-address">Creator wallet</label>
-              <input id="creator-address" placeholder="0x..." />
-            </div>
-            <div class="field">
-              <label for="gross-amount">Gross payout (ART)</label>
-              <input id="gross-amount" placeholder="250.00" inputmode="decimal" />
-            </div>
-            <div class="field">
-              <label for="queue-select">Queue entry</label>
-              <select id="queue-select"><option value="">Choose a pending payout</option></select>
-            </div>
+          </div>
+          <div class="batch-summary" id="batch-summary">No creators selected.</div>
+          <div class="creator-batch-list" id="creator-batch-list">
+            <div class="empty-state">Loading creators…</div>
           </div>
           <div class="admin-actions">
-            <button id="finalize-button" class="btn" type="button" disabled>Finalize payout</button>
+            <button id="finalize-button" class="btn" type="button" disabled>Settle selected creators</button>
             <button id="refresh-button" class="btn secondary" type="button">Refresh queue</button>
           </div>
           <p class="note" id="tx-note">Connect a wallet to unlock the settlement controls.</p>
@@ -1264,13 +1300,12 @@
     const adminPanel = document.getElementById("admin-panel");
     const adminStatus = document.getElementById("admin-status");
     const queueList = document.getElementById("queue-list");
-    const queueSelect = document.getElementById("queue-select");
     const routerAddress = document.getElementById("router-address");
-    const creatorAddress = document.getElementById("creator-address");
-    const grossAmount = document.getElementById("gross-amount");
     const finalizeButton = document.getElementById("finalize-button");
     const refreshButton = document.getElementById("refresh-button");
     const txNote = document.getElementById("tx-note");
+    const creatorBatchList = document.getElementById("creator-batch-list");
+    const batchSummary = document.getElementById("batch-summary");
     const browserLinkButton = document.getElementById("browser-link-button");
     const browserLinkStatus = document.getElementById("browser-link-status");
     const browserEmail = document.getElementById("browser-email");
@@ -1321,17 +1356,40 @@
     };
 
     const setQueueOptions = () => {
-      queueSelect.innerHTML = '<option value="">Choose a pending payout</option>';
-      if (!state.queue.length) {
-        queueSelect.innerHTML += '<option value="" disabled>No pending entries</option>';
+      const grouped = new Map();
+      for (const entry of state.queue) {
+        const key = String(entry.contributorGithub || "unknown");
+        const group = grouped.get(key) || { github: key, wallet: entry.contributor || "", amount: 0, entries: 0 };
+        group.amount += Number(entry.amount) || 0;
+        group.entries += 1;
+        grouped.set(key, group);
+      }
+      creatorBatchList.innerHTML = "";
+      if (!grouped.size) {
+        creatorBatchList.innerHTML = '<div class="empty-state">No pending creators found.</div>';
+        batchSummary.textContent = "No creators selected.";
         return;
       }
-      for (const entry of state.queue) {
-        const option = document.createElement("option");
-        option.value = JSON.stringify(entry);
-        option.textContent = `${entry.contributorGithub} • ${entry.amount} ${entry.currency || "ART"} • #${String(entry.issueRef || "").split("#").pop()}`;
-        queueSelect.appendChild(option);
+      for (const group of grouped.values()) {
+        const label = document.createElement("label");
+        label.className = "creator-batch-item";
+        label.innerHTML = `<input type="checkbox" data-creator="${group.github}"><span><strong>@${group.github}</strong><small>${group.entries} entr${group.entries === 1 ? "y" : "ies"} • ${group.amount.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")} ART • ${group.wallet.slice(0, 10)}…</small></span>`;
+        creatorBatchList.appendChild(label);
       }
+      creatorBatchList.querySelectorAll("input").forEach(input => input.addEventListener("change", updateBatchSummary));
+      updateBatchSummary();
+    };
+
+    const selectedCreators = () => [...creatorBatchList.querySelectorAll("input:checked")].map(input => input.dataset.creator);
+
+    const updateBatchSummary = () => {
+      const creators = selectedCreators();
+      const entries = state.queue.filter(entry => creators.includes(String(entry.contributorGithub || "")));
+      const total = entries.reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+      batchSummary.textContent = creators.length
+        ? `${creators.length} creator${creators.length === 1 ? "" : "s"} selected • ${entries.length} entr${entries.length === 1 ? "y" : "ies"} • ${total.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")} ART`
+        : "No creators selected.";
+      finalizeButton.disabled = !(state.connected && state.account === ADMIN_WALLET && creators.length && routerAddress.value.trim());
     };
 
     const renderQueue = () => {
@@ -1346,9 +1404,9 @@
         item.className = "queue-item";
         item.innerHTML = `<strong>@${entry.contributorGithub} — ${entry.amount} ${entry.currency || "ART"}</strong><small>${entry.issueRef} • ${entry.contributor?.slice(0, 10) || "wallet unknown"}…</small>`;
         item.addEventListener("click", () => {
-          creatorAddress.value = entry.contributor || "";
-          grossAmount.value = entry.amount || "";
-          queueSelect.value = JSON.stringify(entry);
+          const checkbox = creatorBatchList.querySelector(`input[data-creator="${CSS.escape(entry.contributorGithub || "")}"]`);
+          if (checkbox) checkbox.checked = true;
+          updateBatchSummary();
         });
         queueList.appendChild(item);
       }
@@ -1452,46 +1510,41 @@
       if (!state.connected || !state.signer) return;
 
       const router = routerAddress.value.trim();
-      const creator = creatorAddress.value.trim();
-      const amount = grossAmount.value.trim();
+      const creators = selectedCreators();
 
-      if (!router || !creator || !amount) {
-        txNote.textContent = "Fill in the router, creator, and amount first.";
+      if (!router || !creators.length) {
+        txNote.textContent = "Enter the router and select at least one creator.";
         return;
       }
 
       try {
         finalizeButton.disabled = true;
-        txNote.textContent = "Submitting payout transaction…";
+        txNote.textContent = `Submitting ${creators.length} creator payout${creators.length === 1 ? "" : "s"}…`;
 
         const contract = new Contract(router, routerAbi, state.signer);
-        const payout = parseUnits(amount, 18);
-        const tx = await contract.executeDisbursement(creator, payout);
-
-        txNote.textContent = `Transaction sent: ${tx.hash}`;
-        await tx.wait();
-        txNote.textContent = `Payout finalized for ${creator}.`;
+        const transactions = [];
+        for (const creator of creators) {
+          const amount = state.queue
+            .filter(entry => String(entry.contributorGithub || "") === creator)
+            .reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+          const tx = await contract.executeDisbursement(creator, parseUnits(amount.toFixed(8), 18));
+          transactions.push(tx);
+          txNote.textContent = `Submitted @${creator} (${transactions.length}/${creators.length})…`;
+          await tx.wait();
+        }
+        txNote.textContent = `Batch complete: ${transactions.length} creator payout${transactions.length === 1 ? "" : "s"} finalized.`;
       } catch (error) {
         txNote.textContent = error?.shortMessage || error?.message || "Payout failed.";
       } finally {
-        finalizeButton.disabled = !(state.connected && state.account === ADMIN_WALLET);
+        updateBatchSummary();
       }
-    };
-
-    const applyQueueSelection = () => {
-      if (!queueSelect.value) return;
-      try {
-        const entry = JSON.parse(queueSelect.value);
-        creatorAddress.value = entry.contributor || "";
-        grossAmount.value = entry.amount || "";
-      } catch (_) {}
     };
 
     walletButton.addEventListener("click", connectWallet);
     finalizeButton.addEventListener("click", finalizePayout);
     refreshButton.addEventListener("click", loadQueue);
     browserLinkButton.addEventListener("click", linkBrowser);
-    queueSelect.addEventListener("change", applyQueueSelection);
+    routerAddress.addEventListener("input", updateBatchSummary);
 
     if (window.ethereum) {
       window.ethereum.on?.("accountsChanged", (accounts) => {
