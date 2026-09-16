@@ -143,13 +143,37 @@
       box-shadow: 0 24px 90px rgba(0, 0, 0, 0.45);
     }
 
+    .site-header {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 18px 28px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .site-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
     .wallet-dock {
-      position: fixed;
-      top: 18px;
-      right: 18px;
-      z-index: 50;
+      position: relative;
       width: 206px;
       height: 206px;
+      flex: none;
+      display: grid;
+      place-items: center;
       pointer-events: none;
     }
 
@@ -198,6 +222,8 @@
     .wallet-orbit {
       position: absolute;
       inset: 0;
+      display: grid;
+      place-items: center;
       pointer-events: none;
     }
 
@@ -288,16 +314,15 @@
     }
 
     .wallet-action {
-      position: absolute;
-      inset: 50% auto auto 50%;
+      position: relative;
       width: 74px;
       height: 74px;
-      transform: translate(-50%, -50%);
       border: 0;
       border-radius: 50%;
       cursor: pointer;
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       color: var(--text);
       background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03));
       box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.45);
@@ -306,11 +331,11 @@
     }
 
     .wallet-action:hover {
-      transform: translate(-50%, -50%) scale(1.04);
+      transform: scale(1.04);
     }
 
     .wallet-action:active {
-      transform: translate(-50%, -50%) scale(0.97);
+      transform: scale(0.97);
     }
 
     .wallet-action::before {
@@ -500,8 +525,9 @@
         grid-template-columns: 1fr;
       }
       .wallet-dock {
-        transform: scale(0.9);
-        transform-origin: top right;
+        transform: scale(0.82);
+        transform-origin: right center;
+        margin: -18px 0;
       }
     }
 
@@ -516,7 +542,9 @@
   </style>
 </head>
 <body>
-  <div class="wallet-dock" aria-label="Wallet connect controls">
+  <header class="site-header">
+    <div class="site-brand" aria-label="ArtFi">ArtFi</div>
+    <div class="wallet-dock" aria-label="Wallet connect controls">
     <div class="wallet-orbit">
       <div class="wallet-rail" aria-hidden="true">
         <span class="orbit-spark" style="--angle: -58deg; --distance: 80px"></span>
@@ -562,6 +590,7 @@
       </button>
     </div>
   </div>
+  </header>
 
   <main>
     <section class="shell" aria-label="ArtFi landing page">
