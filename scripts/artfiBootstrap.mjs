@@ -85,6 +85,33 @@ function requireHttpsUrl(value, name) {
   return url;
 }
 
+function requestAssetFromArgs(args) {
+  const symbol = envOrArg(args, "asset-symbol", "ARTFI_REQUEST_ASSET_SYMBOL", "ART").toUpperCase();
+  const explicitAsset = envOrArg(args, "asset", "ARTFI_REQUEST_ASSET");
+  if (explicitAsset) {
+    return {
+      symbol,
+      asset: explicitAsset,
+      decimals: Number(envOrArg(args, "decimals", "ARTFI_REQUEST_DECIMALS", symbol === "USDC" ? "6" : "18")),
+    };
+  }
+  if (symbol === "ART") {
+    return {
+      symbol,
+      asset: required(process.env.ART_TOKEN_ADDRESS || ZeroAddress, "ART_TOKEN_ADDRESS"),
+      decimals: Number(envOrArg(args, "decimals", "ARTFI_REQUEST_DECIMALS", "18")),
+    };
+  }
+  if (symbol === "USDC") {
+    return {
+      symbol,
+      asset: required(process.env.USDC_TOKEN_ADDRESS, "USDC_TOKEN_ADDRESS"),
+      decimals: Number(envOrArg(args, "decimals", "ARTFI_REQUEST_DECIMALS", "6")),
+    };
+  }
+  throw new Error("asset symbol must be ART or USDC");
+}
+
 function privateKeyFromEnv() {
   const value = required(process.env.PRIVATE_KEY, "PRIVATE_KEY");
   if (/^[a-fA-F0-9]{64}$/.test(value)) return `0x${value}`;
@@ -234,13 +261,12 @@ async function commandCreateRequest(args) {
   const account = await signer.getAddress();
   const profile = await currentProfile(protocol, account);
   if (!profile.registered) throw new Error("Register your ArtFi profile before creating a request");
-  const asset = envOrArg(args, "asset", "ARTFI_REQUEST_ASSET", process.env.ART_TOKEN_ADDRESS || ZeroAddress);
+  const { symbol, asset, decimals } = requestAssetFromArgs(args);
   if (!isAddress(asset)) throw new Error("request asset is not an address");
   const supported = await protocol.supportedAssets(asset);
   if (!supported) throw new Error(`Asset is not supported by ArtFiProtocol: ${asset}`);
   const amount = envOrArg(args, "amount", "ARTFI_REQUEST_AMOUNT", "100");
   const repayment = envOrArg(args, "repayment", "ARTFI_REQUEST_REPAYMENT", amount);
-  const decimals = Number(envOrArg(args, "decimals", "ARTFI_REQUEST_DECIMALS", "18"));
   const now = Math.floor(Date.now() / 1000);
   const fundingDays = Number(envOrArg(args, "funding-days", "ARTFI_FUNDING_DAYS", "14"));
   const repaymentDays = Number(envOrArg(args, "repayment-days", "ARTFI_REPAYMENT_DAYS", "90"));
@@ -253,7 +279,7 @@ async function commandCreateRequest(args) {
     repaymentAmount: parseUnits(repayment, decimals),
     fundingDeadline: BigInt(now + fundingDays * 24 * 60 * 60),
     repaymentDueAt: BigInt(now + repaymentDays * 24 * 60 * 60),
-    termsHash: asBytes32(JSON.stringify({ asset, amount, repayment, decimals, metadataUri, artizenProjectUrl, artizenFundUrl }), "terms"),
+    termsHash: asBytes32(JSON.stringify({ symbol, asset, amount, repayment, decimals, metadataUri, artizenProjectUrl, artizenFundUrl }), "terms"),
     metadataUri,
     artizenProjectUrl,
     artizenFundUrl,
@@ -269,6 +295,7 @@ async function commandCreateRequest(args) {
     status: "request_created",
     account,
     requestTokenId: event?.args.requestTokenId?.toString() || "unknown",
+    symbol,
     asset,
     amount,
     repayment,
@@ -327,6 +354,7 @@ Commands:
   register-profile   Register the signer profile on ArtFiProtocol.
   publish-content    Publish an ipfs:// CID to ArtFiNetworkRegistry.
   create-request     Mint an ArtFi request NFT from an IPFS metadata URI.
+                     Use --asset-symbol ART or --asset-symbol USDC.
   register-node      Register a Kubo/IPFS node with ArtFiNetworkRegistry.
   approve-node       Admin approval for a registered node.
   set-challenge      Admin sets the monthly heartbeat challenge.
