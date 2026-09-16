@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ArtFi</title>
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=Bungee&display=swap");
+
     :root {
       color-scheme: dark;
       --bg: #0b1020;
@@ -33,27 +35,37 @@
     }
 
     main {
-      min-height: 100vh;
       display: grid;
       place-items: center;
-      padding: 32px 28px 92px;
+      padding: 8px 28px 92px;
     }
 
     .shell {
-      width: min(1120px, 100%);
+      width: min(1320px, 100%);
       display: grid;
-      gap: 24px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      grid-template-columns: minmax(280px, 0.7fr) minmax(0, 1.3fr);
       align-items: center;
     }
 
     .hero, .art, .admin-panel {
-      padding: 24px;
+      padding: 20px;
       background: var(--panel);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 28px;
+      border-radius: 20px;
       backdrop-filter: blur(18px);
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    .hero h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(2rem, 3.5vw, 3.6rem);
+      line-height: 1;
+    }
+
+    .hero > p {
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
 
     .eyebrow {
@@ -78,12 +90,6 @@
       box-shadow: 0 0 18px var(--accent);
     }
 
-    h1 {
-      margin: 18px 0 12px;
-      font-size: clamp(3rem, 8vw, 5.6rem);
-      line-height: 0.92;
-    }
-
     p {
       margin: 0;
       color: var(--muted);
@@ -93,23 +99,24 @@
 
     .points {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 22px;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 16px;
     }
 
     .point {
-      padding: 14px 16px;
-      border-radius: 18px;
+      padding: 10px 12px;
+      border-radius: 8px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.06);
       color: var(--text);
-      font-size: 0.95rem;
+      font-size: 0.84rem;
     }
 
     .art {
       position: relative;
       overflow: hidden;
+      padding: 12px;
     }
 
     .art::before, .art::after {
@@ -136,7 +143,7 @@
 
     .coin {
       width: 100%;
-      max-width: 520px;
+      max-width: none;
       display: block;
       margin: 0 auto;
       border-radius: 50%;
@@ -144,37 +151,226 @@
     }
 
     .site-header {
-      width: min(1120px, 100%);
+      width: 100%;
       margin: 0 auto;
-      padding: 18px 28px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 8px 12px 0 28px;
+      display: grid;
+      grid-template-columns: 165px minmax(0, 1fr) 165px;
+      align-items: flex-start;
       gap: 16px;
+      overflow: clip;
+    }
+
+    .site-header::before {
+      content: "";
+      grid-column: 1;
+      grid-row: 1;
     }
 
     .site-brand {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: center;
       display: inline-flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      padding: 8px 16px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
+      gap: 2px;
+      margin-top: 10px;
+      padding: 8px 18px 10px;
+      border: 0;
+      background: transparent;
+      color: #00e5ff;
+      font: inherit;
+      cursor: pointer;
+      transition: filter 0.18s ease, transform 0.18s ease;
+    }
+
+    .site-brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: "Bungee", Impact, sans-serif;
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      line-height: 1;
+      letter-spacing: 0;
+      text-shadow: 0 0 10px #7300ff, 0 0 20px #00ffff;
+    }
+
+    .site-brand-symbol {
       color: var(--accent);
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
+      font-family: ui-monospace, monospace;
+      font-size: 0.42em;
+      letter-spacing: 0;
+      opacity: 0.85;
+    }
+
+    .site-brand-subtitle {
+      color: #9b83ff;
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0;
+      text-shadow: 0 0 10px #00e5ff;
+    }
+
+    .site-brand:hover {
+      transform: translateY(-1px);
+      filter: drop-shadow(0 0 12px rgba(122, 240, 198, 0.7));
+    }
+
+    .site-brand:focus-visible, .about-close:focus-visible, .about-link:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
     }
 
     .wallet-dock {
+      grid-column: 3;
+      grid-row: 1;
       position: relative;
+      width: 165px;
+      height: 165px;
+      flex: none;
+      pointer-events: none;
+    }
+
+    .wallet-dock .wallet-orbit {
       width: 206px;
       height: 206px;
-      flex: none;
+      inset: 0 0 auto auto;
+      transform: scale(0.8);
+      transform-origin: top right;
+    }
+
+    .about-dialog {
+      width: min(620px, calc(100% - 32px));
+      padding: 0;
+      border: 1px solid rgba(122, 240, 198, 0.3);
+      border-radius: 8px;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(122, 240, 198, 0.2), transparent 34%),
+        radial-gradient(circle at 88% 82%, rgba(141, 124, 247, 0.18), transparent 32%),
+        linear-gradient(145deg, rgba(8, 18, 31, 0.98), rgba(13, 18, 43, 0.98));
+      box-shadow: 0 32px 100px rgba(0, 0, 0, 0.72), inset 0 0 50px rgba(122, 240, 198, 0.03);
+    }
+
+    .about-dialog::backdrop {
+      background: rgba(3, 6, 14, 0.78);
+      backdrop-filter: blur(8px);
+    }
+
+    .about-dialog[open] {
+      animation: about-arrive 0.22s ease-out;
+    }
+
+    @keyframes about-arrive {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .about-inner {
+      position: relative;
+      overflow: hidden;
+      padding: 34px;
+    }
+
+    .about-inner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      background-image: radial-gradient(circle, rgba(237, 246, 242, 0.65) 1px, transparent 1px);
+      background-size: 29px 29px;
+      mask-image: linear-gradient(135deg, black, transparent 70%);
+    }
+
+    .about-close {
+      position: absolute;
+      z-index: 2;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
       display: grid;
       place-items: center;
-      pointer-events: none;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 50%;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 1.35rem;
+      cursor: pointer;
+    }
+
+    .about-branding {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .about-artizen-logo {
+      width: 76px;
+      height: 76px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 16px rgba(24, 204, 111, 0.42));
+    }
+
+    .about-ens-logo {
+      width: 48px;
+      height: 48px;
+      margin-left: auto;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 12px rgba(122, 240, 198, 0.48));
+    }
+
+    .about-dialog h2 {
+      margin: 0 0 4px;
+      font-size: 2rem;
+      letter-spacing: 0;
+    }
+
+    .about-kicker {
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .about-copy {
+      position: relative;
+      max-width: 52ch;
+    }
+
+    .about-links {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .about-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid rgba(122, 240, 198, 0.22);
+      border-radius: 6px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      transition: border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .about-link:hover {
+      border-color: var(--accent);
+      background: rgba(122, 240, 198, 0.1);
     }
 
     .loan-panel {
@@ -575,26 +771,83 @@
       .shell, .loan-panel, .admin-grid {
         grid-template-columns: 1fr;
       }
-      .wallet-dock {
-        transform: scale(0.82);
-        transform-origin: right center;
-        margin: -18px 0;
+      .art {
+        order: -1;
       }
     }
 
     @media (max-width: 860px) {
+      .site-header {
+        grid-template-columns: 1fr 112px;
+        padding-left: 12px;
+      }
+      .site-header::before {
+        display: none;
+      }
+      .site-brand {
+        grid-column: 1;
+        justify-self: start;
+        padding-inline: 0;
+      }
+      .site-brand-title {
+        gap: 5px;
+        font-size: clamp(1.55rem, 8vw, 2.4rem);
+      }
+      .site-brand-subtitle {
+        font-size: 0.58rem;
+      }
+      .wallet-dock {
+        grid-column: 2;
+        width: 112px;
+        height: 132px;
+      }
+      .wallet-dock .wallet-orbit {
+        transform: scale(0.64);
+      }
       .points, .field-grid {
         grid-template-columns: 1fr;
       }
       .admin-head {
         flex-direction: column;
       }
+      .about-links {
+        grid-template-columns: 1fr;
+      }
+      .about-inner {
+        padding: 28px 22px 22px;
+      }
+      .about-branding {
+        gap: 10px;
+        padding-top: 18px;
+      }
+      .about-artizen-logo {
+        width: 54px;
+        height: 54px;
+      }
+      .about-ens-logo {
+        width: 36px;
+        height: 36px;
+      }
+      .about-dialog h2 {
+        font-size: 1.5rem;
+      }
+      .about-kicker {
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+      }
     }
   </style>
 </head>
 <body>
   <header class="site-header">
-    <div class="site-brand" aria-label="ArtFi">ArtFi</div>
+    <button id="about-open" class="site-brand" type="button" aria-label="About ArtFi" aria-haspopup="dialog" aria-controls="about-dialog">
+      <span class="site-brand-title">
+        <span class="site-brand-symbol">::-&#9671;-</span>
+        <span>ArtFi</span>
+        <span class="site-brand-symbol">-&#9671;-::</span>
+      </span>
+      <span class="site-brand-subtitle">(Another Decent Frankenstein)</span>
+    </button>
     <div class="wallet-dock" aria-label="Wallet connect controls">
     <div class="wallet-orbit">
       <div class="wallet-rail" aria-hidden="true">
@@ -631,6 +884,26 @@
     </div>
   </div>
   </header>
+
+  <dialog id="about-dialog" class="about-dialog" aria-labelledby="about-title">
+    <div class="about-inner">
+      <button id="about-close" class="about-close" type="button" aria-label="Close about ArtFi">&times;</button>
+      <div class="about-branding">
+        <img class="about-artizen-logo" src="./Artizen_LOGO.png" alt="Artizen" />
+        <div>
+          <div class="about-kicker">Artizen creator liquidity</div>
+          <h2 id="about-title">About ArtFi</h2>
+        </div>
+        <img class="about-ens-logo" src="./Ens_Eth_Breathe.gif" alt="ENS and Ethereum" />
+      </div>
+      <p class="about-copy">ArtFi helps first-season Artizen creators access zero-to-no-profit micro-liquidity, combining community onboarding with transparent, wallet-based settlement.</p>
+      <nav class="about-links" aria-label="ArtFi links">
+        <a class="about-link" href="https://github.com/TheJollyLaMa/ArtFi" target="_blank" rel="noreferrer">View repository</a>
+        <a class="about-link" href="https://artizen.fund/" target="_blank" rel="noreferrer">Visit Artizen</a>
+        <a class="about-link" href="https://revnet.money/base:6" target="_blank" rel="noreferrer">Get ART token</a>
+      </nav>
+    </div>
+  </dialog>
 
   <script>
     // draw constellation lines with traveling pulses between the orbit sparks
@@ -678,6 +951,13 @@
 
       orbit.prepend(svg);
     })();
+
+    const aboutDialog = document.getElementById("about-dialog");
+    document.getElementById("about-open").addEventListener("click", () => aboutDialog.showModal());
+    document.getElementById("about-close").addEventListener("click", () => aboutDialog.close());
+    aboutDialog.addEventListener("click", (event) => {
+      if (event.target === aboutDialog) aboutDialog.close();
+    });
   </script>
 
   <main>
