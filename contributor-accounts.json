@@ -6,11 +6,13 @@
       "role": "owner",
       "walletAddress": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "artEarned": 0,
-      "artPending": 0,
+      "artPending": 25,
       "ideasCredited": [],
       "bnutEarned": 0,
       "bnutPending": 0,
-      "issuesClosed": []
+      "issuesClosed": [
+        "TheJollyLaMa/ArtFi#28"
+      ]
     }
   ]
 }

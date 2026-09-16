@@ -1,4 +1,15 @@
 {
-  "pending": [],
+  "pending": [
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#28",
+      "currency": "ART",
+      "queuedAt": "2026-09-16T13:26:05.048Z",
+      "queuedBy": "TheJollyLaMa",
+      "prNumber": 29,
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "25"
+    }
+  ],
   "settled": []
 }
