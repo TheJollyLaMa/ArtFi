@@ -55,7 +55,66 @@ npm test
 npm run test:storage
 ```
 
-The deployment script reads optional `ADMIN_ADDRESS`, `ART_TOKEN_ADDRESS`, and comma-separated `SUPPORTED_ASSETS`. Native currency is enabled by default. The script deploys only `ArtFiProtocol`; this work does not deploy it to any network.
+The deployment script reads optional `ADMIN_ADDRESS`, `ART_TOKEN_ADDRESS`, and comma-separated `SUPPORTED_ASSETS`. Native currency is enabled by default. The script deploys `ArtFiProtocol`, then deploys `ArtFiNetworkRegistry` with the protocol address.
+
+### First network bootstrap
+
+After deployment, keep the deployed contract addresses in `.env` as `ARTFI_PROTOCOL_ADDRESS` and `ARTFI_NETWORK_REGISTRY_ADDRESS`. Do not commit `.env`.
+
+Check that both deployed addresses have code and that the configured signer can reach them:
+
+```bash
+npm run network:verify
+```
+
+Generate the two `bytes32` values needed to register a local IPFS Desktop/Kubo node:
+
+```bash
+npm run network:node-hashes
+```
+
+Copy `nodeDidHash` and `peerIdHash` into the IPFS storage panel, or register from the terminal:
+
+```bash
+ARTFI_NODE_DID_HASH=0x... \
+ARTFI_PEER_ID_HASH=0x... \
+npm run network:register-node
+```
+
+The administrator wallet must approve the new node before heartbeats count:
+
+```bash
+ARTFI_NODE_ID=1 npm run network:approve-node
+```
+
+Set the current monthly challenge:
+
+```bash
+ARTFI_NETWORK_MONTH=202609 npm run network:set-challenge
+```
+
+Once a profile and request metadata CID exist, publish the CID into the serverless registry and mint the request NFT:
+
+```bash
+ARTFI_CONTENT_KIND=request \
+ARTFI_CONTENT_CID=ipfs://... \
+ARTFI_CONTENT_FILE=request.json \
+ARTFI_PROJECT_URL=https://... \
+ARTFI_FUND_URL=https://... \
+npm run network:publish-content
+
+ARTFI_REQUEST_AMOUNT=100 \
+ARTFI_REQUEST_METADATA_URI=ipfs://... \
+ARTFI_PROJECT_URL=https://... \
+ARTFI_FUND_URL=https://... \
+npm run network:create-request
+```
+
+Rebuild the local read-only ledger view for the UI:
+
+```bash
+npm run index:network
+```
 
 ## Payroll bounty labels
 

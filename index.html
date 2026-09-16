@@ -845,6 +845,85 @@
       margin-top: 4px;
     }
 
+    .network-ledger {
+      width: min(1120px, 100%);
+      margin-top: 24px;
+      padding: 22px;
+      border: 1px solid rgba(122, 240, 198, 0.18);
+      border-radius: 18px;
+      background: rgba(6, 9, 18, 0.62);
+      backdrop-filter: blur(18px);
+    }
+
+    .network-ledger-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .network-ledger-head h2 {
+      margin: 0 0 6px;
+      font-size: 1.55rem;
+    }
+
+    .network-summary {
+      margin-top: 16px;
+      color: var(--accent);
+      font-size: 0.9rem;
+    }
+
+    .network-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .network-records {
+      display: grid;
+      gap: 10px;
+      max-height: 320px;
+      overflow: auto;
+    }
+
+    .network-record {
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .network-record strong,
+    .network-stat strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .network-record small,
+    .network-stat small {
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .network-record a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .network-stats {
+      display: grid;
+      gap: 10px;
+    }
+
+    .network-stat {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(122, 240, 198, 0.06);
+      border: 1px solid rgba(122, 240, 198, 0.12);
+    }
+
     .wallet-orbit {
       position: absolute;
       inset: 0;
@@ -1198,7 +1277,7 @@
     }
 
     @media (max-width: 980px) {
-      .shell, .loan-panel, .admin-grid {
+      .shell, .loan-panel, .admin-grid, .network-grid {
         grid-template-columns: 1fr;
       }
       .art {
@@ -1657,6 +1736,27 @@
       </div>
     </section>
 
+    <section class="network-ledger" aria-label="ArtFi network ledger">
+      <div class="network-ledger-head">
+        <div>
+          <h2>Network Ledger</h2>
+          <p class="muted">Indexed IPFS publications, node registrations, heartbeats, and rewards from ArtFiNetworkRegistry.</p>
+        </div>
+        <button id="network-refresh-button" class="btn secondary" type="button">Refresh ledger</button>
+      </div>
+      <div id="network-summary" class="network-summary">Run npm run index:network to generate artizen-network-index.json.</div>
+      <div class="network-grid">
+        <div id="network-publications" class="network-records">
+          <div class="empty-state">No indexed publications loaded.</div>
+        </div>
+        <div id="network-stats" class="network-stats">
+          <div class="network-stat"><strong>Nodes</strong><small>0 registered</small></div>
+          <div class="network-stat"><strong>Heartbeats</strong><small>0 submitted</small></div>
+          <div class="network-stat"><strong>Rewards</strong><small>0 recorded</small></div>
+        </div>
+      </div>
+    </section>
+
     <section id="admin-panel" class="admin-panel" data-visible="false" aria-label="Payroll admin panel">
       <div class="admin-head">
         <div>
@@ -1760,6 +1860,10 @@
       const ipfsSpaceDid = document.getElementById("ipfs-space-did");
       const ipfsSpaceDidPrefix = document.getElementById("ipfs-space-did-prefix");
       const ipfsSpaceDidSuffix = document.getElementById("ipfs-space-did-suffix");
+    const networkRefreshButton = document.getElementById("network-refresh-button");
+    const networkSummary = document.getElementById("network-summary");
+    const networkPublications = document.getElementById("network-publications");
+    const networkStats = document.getElementById("network-stats");
     const authEndpoint = document.querySelector('meta[name="artfi-auth-endpoint"]')?.content || "/api/browser-auth/start";
 
     const state = {
@@ -1917,6 +2021,48 @@
 
     const uploadIpfsJson = async () => {
       ipfsJsonFile.click();
+    };
+
+    const networkKindLabel = (kind) => ["Profile", "Request", "Offer", "Outcome"][Number(kind)] || `Kind ${kind}`;
+
+    const cidGatewayUrl = (uri) => uri?.startsWith("ipfs://")
+      ? `https://ipfs.io/ipfs/${encodeURIComponent(uri.slice(7))}`
+      : "";
+
+    const renderNetworkIndex = (index) => {
+      const publications = Array.isArray(index.publications) ? index.publications : [];
+      const nodes = Array.isArray(index.nodes) ? index.nodes : [];
+      const heartbeats = Array.isArray(index.heartbeats) ? index.heartbeats : [];
+      const rewards = Array.isArray(index.rewards) ? index.rewards : [];
+      networkSummary.textContent = `${publications.length} publication${publications.length === 1 ? "" : "s"} and ${nodes.length} node${nodes.length === 1 ? "" : "s"} indexed from ${index.registry || "registry unknown"}.`;
+      networkPublications.innerHTML = "";
+      if (!publications.length) {
+        networkPublications.innerHTML = '<div class="empty-state">No publications found in the local index yet.</div>';
+      } else {
+        for (const publication of publications.slice().reverse()) {
+          const item = document.createElement("article");
+          item.className = "network-record";
+          const gatewayUrl = cidGatewayUrl(publication.cid);
+          item.innerHTML = `<strong>${networkKindLabel(publication.kind)} #${publication.publicationId}</strong><small>${publication.cid || "CID unknown"}</small>${gatewayUrl ? `<small><a href="${gatewayUrl}" target="_blank" rel="noreferrer">Open IPFS content</a></small>` : ""}<small>${publication.active === false ? "Inactive" : "Active"} • publisher ${publication.publisher || "unknown"}</small>`;
+          networkPublications.appendChild(item);
+        }
+      }
+      networkStats.innerHTML = [
+        ["Nodes", `${nodes.length} registered`],
+        ["Heartbeats", `${heartbeats.length} submitted`],
+        ["Rewards", `${rewards.length} recorded`],
+      ].map(([label, value]) => `<div class="network-stat"><strong>${label}</strong><small>${value}</small></div>`).join("");
+    };
+
+    const loadNetworkIndex = async () => {
+      try {
+        const response = await fetch(`./artizen-network-index.json?ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("Network index not generated yet.");
+        renderNetworkIndex(await response.json());
+      } catch (error) {
+        networkSummary.textContent = "Network index not generated yet.";
+        networkPublications.innerHTML = '<div class="empty-state">Run npm run index:network after publishing to refresh this view.</div>';
+      }
     };
 
     ipfsJsonFile.addEventListener("change", async () => {
@@ -2131,6 +2277,7 @@
     ipfsDesktopProvider.addEventListener("click", () => setIpfsProvider("desktop"));
     pinataProvider.addEventListener("click", () => setIpfsProvider("pinata"));
     ipfsUploadButton.addEventListener("click", uploadIpfsJson);
+    networkRefreshButton.addEventListener("click", loadNetworkIndex);
     routerAddress.addEventListener("input", updateBatchSummary);
 
     if (window.ethereum) {
@@ -2168,6 +2315,7 @@
       });
     restoreWallet();
     loadQueue();
+    loadNetworkIndex();
     probeIpfsDesktop();
   </script>
 </body>
