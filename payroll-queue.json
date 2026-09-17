@@ -85,6 +85,28 @@
       "contributorGithub": "TheJollyLaMa",
       "amount": "5",
       "role": "idea-originator"
+    },
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#40",
+      "currency": "ART",
+      "queuedAt": "2026-09-17T00:17:07.038Z",
+      "queuedBy": "TheJollyLaMa",
+      "prNumber": 41,
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "80",
+      "role": "implementer"
+    },
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#40",
+      "currency": "ART",
+      "queuedAt": "2026-09-17T00:17:07.038Z",
+      "queuedBy": "TheJollyLaMa",
+      "prNumber": 41,
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "20",
+      "role": "idea-originator"
     }
   ],
   "settled": []
