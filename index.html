@@ -25,9 +25,14 @@
       box-sizing: border-box;
     }
 
+    html {
+      overflow-x: clip;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
+      overflow-x: clip;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background: radial-gradient(circle at top, rgba(122, 240, 198, 0.18), transparent 32%),
@@ -38,11 +43,13 @@
     main {
       display: grid;
       place-items: center;
+      width: 100%;
       padding: 8px 28px 92px;
     }
 
     .shell {
       width: min(1320px, 100%);
+      min-width: 0;
       display: grid;
       gap: 20px;
       grid-template-columns: minmax(280px, 0.7fr) minmax(0, 1.3fr);
@@ -50,6 +57,7 @@
     }
 
     .hero, .art, .admin-panel {
+      min-width: 0;
       padding: 20px;
       background: var(--panel);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -62,6 +70,7 @@
       margin: 16px 0 10px;
       font-size: clamp(2rem, 3.5vw, 3.6rem);
       line-height: 1;
+      overflow-wrap: anywhere;
     }
 
     .hero > p {
@@ -729,6 +738,7 @@
 
     .loan-panel {
       width: min(1120px, 100%);
+      min-width: 0;
       display: grid;
       gap: 18px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -812,6 +822,7 @@
     }
 
     .loan-card {
+      min-width: 0;
       padding: 20px;
       border-radius: 22px;
       background: var(--panel);
@@ -853,8 +864,148 @@
       overflow-wrap: anywhere;
     }
 
+    .canopy-panel {
+      width: min(1120px, 100%);
+      min-width: 0;
+      margin-top: 24px;
+      padding: 22px;
+      border: 1px solid rgba(141, 124, 247, 0.22);
+      border-radius: 18px;
+      background: rgba(7, 11, 24, 0.72);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+    }
+
+    .canopy-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .canopy-head h2 {
+      margin: 0 0 6px;
+      font-size: 1.55rem;
+    }
+
+    .canopy-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .canopy-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .canopy-toolbar select {
+      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      font: inherit;
+    }
+
+    .canopy-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 0.36fr);
+      gap: 14px;
+      margin-top: 16px;
+      min-width: 0;
+      min-height: 420px;
+    }
+
+    .canopy-canvas-wrap {
+      position: relative;
+      min-height: 420px;
+      overflow: hidden;
+      border: 1px solid rgba(122, 240, 198, 0.14);
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(122, 240, 198, 0.13), transparent 26%),
+        radial-gradient(circle at 15% 18%, rgba(141, 124, 247, 0.18), transparent 28%),
+        rgba(3, 7, 18, 0.7);
+    }
+
+    #canopy-canvas {
+      display: block;
+      width: 100%;
+      height: 420px;
+      cursor: grab;
+    }
+
+    #canopy-canvas[data-dragging="true"] {
+      cursor: grabbing;
+    }
+
+    .canopy-empty {
+      position: absolute;
+      inset: auto 16px 16px;
+      padding: 12px 14px;
+      border: 1px dashed rgba(255, 255, 255, 0.16);
+      border-radius: 12px;
+      color: var(--muted);
+      background: rgba(6, 9, 18, 0.78);
+    }
+
+    .canopy-details {
+      min-height: 420px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .canopy-details h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+
+    .canopy-details p,
+    .canopy-details li,
+    .canopy-details small {
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .canopy-details ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+
+    .canopy-details a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .canopy-badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .canopy-badge {
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(122, 240, 198, 0.08);
+      border: 1px solid rgba(122, 240, 198, 0.16);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
     .network-ledger {
       width: min(1120px, 100%);
+      min-width: 0;
       margin-top: 24px;
       padding: 22px;
       border: 1px solid rgba(122, 240, 198, 0.18);
@@ -1285,8 +1436,11 @@
     }
 
     @media (max-width: 980px) {
-      .shell, .loan-panel, .admin-grid, .network-grid {
+      .shell, .loan-panel, .admin-grid, .network-grid, .canopy-shell {
         grid-template-columns: 1fr;
+      }
+      .canopy-shell {
+        grid-template-columns: minmax(0, 1fr);
       }
       .art {
         order: -1;
@@ -1294,6 +1448,19 @@
     }
 
     @media (max-width: 860px) {
+      main {
+        padding-inline: 16px;
+      }
+      .canopy-panel {
+        padding: 16px;
+      }
+      .canopy-canvas-wrap,
+      .canopy-details {
+        min-height: 360px;
+      }
+      #canopy-canvas {
+        height: 360px;
+      }
       .site-header {
         grid-template-columns: minmax(128px, 1fr) minmax(128px, 1fr);
         grid-template-rows: 173px auto;
@@ -1811,6 +1978,43 @@
       </div>
     </section>
 
+    <section class="canopy-panel" aria-label="ArtFi request offer canopy">
+      <div class="canopy-head">
+        <div>
+          <h2>Request Canopy</h2>
+          <p class="muted">Discover requests, offers, projects, CIDs, and node references before terms are accepted.</p>
+        </div>
+        <div class="canopy-toolbar" aria-label="Canopy controls">
+          <label for="canopy-kind-filter">Kind
+            <select id="canopy-kind-filter">
+              <option value="all">All</option>
+              <option value="request">Requests</option>
+              <option value="offer">Offers</option>
+            </select>
+          </label>
+          <label for="canopy-asset-filter">Asset
+            <select id="canopy-asset-filter">
+              <option value="all">All</option>
+              <option value="ART">ART</option>
+              <option value="USDC">USDC</option>
+            </select>
+          </label>
+          <button id="canopy-toggle-links" class="btn secondary" type="button" aria-pressed="true">Connections</button>
+          <button id="canopy-reset-view" class="btn secondary" type="button">Home</button>
+        </div>
+      </div>
+      <div class="canopy-shell">
+        <div class="canopy-canvas-wrap" role="region" aria-label="Interactive ArtFi request and offer constellation">
+          <canvas id="canopy-canvas" aria-label="ArtFi request and offer discovery constellation"></canvas>
+          <div id="canopy-empty" class="canopy-empty">Run npm run index:network after publishing requests or offers.</div>
+        </div>
+        <aside id="canopy-details" class="canopy-details" aria-live="polite">
+          <h3>Canopy details</h3>
+          <p>Select a node to inspect request, offer, project, CID, or node relationships.</p>
+        </aside>
+      </div>
+    </section>
+
     <section class="network-ledger" aria-label="ArtFi network ledger">
       <div class="network-ledger-head">
         <div>
@@ -1954,6 +2158,14 @@
     const networkSummary = document.getElementById("network-summary");
     const networkPublications = document.getElementById("network-publications");
     const networkStats = document.getElementById("network-stats");
+    const canopyCanvas = document.getElementById("canopy-canvas");
+    const canopyContext = canopyCanvas?.getContext("2d");
+    const canopyEmpty = document.getElementById("canopy-empty");
+    const canopyDetails = document.getElementById("canopy-details");
+    const canopyKindFilter = document.getElementById("canopy-kind-filter");
+    const canopyAssetFilter = document.getElementById("canopy-asset-filter");
+    const canopyToggleLinks = document.getElementById("canopy-toggle-links");
+    const canopyResetView = document.getElementById("canopy-reset-view");
     const authEndpoint = document.querySelector('meta[name="artfi-auth-endpoint"]')?.content || "/api/browser-auth/start";
 
     const state = {
@@ -1965,6 +2177,20 @@
       queue: []
       ,ipfsProvider: "desktop"
       ,lastCid: ""
+    };
+
+    const canopyState = {
+      index: null,
+      metadata: new Map(),
+      nodes: [],
+      edges: [],
+      selectedNodeId: "",
+      hoveredNodeId: "",
+      pan: { x: 0, y: 0 },
+      zoom: 1,
+      dragging: false,
+      dragStart: { x: 0, y: 0 },
+      showLinks: true,
     };
 
     const setIpfsSpaceDid = (did) => {
@@ -2229,11 +2455,329 @@
       try {
         const response = await fetch(`./artizen-network-index.json?ts=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) throw new Error("Network index not generated yet.");
-        renderNetworkIndex(await response.json());
+        const index = await response.json();
+        await hydratePublicationMetadata(index);
+        renderNetworkIndex(index);
+        renderCanopyIndex(index);
       } catch (error) {
         networkSummary.textContent = "Network index not generated yet.";
         networkPublications.innerHTML = '<div class="empty-state">Run npm run index:network after publishing to refresh this view.</div>';
+        renderCanopyIndex({ publications: [], nodes: [], heartbeats: [], rewards: [] });
       }
+    };
+
+    const ipfsCidFromUri = (uri) => String(uri || "").startsWith("ipfs://") ? String(uri).slice(7) : "";
+
+    const fetchIpfsJson = async (uri) => {
+      const cid = ipfsCidFromUri(uri);
+      if (!cid) return null;
+      const urls = [
+        `http://127.0.0.1:5001/api/v0/cat?arg=${encodeURIComponent(cid)}`,
+        `https://ipfs.io/ipfs/${encodeURIComponent(cid)}`,
+      ];
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, { method: url.includes("127.0.0.1") ? "POST" : "GET" });
+          if (!response.ok) continue;
+          return await response.json();
+        } catch (_) {}
+      }
+      return null;
+    };
+
+    const hydratePublicationMetadata = async (index) => {
+      const publications = Array.isArray(index.publications) ? index.publications : [];
+      await Promise.all(publications.map(async publication => {
+        if (!publication.cid || canopyState.metadata.has(publication.cid)) return;
+        canopyState.metadata.set(publication.cid, await fetchIpfsJson(publication.cid));
+      }));
+    };
+
+    const nodeColor = (type) => ({
+      root: "#7af0c6",
+      request: "#7af0c6",
+      offer: "#8d7cf7",
+      project: "#f6c768",
+      cid: "#74d6ff",
+      node: "#b7ffd4",
+      unmatched: "#ff8aa1",
+    }[type] || "#edf6f2");
+
+    const canopyKind = (publication) => ["profile", "request", "offer", "outcome"][Number(publication.kind)] || "content";
+
+    const canopyAsset = (publication) => {
+      const metadata = canopyState.metadata.get(publication.cid) || {};
+      return String(metadata.amount?.currency || metadata.asset || "Unknown").toUpperCase();
+    };
+
+    const projectUrlsFor = (publication) => {
+      const metadata = canopyState.metadata.get(publication.cid) || {};
+      const urls = Array.isArray(metadata.projectUrls) ? metadata.projectUrls : [];
+      return [...new Set([metadata.primaryProjectUrl, publication.artizenProjectUrl, ...urls].filter(Boolean))];
+    };
+
+    const publicationTitle = (publication) => {
+      const metadata = canopyState.metadata.get(publication.cid) || {};
+      return metadata.title || `${networkKindLabel(publication.kind)} #${publication.publicationId}`;
+    };
+
+    const addCanopyNode = (nodes, node) => {
+      if (!nodes.some(existing => existing.id === node.id)) nodes.push(node);
+    };
+
+    const buildCanopyGraph = (index) => {
+      const publications = Array.isArray(index.publications) ? index.publications : [];
+      const registryNodes = Array.isArray(index.nodes) ? index.nodes : [];
+      const selectedKind = canopyKindFilter?.value || "all";
+      const selectedAsset = canopyAssetFilter?.value || "all";
+      const nodes = [];
+      const edges = [];
+      const publicationNodeByCid = new Map();
+      addCanopyNode(nodes, { id: "root", type: "root", label: "ArtFi", detail: "On-chain registry discovery root", x: 0, y: 0, size: 18 });
+
+      const filteredPublications = publications.filter(publication => {
+        const kind = canopyKind(publication);
+        const asset = canopyAsset(publication);
+        return (selectedKind === "all" || kind === selectedKind) && (selectedAsset === "all" || asset === selectedAsset || asset === "UNKNOWN");
+      });
+
+      filteredPublications.forEach((publication, publicationIndex) => {
+        const kind = canopyKind(publication);
+        const angle = -Math.PI / 2 + publicationIndex * 0.88;
+        const radius = 116 + publicationIndex * 24;
+        const nodeId = `publication:${publication.publicationId}`;
+        publicationNodeByCid.set(publication.cid, nodeId);
+        addCanopyNode(nodes, {
+          id: nodeId,
+          type: kind,
+          label: `${networkKindLabel(publication.kind)} #${publication.publicationId}`,
+          detail: publicationTitle(publication),
+          publication,
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius,
+          size: kind === "request" ? 14 : 12,
+        });
+        edges.push({ from: "root", to: nodeId, type: "registry", label: "published" });
+
+        const cidNodeId = `cid:${publication.cid}`;
+        addCanopyNode(nodes, {
+          id: cidNodeId,
+          type: "cid",
+          label: "CID",
+          detail: publication.cid,
+          publication,
+          x: Math.cos(angle + 0.22) * (radius + 58),
+          y: Math.sin(angle + 0.22) * (radius + 58),
+          size: 9,
+        });
+        edges.push({ from: nodeId, to: cidNodeId, type: "metadata", label: "metadata" });
+
+        projectUrlsFor(publication).forEach((url, urlIndex) => {
+          const projectNodeId = `project:${url}`;
+          let projectLabel = url;
+          try { projectLabel = new URL(url).hostname.replace(/^www\./, ""); } catch (_) {}
+          addCanopyNode(nodes, {
+            id: projectNodeId,
+            type: "project",
+            label: projectLabel,
+            detail: url,
+            x: Math.cos(angle - 0.28 - urlIndex * 0.18) * (radius + 96),
+            y: Math.sin(angle - 0.28 - urlIndex * 0.18) * (radius + 96),
+            size: 10,
+          });
+          edges.push({ from: nodeId, to: projectNodeId, type: "project", label: "project" });
+        });
+      });
+
+      filteredPublications
+        .filter(publication => canopyKind(publication) === "offer")
+        .forEach(publication => {
+          const metadata = canopyState.metadata.get(publication.cid) || {};
+          const sourceNodeId = publicationNodeByCid.get(publication.cid);
+          const relatedRequestCid = String(metadata.relatedRequestCid || "").trim();
+          if (!sourceNodeId || !relatedRequestCid) return;
+          const targetNodeId = publicationNodeByCid.get(relatedRequestCid);
+          if (targetNodeId) {
+            edges.push({ from: sourceNodeId, to: targetNodeId, type: "proposed", label: "proposed" });
+          } else {
+            const unmatchedNodeId = `unmatched:${relatedRequestCid}`;
+            addCanopyNode(nodes, { id: unmatchedNodeId, type: "unmatched", label: "Request", detail: relatedRequestCid, x: 190, y: 150, size: 10 });
+            edges.push({ from: sourceNodeId, to: unmatchedNodeId, type: "proposed", label: "proposed" });
+          }
+        });
+
+      registryNodes.forEach((node, nodeIndex) => {
+        addCanopyNode(nodes, {
+          id: `node:${node.nodeId}`,
+          type: "node",
+          label: `Node #${node.nodeId}`,
+          detail: `${node.operator || "unknown"} ${node.softwareVersion || ""}`.trim(),
+          x: -220 + nodeIndex * 62,
+          y: 205,
+          size: 10,
+        });
+        edges.push({ from: "root", to: `node:${node.nodeId}`, type: "node", label: "replicates" });
+      });
+
+      return { nodes, edges };
+    };
+
+    const resetCanopyCamera = () => {
+      canopyState.pan = { x: 0, y: 0 };
+      canopyState.zoom = 1;
+      drawCanopy();
+    };
+
+    const canvasPoint = (event) => {
+      const box = canopyCanvas.getBoundingClientRect();
+      return { x: event.clientX - box.left, y: event.clientY - box.top };
+    };
+
+    const worldPoint = (point) => ({
+      x: (point.x - canopyCanvas.clientWidth / 2 - canopyState.pan.x) / canopyState.zoom,
+      y: (point.y - canopyCanvas.clientHeight / 2 - canopyState.pan.y) / canopyState.zoom,
+    });
+
+    const findCanopyNode = (point) => {
+      const world = worldPoint(point);
+      return canopyState.nodes.slice().reverse().find(node => Math.hypot(world.x - node.x, world.y - node.y) <= node.size + 8) || null;
+    };
+
+    const showCanopyDetails = (node) => {
+      if (!canopyDetails) return;
+      if (!node) {
+        canopyDetails.innerHTML = "<h3>Canopy details</h3><p>Select a node to inspect request, offer, project, CID, or node relationships.</p>";
+        return;
+      }
+      const publication = node.publication || null;
+      const metadata = publication ? canopyState.metadata.get(publication.cid) || {} : {};
+      const badges = [node.type, publication ? canopyAsset(publication) : ""].filter(Boolean);
+      const links = projectUrlsFor(publication || {}).map(url => `<li><a href="${url}" target="_blank" rel="noreferrer">${url}</a></li>`).join("");
+      const related = metadata.relatedRequestCid ? `<p><strong>Related request</strong><br><small>${metadata.relatedRequestCid}</small></p>` : "";
+      const gateway = publication?.cid ? cidGatewayUrl(publication.cid) : "";
+      canopyDetails.innerHTML = `
+        <h3>${node.label}</h3>
+        <p>${node.detail || "No details loaded."}</p>
+        <div class="canopy-badge-row">${badges.map(badge => `<span class="canopy-badge">${badge}</span>`).join("")}</div>
+        ${publication?.cid ? `<p><strong>CID</strong><br><small>${publication.cid}</small></p>` : ""}
+        ${gateway ? `<p><a href="${gateway}" target="_blank" rel="noreferrer">Open IPFS content</a></p>` : ""}
+        ${related}
+        ${links ? `<p><strong>Project URLs</strong></p><ul>${links}</ul>` : ""}
+      `;
+    };
+
+    const resizeCanopy = () => {
+      if (!canopyCanvas || !canopyContext) return;
+      const box = canopyCanvas.parentElement.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      canopyCanvas.width = Math.floor(box.width * ratio);
+      canopyCanvas.height = Math.floor(420 * ratio);
+      canopyCanvas.style.height = "420px";
+      canopyContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+      drawCanopy();
+    };
+
+    const drawCanopy = () => {
+      if (!canopyCanvas || !canopyContext) return;
+      const width = canopyCanvas.clientWidth;
+      const height = canopyCanvas.clientHeight;
+      canopyContext.clearRect(0, 0, width, height);
+      canopyContext.save();
+      canopyContext.translate(width / 2 + canopyState.pan.x, height / 2 + canopyState.pan.y);
+      canopyContext.scale(canopyState.zoom, canopyState.zoom);
+
+      if (canopyState.showLinks) {
+        canopyContext.lineCap = "round";
+        canopyState.edges.forEach(edge => {
+          const from = canopyState.nodes.find(node => node.id === edge.from);
+          const to = canopyState.nodes.find(node => node.id === edge.to);
+          if (!from || !to) return;
+          canopyContext.beginPath();
+          canopyContext.moveTo(from.x, from.y);
+          canopyContext.quadraticCurveTo((from.x + to.x) / 2, (from.y + to.y) / 2 - 18, to.x, to.y);
+          canopyContext.strokeStyle = edge.type === "proposed" ? "rgba(141, 124, 247, 0.74)" : "rgba(122, 240, 198, 0.28)";
+          canopyContext.lineWidth = edge.type === "proposed" ? 2.3 : 1.2;
+          canopyContext.setLineDash(edge.type === "proposed" ? [5, 6] : []);
+          canopyContext.stroke();
+          canopyContext.setLineDash([]);
+        });
+      }
+
+      canopyState.nodes.forEach(node => {
+        const selected = canopyState.selectedNodeId === node.id;
+        const hovered = canopyState.hoveredNodeId === node.id;
+        canopyContext.beginPath();
+        canopyContext.arc(node.x, node.y, node.size + (selected ? 4 : hovered ? 2 : 0), 0, Math.PI * 2);
+        canopyContext.fillStyle = nodeColor(node.type);
+        canopyContext.globalAlpha = node.type === "cid" ? 0.72 : 0.95;
+        canopyContext.fill();
+        canopyContext.globalAlpha = 1;
+        canopyContext.strokeStyle = selected ? "#ffffff" : "rgba(255,255,255,0.34)";
+        canopyContext.lineWidth = selected ? 2 : 1;
+        canopyContext.stroke();
+        canopyContext.fillStyle = "rgba(237, 246, 242, 0.92)";
+        canopyContext.font = "700 11px ui-monospace, monospace";
+        canopyContext.textAlign = "center";
+        canopyContext.fillText(node.label, node.x, node.y + node.size + 15);
+      });
+      canopyContext.restore();
+    };
+
+    const renderCanopyIndex = (index) => {
+      canopyState.index = index;
+      const graph = buildCanopyGraph(index);
+      canopyState.nodes = graph.nodes;
+      canopyState.edges = graph.edges;
+      if (canopyCanvas) {
+        canopyCanvas.dataset.nodeCount = String(canopyState.nodes.length);
+        canopyCanvas.dataset.edgeCount = String(canopyState.edges.length);
+        canopyCanvas.dataset.proposedEdgeCount = String(canopyState.edges.filter(edge => edge.type === "proposed").length);
+      }
+      if (canopyEmpty) canopyEmpty.hidden = canopyState.nodes.length > 1;
+      resizeCanopy();
+      showCanopyDetails(canopyState.nodes.find(node => node.id === canopyState.selectedNodeId));
+    };
+
+    const bindCanopyEvents = () => {
+      if (!canopyCanvas) return;
+      canopyCanvas.addEventListener("pointerdown", (event) => {
+        canopyState.dragging = true;
+        canopyState.dragStart = { x: event.clientX - canopyState.pan.x, y: event.clientY - canopyState.pan.y };
+        canopyCanvas.dataset.dragging = "true";
+        canopyCanvas.setPointerCapture?.(event.pointerId);
+      });
+      canopyCanvas.addEventListener("pointermove", (event) => {
+        const hovered = findCanopyNode(canvasPoint(event));
+        canopyState.hoveredNodeId = hovered?.id || "";
+        if (canopyState.dragging) {
+          canopyState.pan = { x: event.clientX - canopyState.dragStart.x, y: event.clientY - canopyState.dragStart.y };
+        }
+        drawCanopy();
+      });
+      canopyCanvas.addEventListener("pointerup", (event) => {
+        canopyState.dragging = false;
+        canopyCanvas.dataset.dragging = "false";
+        canopyCanvas.releasePointerCapture?.(event.pointerId);
+      });
+      canopyCanvas.addEventListener("pointerleave", () => {
+        canopyState.dragging = false;
+        canopyState.hoveredNodeId = "";
+        canopyCanvas.dataset.dragging = "false";
+        drawCanopy();
+      });
+      canopyCanvas.addEventListener("click", (event) => {
+        const selected = findCanopyNode(canvasPoint(event));
+        canopyState.selectedNodeId = selected?.id || "";
+        showCanopyDetails(selected);
+        drawCanopy();
+      });
+      canopyCanvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        const nextZoom = Math.min(2.8, Math.max(0.45, canopyState.zoom * (event.deltaY > 0 ? 0.9 : 1.1)));
+        canopyState.zoom = nextZoom;
+        drawCanopy();
+      }, { passive: false });
+      window.addEventListener("resize", resizeCanopy, { passive: true });
     };
 
     ipfsJsonFile.addEventListener("change", async () => {
@@ -2452,6 +2996,15 @@
     pinataProvider.addEventListener("click", () => setIpfsProvider("pinata"));
     ipfsUploadButton.addEventListener("click", uploadIpfsJson);
     networkRefreshButton.addEventListener("click", loadNetworkIndex);
+    canopyKindFilter?.addEventListener("change", () => renderCanopyIndex(canopyState.index || { publications: [], nodes: [] }));
+    canopyAssetFilter?.addEventListener("change", () => renderCanopyIndex(canopyState.index || { publications: [], nodes: [] }));
+    canopyToggleLinks?.addEventListener("click", () => {
+      canopyState.showLinks = !canopyState.showLinks;
+      canopyToggleLinks.setAttribute("aria-pressed", String(canopyState.showLinks));
+      canopyToggleLinks.classList.toggle("active", canopyState.showLinks);
+      drawCanopy();
+    });
+    canopyResetView?.addEventListener("click", resetCanopyCamera);
     routerAddress.addEventListener("input", updateBatchSummary);
 
     if (window.ethereum) {
@@ -2488,6 +3041,7 @@
         }
       });
     restoreWallet();
+    bindCanopyEvents();
     loadQueue();
     loadNetworkIndex();
     probeIpfsDesktop();
