@@ -8,6 +8,7 @@ const ABI = [
   "event ContentDeactivated(uint256 indexed publicationId,address indexed publisher)",
   "event NodeRegistered(uint256 indexed nodeId,address indexed operator,bytes32 nodeDidHash,bytes32 peerIdHash,string softwareVersion)",
   "event NodeHeartbeat(uint256 indexed nodeId,uint256 indexed month,bytes32 challengeHash,bytes32 sampleProofHash,uint256 sampleCount,uint256 timestamp)",
+  "event NodeCheckRecorded(uint256 indexed nodeId,uint256 indexed month,address indexed checker,bytes32 challengeHash,bytes32 sampleProofHash,uint256 sampleCount,uint256 timestamp)",
   "event MonthlyNodeRewardRecorded(uint256 indexed nodeId,uint256 indexed month,address indexed operator,uint256 amount,bytes32 paymentReference)",
 ];
 
@@ -21,12 +22,13 @@ const registry = new Contract(registryAddress, ABI, new JsonRpcProvider(rpcUrl))
 const latestBlock = await registry.runner.provider.getBlockNumber();
 const fromBlock = Number(process.env.ARTFI_NETWORK_FROM_BLOCK || Math.max(0, latestBlock - 1999));
 const toBlock = Number(process.env.ARTFI_NETWORK_TO_BLOCK || latestBlock);
-const [published, statusUpdates, deactivated, nodes, heartbeats, rewards] = await Promise.all([
+const [published, statusUpdates, deactivated, nodes, heartbeats, checkerChecks, rewards] = await Promise.all([
   registry.queryFilter(registry.filters.ContentPublished(), fromBlock, toBlock),
   registry.queryFilter(registry.filters.ContentStatusUpdated(), fromBlock, toBlock),
   registry.queryFilter(registry.filters.ContentDeactivated(), fromBlock, toBlock),
   registry.queryFilter(registry.filters.NodeRegistered(), fromBlock, toBlock),
   registry.queryFilter(registry.filters.NodeHeartbeat(), fromBlock, toBlock),
+  registry.queryFilter(registry.filters.NodeCheckRecorded(), fromBlock, toBlock),
   registry.queryFilter(registry.filters.MonthlyNodeRewardRecorded(), fromBlock, toBlock),
 ]);
 
@@ -72,13 +74,25 @@ const index = {
     peerIdHash: event.args.peerIdHash,
     softwareVersion: event.args.softwareVersion,
   })),
-  heartbeats: heartbeats.map(event => ({
-    nodeId: event.args.nodeId.toString(),
-    month: event.args.month.toString(),
-    sampleProofHash: event.args.sampleProofHash,
-    sampleCount: event.args.sampleCount.toString(),
-    timestamp: event.args.timestamp.toString(),
-  })),
+  heartbeats: [
+    ...heartbeats.map(event => ({
+      source: "operator",
+      nodeId: event.args.nodeId.toString(),
+      month: event.args.month.toString(),
+      sampleProofHash: event.args.sampleProofHash,
+      sampleCount: event.args.sampleCount.toString(),
+      timestamp: event.args.timestamp.toString(),
+    })),
+    ...checkerChecks.map(event => ({
+      source: "checker",
+      nodeId: event.args.nodeId.toString(),
+      month: event.args.month.toString(),
+      checker: event.args.checker,
+      sampleProofHash: event.args.sampleProofHash,
+      sampleCount: event.args.sampleCount.toString(),
+      timestamp: event.args.timestamp.toString(),
+    })),
+  ].sort((first, second) => Number(first.timestamp) - Number(second.timestamp)),
   rewards: rewards.map(event => ({
     nodeId: event.args.nodeId.toString(),
     month: event.args.month.toString(),

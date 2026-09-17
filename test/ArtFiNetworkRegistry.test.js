@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 
 describe("ArtFiNetworkRegistry", function () {
   const projectUrl = "https://artizen.fund/index/p/project";
@@ -14,11 +15,12 @@ describe("ArtFiNetworkRegistry", function () {
   let admin;
   let creator;
   let operator;
+  let checker;
   let outsider;
   let creatorAgentHash;
 
   beforeEach(async function () {
-    [admin, creator, operator, outsider] = await ethers.getSigners();
+    [admin, creator, operator, checker, outsider] = await ethers.getSigners();
     const Protocol = await ethers.getContractFactory("ArtFiProtocol");
     protocol = await Protocol.deploy(admin.address);
     creatorAgentHash = ethers.id("creator browser agent");
@@ -85,6 +87,26 @@ describe("ArtFiNetworkRegistry", function () {
     )).to.emit(registry, "NodeHeartbeat");
     await expect(registry.connect(operator).heartbeat(
       1, 202609, ethers.id("challenge-1"), ethers.id("sample"), 3, "kubo-0.34"
+    )).to.be.revertedWith("Heartbeat too soon");
+  });
+
+  it("allows approved checkers to record independent node checks", async function () {
+    await registry.connect(operator).registerNode(nodeDidHash, peerIdHash, "kubo-0.34");
+    await registry.setMonthChallenge(202609, ethers.id("challenge-1"));
+    await registry.setNodeApproval(1, true);
+    const checkerRole = await registry.NODE_CHECKER_ROLE();
+    await expect(registry.connect(outsider).recordNodeCheck(
+      1, 202609, ethers.id("challenge-1"), ethers.id("sample"), 3
+    )).to.be.reverted;
+    await registry.grantRole(checkerRole, checker.address);
+    await expect(registry.connect(checker).recordNodeCheck(
+      1, 202609, ethers.id("challenge-1"), ethers.id("sample"), 3
+    )).to.emit(registry, "NodeCheckRecorded")
+      .withArgs(1, 202609, checker.address, ethers.id("challenge-1"), ethers.id("sample"), 3, anyValue);
+    const stats = await registry.monthStats(1, 202609);
+    expect(stats.checks).to.equal(1);
+    await expect(registry.connect(checker).recordNodeCheck(
+      1, 202609, ethers.id("challenge-1"), ethers.id("sample-2"), 3
     )).to.be.revertedWith("Heartbeat too soon");
   });
 

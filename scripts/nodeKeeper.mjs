@@ -5,6 +5,7 @@ import { Contract, JsonRpcProvider, Wallet, keccak256, toUtf8Bytes } from "ether
 const REGISTRY_ABI = [
   "function monthChallenges(uint256) view returns (bytes32)",
   "function heartbeat(uint256 nodeId,uint256 month,bytes32 challengeHash,bytes32 sampleProofHash,uint256 sampleCount,string softwareVersion)",
+  "function recordNodeCheck(uint256 nodeId,uint256 month,bytes32 challengeHash,bytes32 sampleProofHash,uint256 sampleCount)",
 ];
 
 export function normalizeCid(value) {
@@ -69,6 +70,7 @@ export async function submitHeartbeat({
   softwareVersion,
   fetchImpl,
   pinBeforeSample = true,
+  checkMode = "operator",
 }) {
   const sampleCidsForHeartbeat = cids?.length ? cids.map(normalizeCid) : await loadSampleCidsFromIndex({ indexPath });
   if (!sampleCidsForHeartbeat.length) throw new Error("No sample CIDs are available; publish or index ArtFi content first");
@@ -80,15 +82,17 @@ export async function submitHeartbeat({
   const challengeHash = await registry.monthChallenges(month);
   if (challengeHash === `0x${"0".repeat(64)}`) throw new Error("No active challenge is configured for this month");
   const sampleProofHash = createSampleProofHash(samples);
-  const transaction = await registry.heartbeat(
-    nodeId,
-    month,
-    challengeHash,
-    sampleProofHash,
-    samples.length,
-    softwareVersion
-  );
-  return { transactionHash: transaction.hash, challengeHash, sampleProofHash, samples };
+  const transaction = checkMode === "checker"
+    ? await registry.recordNodeCheck(nodeId, month, challengeHash, sampleProofHash, samples.length)
+    : await registry.heartbeat(
+        nodeId,
+        month,
+        challengeHash,
+        sampleProofHash,
+        samples.length,
+        softwareVersion
+      );
+  return { transactionHash: transaction.hash, checkMode, challengeHash, sampleProofHash, samples };
 }
 
 async function main() {
@@ -126,6 +130,7 @@ async function main() {
     apiUrl: process.env.IPFS_API_URL || "http://127.0.0.1:5001",
     softwareVersion: process.env.IPFS_SOFTWARE_VERSION || "kubo/ipfs-desktop",
     pinBeforeSample: process.env.ARTFI_PIN_BEFORE_SAMPLE !== "false",
+    checkMode: process.env.ARTFI_CHECK_MODE || (command === "spot-check" ? "checker" : "operator"),
   });
   console.log(JSON.stringify(result, null, 2));
 }

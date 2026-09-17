@@ -1671,8 +1671,8 @@
         <div id="node-reward-panel" hidden>
           <div class="node-reward-guide">
             <span><strong>1.</strong> Run IPFS Desktop/Kubo and generate hashes from this node.</span>
-            <span><strong>2.</strong> Register the node with your wallet, then wait for admin approval.</span>
-            <span><strong>3.</strong> Run the keeper on this machine; it pins indexed ArtFi CIDs before each heartbeat.</span>
+            <span><strong>2.</strong> Register the node with your connected wallet, then wait for admin approval.</span>
+            <span><strong>3.</strong> Approved checkers spot-check your node and record successful checks for rewards.</span>
           </div>
           <input id="network-registry-address" class="storage-email" value="0xBa6bD3916eC55cEba803079426bcaF4B0Ae748B5" placeholder="ArtFiNetworkRegistry address" />
           <input id="node-did-hash" class="storage-email" placeholder="Node DID hash (bytes32)" />
@@ -1680,10 +1680,10 @@
           <input id="node-software-version" class="storage-email" value="kubo/ipfs-desktop" placeholder="Software version" />
           <button id="generate-node-hashes-button" class="btn secondary" type="button">Generate hashes</button>
           <button id="register-node-button" class="btn secondary" type="button">Register node</button>
-          <button id="keeper-command-button" class="btn secondary" type="button">Copy keeper command</button>
-          <button id="heartbeat-button" class="btn secondary" type="button" disabled>Submit heartbeat</button>
-          <p class="keeper-command" id="keeper-command-preview">npm run index:network && npm run node:pin-samples && ARTFI_NODE_ID=1 npm run node:heartbeat</p>
-          <p id="node-reward-status" class="note">10 ART/month is recorded after admin approval, a monthly challenge, and 25 successful spaced heartbeats.</p>
+          <button id="keeper-command-button" class="btn secondary" type="button">Copy checker command</button>
+          <button id="heartbeat-button" class="btn secondary" type="button" disabled>Spot-check info</button>
+          <p class="keeper-command" id="keeper-command-preview">npm run index:network && npm run node:pin-samples && ARTFI_NODE_ID=1 npm run node:spot-check</p>
+          <p id="node-reward-status" class="note">10 ART/month is recorded after admin approval, a monthly challenge, and 25 successful checker spot checks.</p>
         </div>
         <div class="ipfs-upload-row">
           <input id="ipfs-json-file" type="file" accept="application/json,.json" hidden />
@@ -2860,7 +2860,7 @@
       keeperCommandPreview.textContent = [
         `export ARTFI_NETWORK_REGISTRY_ADDRESS=${registry}`,
         `ARTFI_NODE_ID=${nodeId};`,
-        "npm run index:network && npm run node:pin-samples && npm run node:heartbeat"
+        "npm run index:network && npm run node:pin-samples && npm run node:spot-check"
       ].join(" ");
     };
 
@@ -2903,13 +2903,13 @@
     });
 
     heartbeatButton.addEventListener("click", () => {
-      nodeRewardStatus.textContent = "Run the keeper command on the node host. It indexes the registry, pins active CIDs, then submits a heartbeat after admin approval and challenge setup.";
+      nodeRewardStatus.textContent = "A checker machine runs this command to call your node, pin/sample active CIDs, and record successful checks. Node operators only need to register and keep Kubo online.";
     });
 
     keeperCommandButton.addEventListener("click", async () => {
       refreshKeeperCommand();
       await navigator.clipboard.writeText(keeperCommandPreview.textContent);
-      nodeRewardStatus.textContent = "Keeper command copied. Run it from the ArtFi repo on the machine hosting Kubo.";
+      nodeRewardStatus.textContent = "Checker command copied. Run it from the ArtFi repo on an approved checker machine after challenge setup.";
     });
     networkRegistryAddress.addEventListener("input", refreshKeeperCommand);
     refreshKeeperCommand();

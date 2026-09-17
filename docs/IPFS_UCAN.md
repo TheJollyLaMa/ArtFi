@@ -143,27 +143,36 @@ The first pilot requires 25 successful checks per month, with checks no more oft
 
 The heartbeat proves an operator responded to a current challenge and reports sample retrieval evidence; it does not claim that one node is the only copy. Multiple approved operators should pin the same public CIDs. Encrypted private attachments are excluded unless their participants explicitly authorize replication.
 
-### Operator heartbeat command
+### Checker spot-check command
 
-After an administrator approves the registered node and configures the monthly challenge, run this command from the machine hosting IPFS Desktop/Kubo. Schedule it with cron, launchd, or another local task runner no more than once every 12 hours:
+Node operators register once with their connected wallet and keep IPFS Desktop/Kubo online. They do not need to self-report every check. After an administrator approves the registered node and configures the monthly challenge, an approved checker can run this command to spot-check that node. Schedule it with cron, launchd, or another local task runner no more than once every 12 hours:
+
+Checker-submitted spot checks require an `ArtFiNetworkRegistry` deployment that includes `NODE_CHECKER_ROLE` and `recordNodeCheck`. Registries deployed before this feature still support operator-submitted `node:heartbeat`, but must be redeployed before `node:spot-check` can record independent checks.
+
+Grant a checker wallet before running routine spot checks:
+
+```bash
+ARTFI_NODE_CHECKER=0xCheckerWallet \
+npm run network:approve-checker
+```
 
 ```bash
 BASE_RPC_URL=... \\
 NODE_PRIVATE_KEY=... \\
 ARTFI_NETWORK_REGISTRY_ADDRESS=0x... \\
 ARTFI_NODE_ID=1 \\
-npm run node:heartbeat
+npm run node:spot-check
 ```
 
-By default, the keeper reads active publication CIDs from `artizen-network-index.json`, pins them through the local Kubo API, retrieves every sample CID, hashes the successful retrieval report, reads the current on-chain challenge, and submits one wallet-signed heartbeat. Keep `NODE_PRIVATE_KEY` in the node operator's local secret store; never put it in the browser or repository.
+By default, the keeper reads active publication CIDs from `artizen-network-index.json`, pins them through the local Kubo API, retrieves every sample CID, hashes the successful retrieval report, reads the current on-chain challenge, and submits one checker-signed `recordNodeCheck` transaction. Keep `NODE_PRIVATE_KEY` in the checker machine's local secret store; never put it in the browser or repository. Use a dedicated checker wallet with `NODE_CHECKER_ROLE`, not an administrator's main wallet, for routine checks.
 
-The normal operator loop is:
+The normal checker loop is:
 
 ```bash
 npm run index:network
 npm run node:sample-cids
 npm run node:pin-samples
-npm run node:heartbeat
+npm run node:spot-check
 ```
 
-`node:sample-cids` previews the active CIDs selected from the index. `node:pin-samples` pins those CIDs locally before a heartbeat. Set `ARTFI_SAMPLE_CIDS=ipfs://bafy...,ipfs://bafy...` only when an administrator publishes a curated challenge list; otherwise the index-driven list is the least manual path.
+`node:sample-cids` previews the active CIDs selected from the index. `node:pin-samples` pins those CIDs locally before a spot check. Set `ARTFI_SAMPLE_CIDS=ipfs://bafy...,ipfs://bafy...` only when an administrator publishes a curated challenge list; otherwise the index-driven list is the least manual path. The older `node:heartbeat` command remains available for an operator-submitted fallback, but the reward pilot should prefer independent checker checks.
