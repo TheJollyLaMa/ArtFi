@@ -15,8 +15,12 @@
     "network:create-request": "node scripts/artfiBootstrap.mjs create-request",
     "network:register-node": "node scripts/artfiBootstrap.mjs register-node",
     "network:approve-node": "node scripts/artfiBootstrap.mjs approve-node",
+    "network:approve-checker": "node scripts/artfiBootstrap.mjs approve-checker",
     "network:set-challenge": "node scripts/artfiBootstrap.mjs set-challenge",
     "index:network": "node scripts/indexNetwork.mjs",
+    "node:sample-cids": "node scripts/nodeKeeper.mjs sample-cids",
+    "node:pin-samples": "node scripts/nodeKeeper.mjs pin-samples",
+    "node:spot-check": "node scripts/nodeKeeper.mjs spot-check",
     "node:heartbeat": "node scripts/nodeKeeper.mjs",
     "compile": "hardhat compile",
     "deploy:base": "hardhat run scripts/deploy.js --network base"
