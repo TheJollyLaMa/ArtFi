@@ -121,7 +121,7 @@ async function main() {
 
   const result = await submitHeartbeat({
     rpcUrl: required("BASE_RPC_URL"),
-    privateKey: required("NODE_PRIVATE_KEY"),
+    privateKey: process.env.NODE_PRIVATE_KEY || required("PRIVATE_KEY"),
     registryAddress: required("ARTFI_NETWORK_REGISTRY_ADDRESS"),
     nodeId: required("ARTFI_NODE_ID"),
     month: process.env.ARTFI_NETWORK_MONTH || new Date().toISOString().slice(0, 7).replace("-", ""),
