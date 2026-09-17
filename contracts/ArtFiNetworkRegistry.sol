@@ -12,6 +12,7 @@ interface IArtFiProfileReader {
 
 contract ArtFiNetworkRegistry is AccessControl {
     bytes32 public constant NETWORK_ADMIN_ROLE = keccak256("NETWORK_ADMIN_ROLE");
+    bytes32 public constant NODE_CHECKER_ROLE = keccak256("NODE_CHECKER_ROLE");
     uint256 public constant MONTHLY_NODE_REWARD = 10 ether;
     uint256 public constant HEARTBEAT_INTERVAL = 12 hours;
     uint256 public constant MIN_MONTHLY_CHECKS = 25;
@@ -86,6 +87,15 @@ contract ArtFiNetworkRegistry is AccessControl {
         uint256 sampleCount,
         uint256 timestamp
     );
+    event NodeCheckRecorded(
+        uint256 indexed nodeId,
+        uint256 indexed month,
+        address indexed checker,
+        bytes32 challengeHash,
+        bytes32 sampleProofHash,
+        uint256 sampleCount,
+        uint256 timestamp
+    );
     event MonthlyNodeRewardRecorded(
         uint256 indexed nodeId,
         uint256 indexed month,
@@ -100,6 +110,7 @@ contract ArtFiNetworkRegistry is AccessControl {
         profileReader = IArtFiProfileReader(profileContract);
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
         _grantRole(NETWORK_ADMIN_ROLE, defaultAdmin);
+        _grantRole(NODE_CHECKER_ROLE, defaultAdmin);
     }
 
     function publishContent(
@@ -211,6 +222,30 @@ contract ArtFiNetworkRegistry is AccessControl {
     ) external {
         Node storage node = nodes[nodeId];
         require(node.operator == msg.sender, "Only node operator can heartbeat");
+        _recordNodeCheck(nodeId, month, challengeHash, sampleProofHash, sampleCount);
+        node.softwareVersion = softwareVersion;
+        emit NodeHeartbeat(nodeId, month, challengeHash, sampleProofHash, sampleCount, block.timestamp);
+    }
+
+    function recordNodeCheck(
+        uint256 nodeId,
+        uint256 month,
+        bytes32 challengeHash,
+        bytes32 sampleProofHash,
+        uint256 sampleCount
+    ) external onlyRole(NODE_CHECKER_ROLE) {
+        _recordNodeCheck(nodeId, month, challengeHash, sampleProofHash, sampleCount);
+        emit NodeCheckRecorded(nodeId, month, msg.sender, challengeHash, sampleProofHash, sampleCount, block.timestamp);
+    }
+
+    function _recordNodeCheck(
+        uint256 nodeId,
+        uint256 month,
+        bytes32 challengeHash,
+        bytes32 sampleProofHash,
+        uint256 sampleCount
+    ) internal {
+        Node storage node = nodes[nodeId];
         require(node.approved && node.active, "Node is not approved and active");
         require(monthChallenges[month] == challengeHash, "Challenge does not match");
         require(sampleProofHash != bytes32(0), "Sample proof is required");
@@ -221,8 +256,6 @@ contract ArtFiNetworkRegistry is AccessControl {
         stats.lastHeartbeat = uint64(block.timestamp);
         stats.lastSampleProofHash = sampleProofHash;
         ++stats.checks;
-        node.softwareVersion = softwareVersion;
-        emit NodeHeartbeat(nodeId, month, challengeHash, sampleProofHash, sampleCount, block.timestamp);
     }
 
     function rewardEligible(uint256 nodeId, uint256 month) public view returns (bool) {

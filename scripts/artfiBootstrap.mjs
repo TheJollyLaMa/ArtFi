@@ -26,6 +26,8 @@ const registryAbi = [
   "function publicationCount() view returns (uint256)",
   "function nodeCount() view returns (uint256)",
   "function nodes(uint256 nodeId) view returns (address operator,bytes32 nodeDidHash,bytes32 peerIdHash,string softwareVersion,bool approved,bool active)",
+  "function NODE_CHECKER_ROLE() view returns (bytes32)",
+  "function grantRole(bytes32 role,address account)",
   "function registerNode(bytes32 nodeDidHash,bytes32 peerIdHash,string softwareVersion) returns (uint256)",
   "function setNodeApproval(uint256 nodeId,bool approved)",
   "function setMonthChallenge(uint256 month,bytes32 challengeHash)",
@@ -334,6 +336,17 @@ async function commandApproveNode(args) {
   console.log(JSON.stringify({ status: "node_approval_updated", nodeId, approved }, null, 2));
 }
 
+async function commandApproveChecker(args) {
+  const { registry } = contracts();
+  const checker = required(envOrArg(args, "checker", "ARTFI_NODE_CHECKER"), "ARTFI_NODE_CHECKER");
+  if (!isAddress(checker)) throw new Error("checker is not an address");
+  const role = await registry.NODE_CHECKER_ROLE();
+  const transaction = await registry.grantRole(role, checker);
+  console.log(`Checker approval sent: ${transaction.hash}`);
+  await transaction.wait();
+  console.log(JSON.stringify({ status: "checker_approved", checker, role }, null, 2));
+}
+
 async function commandSetChallenge(args) {
   const { registry } = contracts();
   const month = envOrArg(args, "month", "ARTFI_NETWORK_MONTH", new Date().toISOString().slice(0, 7).replace("-", ""));
@@ -357,6 +370,7 @@ Commands:
                      Use --asset-symbol ART or --asset-symbol USDC.
   register-node      Register a Kubo/IPFS node with ArtFiNetworkRegistry.
   approve-node       Admin approval for a registered node.
+  approve-checker    Admin grants NODE_CHECKER_ROLE to a checker wallet.
   set-challenge      Admin sets the monthly heartbeat challenge.
 `);
 }
@@ -371,6 +385,7 @@ try {
   else if (command === "create-request") await commandCreateRequest(args);
   else if (command === "register-node") await commandRegisterNode(args);
   else if (command === "approve-node") await commandApproveNode(args);
+  else if (command === "approve-checker") await commandApproveChecker(args);
   else if (command === "set-challenge") await commandSetChallenge(args);
   else throw new Error(`Unknown command: ${command}`);
 } catch (error) {
