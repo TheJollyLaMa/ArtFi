@@ -413,6 +413,29 @@
       max-width: 100%;
       overflow-wrap: anywhere;
     }
+    .node-reward-guide {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 12px;
+      border: 1px solid rgba(122, 240, 198, 0.14);
+      border-radius: 10px;
+      background: rgba(122, 240, 198, 0.055);
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+    .node-reward-guide strong { color: var(--accent); }
+    .keeper-command {
+      margin: 0;
+      padding: 10px;
+      border-radius: 10px;
+      color: var(--accent);
+      background: rgba(3, 7, 18, 0.75);
+      border: 1px solid rgba(122, 240, 198, 0.12);
+      font: 700 0.74rem ui-monospace, monospace;
+      overflow-wrap: anywhere;
+    }
     .ipfs-provider-row, .ipfs-upload-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .ipfs-provider-row button[data-selected="true"] { border-color: var(--accent); color: var(--accent); }
     .ipfs-cid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
@@ -1646,13 +1669,21 @@
         <p id="pinata-warning" class="note" hidden>Your JWT stays in memory for this page and is never stored or sent to ArtFi. Use a least-privilege Pinata key.</p>
         <label class="ipfs-reward-optin"><input id="node-reward-optin" type="checkbox" /> Opt in to node rewards</label>
         <div id="node-reward-panel" hidden>
-          <input id="network-registry-address" class="storage-email" placeholder="ArtFiNetworkRegistry address" />
+          <div class="node-reward-guide">
+            <span><strong>1.</strong> Run IPFS Desktop/Kubo and generate hashes from this node.</span>
+            <span><strong>2.</strong> Register the node with your wallet, then wait for admin approval.</span>
+            <span><strong>3.</strong> Run the keeper on this machine; it pins indexed ArtFi CIDs before each heartbeat.</span>
+          </div>
+          <input id="network-registry-address" class="storage-email" value="0xBa6bD3916eC55cEba803079426bcaF4B0Ae748B5" placeholder="ArtFiNetworkRegistry address" />
           <input id="node-did-hash" class="storage-email" placeholder="Node DID hash (bytes32)" />
           <input id="node-peer-id-hash" class="storage-email" placeholder="Peer ID hash (bytes32)" />
           <input id="node-software-version" class="storage-email" value="kubo/ipfs-desktop" placeholder="Software version" />
+          <button id="generate-node-hashes-button" class="btn secondary" type="button">Generate hashes</button>
           <button id="register-node-button" class="btn secondary" type="button">Register node</button>
+          <button id="keeper-command-button" class="btn secondary" type="button">Copy keeper command</button>
           <button id="heartbeat-button" class="btn secondary" type="button" disabled>Submit heartbeat</button>
-          <p id="node-reward-status" class="note">Rewards require an approved node, sample CID checks, and 10 ART is recorded monthly after eligibility.</p>
+          <p class="keeper-command" id="keeper-command-preview">npm run index:network && npm run node:pin-samples && ARTFI_NODE_ID=1 npm run node:heartbeat</p>
+          <p id="node-reward-status" class="note">10 ART/month is recorded after admin approval, a monthly challenge, and 25 successful spaced heartbeats.</p>
         </div>
         <div class="ipfs-upload-row">
           <input id="ipfs-json-file" type="file" accept="application/json,.json" hidden />
@@ -2085,7 +2116,7 @@
     }
   </script>
   <script type="module">
-    import { BrowserProvider, Contract, parseUnits, solidityPackedKeccak256 } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
+    import { BrowserProvider, Contract, keccak256, parseUnits, solidityPackedKeccak256, toUtf8Bytes } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
     import {
       consumeEmailAuthorizationFromLocation,
       createWalletAgentBinding,
@@ -2148,7 +2179,10 @@
     const nodeDidHash = document.getElementById("node-did-hash");
     const nodePeerIdHash = document.getElementById("node-peer-id-hash");
     const nodeSoftwareVersion = document.getElementById("node-software-version");
+    const generateNodeHashesButton = document.getElementById("generate-node-hashes-button");
     const registerNodeButton = document.getElementById("register-node-button");
+    const keeperCommandButton = document.getElementById("keeper-command-button");
+    const keeperCommandPreview = document.getElementById("keeper-command-preview");
     const heartbeatButton = document.getElementById("heartbeat-button");
     const nodeRewardStatus = document.getElementById("node-reward-status");
       const ipfsSpaceDid = document.getElementById("ipfs-space-did");
@@ -2817,10 +2851,41 @@
 
     nodeRewardOptin.addEventListener("change", () => {
       nodeRewardPanel.hidden = !nodeRewardOptin.checked;
+      if (nodeRewardOptin.checked) refreshKeeperCommand();
+    });
+
+    const refreshKeeperCommand = () => {
+      const registry = networkRegistryAddress.value.trim() || "0xYourRegistryAddress";
+      const nodeId = "1";
+      keeperCommandPreview.textContent = [
+        `export ARTFI_NETWORK_REGISTRY_ADDRESS=${registry}`,
+        `ARTFI_NODE_ID=${nodeId};`,
+        "npm run index:network && npm run node:pin-samples && npm run node:heartbeat"
+      ].join(" ");
+    };
+
+    generateNodeHashesButton.addEventListener("click", async () => {
+      try {
+        nodeRewardStatus.textContent = "Reading local Kubo peer ID…";
+        const response = await fetch("http://127.0.0.1:5001/api/v0/id", { method: "POST" });
+        if (!response.ok) throw new Error(`Could not read Kubo peer ID (${response.status})`);
+        const node = await response.json();
+        const peerId = String(node.ID || "").trim();
+        if (!peerId) throw new Error("Kubo did not return a peer ID.");
+        nodeDidHash.value = keccak256(toUtf8Bytes(`did:artfi-node:${peerId}`));
+        nodePeerIdHash.value = keccak256(toUtf8Bytes(peerId));
+        setIpfsSpaceDid(peerId);
+        nodeRewardStatus.textContent = `Hashes generated for ${peerId}. Register this node, then ask an admin to approve it.`;
+      } catch (error) {
+        nodeRewardStatus.textContent = error?.message || "Could not generate node hashes.";
+      }
     });
 
     registerNodeButton.addEventListener("click", async () => {
-      if (!state.signer) return;
+      if (!state.signer) {
+        nodeRewardStatus.textContent = "Connect a wallet before registering the node.";
+        return;
+      }
       try {
         const registry = new Contract(networkRegistryAddress.value.trim(), networkRegistryAbi, state.signer);
         const transaction = await registry.registerNode(
@@ -2838,8 +2903,16 @@
     });
 
     heartbeatButton.addEventListener("click", () => {
-      nodeRewardStatus.textContent = "Run npm run node:heartbeat on the node host to sample CIDs and submit the signed heartbeat.";
+      nodeRewardStatus.textContent = "Run the keeper command on the node host. It indexes the registry, pins active CIDs, then submits a heartbeat after admin approval and challenge setup.";
     });
+
+    keeperCommandButton.addEventListener("click", async () => {
+      refreshKeeperCommand();
+      await navigator.clipboard.writeText(keeperCommandPreview.textContent);
+      nodeRewardStatus.textContent = "Keeper command copied. Run it from the ArtFi repo on the machine hosting Kubo.";
+    });
+    networkRegistryAddress.addEventListener("input", refreshKeeperCommand);
+    refreshKeeperCommand();
 
     const connectWallet = async () => {
       if (!window.ethereum) {

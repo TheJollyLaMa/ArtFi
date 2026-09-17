@@ -17,6 +17,8 @@
     "network:approve-node": "node scripts/artfiBootstrap.mjs approve-node",
     "network:set-challenge": "node scripts/artfiBootstrap.mjs set-challenge",
     "index:network": "node scripts/indexNetwork.mjs",
+    "node:sample-cids": "node scripts/nodeKeeper.mjs sample-cids",
+    "node:pin-samples": "node scripts/nodeKeeper.mjs pin-samples",
     "node:heartbeat": "node scripts/nodeKeeper.mjs",
     "compile": "hardhat compile",
     "deploy:base": "hardhat run scripts/deploy.js --network base"

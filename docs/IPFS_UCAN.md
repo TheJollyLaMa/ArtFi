@@ -152,8 +152,18 @@ BASE_RPC_URL=... \\
 NODE_PRIVATE_KEY=... \\
 ARTFI_NETWORK_REGISTRY_ADDRESS=0x... \\
 ARTFI_NODE_ID=1 \\
-ARTFI_SAMPLE_CIDS=ipfs://bafy...,ipfs://bafy... \\
 npm run node:heartbeat
 ```
 
-The keeper retrieves every sample CID through the local Kubo API, hashes the successful retrieval report, reads the current on-chain challenge, and submits one wallet-signed heartbeat. Keep `NODE_PRIVATE_KEY` in the node operator's local secret store; never put it in the browser or repository.
+By default, the keeper reads active publication CIDs from `artizen-network-index.json`, pins them through the local Kubo API, retrieves every sample CID, hashes the successful retrieval report, reads the current on-chain challenge, and submits one wallet-signed heartbeat. Keep `NODE_PRIVATE_KEY` in the node operator's local secret store; never put it in the browser or repository.
+
+The normal operator loop is:
+
+```bash
+npm run index:network
+npm run node:sample-cids
+npm run node:pin-samples
+npm run node:heartbeat
+```
+
+`node:sample-cids` previews the active CIDs selected from the index. `node:pin-samples` pins those CIDs locally before a heartbeat. Set `ARTFI_SAMPLE_CIDS=ipfs://bafy...,ipfs://bafy...` only when an administrator publishes a curated challenge list; otherwise the index-driven list is the least manual path.
