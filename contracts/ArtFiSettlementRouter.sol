@@ -67,6 +67,15 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         emit FundStatusUpdated(fundId, active);
     }
 
+    function setFundMetadataUri(bytes32 fundId, string calldata metadataUri)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(bytes(funds[fundId].metadataUri).length > 0 || funds[fundId].active, "Fund does not exist");
+        funds[fundId].metadataUri = metadataUri;
+        emit FundCreated(fundId, metadataUri);
+    }
+
     function setAssetApproved(address asset, bool approved) external onlyRole(ASSET_ADMIN_ROLE) {
         if (!approved) require(totalFundBalances[asset] == 0, "Asset is allocated to a fund");
         approvedAssets[asset] = approved;
