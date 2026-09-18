@@ -9,6 +9,9 @@ on:
       - Ens_Eth_Breathe.gif
       - metamask.png
       - IPFS_Logo.png
+      - favicon.png
+      - usdc.png
+      - BigNuten.png
       - payroll-queue.json
       - scripts/ucanStorage.mjs
       - .github/workflows/deploy-pages.yml
@@ -40,7 +43,7 @@ jobs:
       - name: Assemble public site
         run: |
           mkdir -p _site/scripts
-          cp index.html Artizen_LOGO.png Ens_Eth_Breathe.gif metamask.png IPFS_Logo.png payroll-queue.json _site/
+          cp index.html Artizen_LOGO.png Ens_Eth_Breathe.gif metamask.png IPFS_Logo.png favicon.png usdc.png BigNuten.png payroll-queue.json _site/
           cp scripts/ucanStorage.mjs _site/scripts/
           touch _site/.nojekyll
 

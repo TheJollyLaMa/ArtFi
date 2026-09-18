@@ -21,7 +21,7 @@ First season newcomers only!
 
 ## On-chain advance protocol
 
-`ArtFiProtocol` is the deployable escrow/NFT contract, and `ArtFiNetworkRegistry` is the separate serverless CID discovery and node-reward registry. Together they combine request discovery, sponsor escrow, receivable ownership, settlement, outcome attestations, participant history, and community replication without an ArtFi-owned database.
+`ArtFiProtocol` is the deployable escrow/NFT contract, `ArtFiNetworkRegistry` is the separate serverless CID discovery and node-reward registry, and `ArtFiSettlementRouter` is the isolated payroll/project treasury. Together they combine request discovery, sponsor escrow, receivable ownership, settlement, outcome attestations, participant history, community replication, and accountable payroll without an ArtFi-owned database.
 
 ### NFT lifecycle
 
@@ -55,7 +55,21 @@ npm test
 npm run test:storage
 ```
 
-The deployment script reads optional `ADMIN_ADDRESS`, `ART_TOKEN_ADDRESS`, and comma-separated `SUPPORTED_ASSETS`. Native currency is enabled by default. The script deploys `ArtFiProtocol`, then deploys `ArtFiNetworkRegistry` with the protocol address.
+The deployment script reads optional `ADMIN_ADDRESS`, `ART_TOKEN_ADDRESS`, and comma-separated `SUPPORTED_ASSETS`. Native currency is enabled by default. The script deploys `ArtFiProtocol`, then `ArtFiNetworkRegistry` with the protocol address, then `ArtFiSettlementRouter` with the administrator. Configured ERC-20 assets are approved in both contracts, and the initial `artfi-repo-dev` settlement fund is created.
+
+### Settlement router and payroll fund
+
+`ArtFiSettlementRouter` keeps payroll funds isolated by `(fundId, asset)`. The initial fund is:
+
+```text
+fundId: artfi-repo-dev
+asset: ART
+purpose: contributor payroll for reviewed repository work
+```
+
+The router rejects duplicate issue/PR work references within a fund and emits a `PayrollPaid` ledger event containing the recipient, asset, amount, repository/contributor hashes, work reference, and metadata evidence. Recovery can only withdraw contract-level excess; allocated fund balances remain protected.
+
+Set `ARTFI_SETTLEMENT_ROUTER_ADDRESS` after deployment. Fund `artfi-repo-dev` with ART before enabling payroll settlement. The payroll UI must wait for the router transaction receipt before the off-chain queue is marked settled.
 
 ### First network bootstrap
 
