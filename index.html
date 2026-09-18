@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="artfi-auth-endpoint" content="/api/browser-auth/start" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
   <title>ArtFi</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Bungee&family=Pacifico&display=swap");
@@ -229,15 +230,17 @@
       position: relative;
       width: 165px;
       height: 165px;
+      transform: translateY(8px) scale(0.95);
+      transform-origin: top left;
       pointer-events: none;
     }
 
     .ipfs-orbit {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 140px;
-      height: 140px;
+      top: 6.825px;
+      left: 6.825px;
+      width: 126.35px;
+      height: 126.35px;
       display: grid;
       place-items: center;
       border: 1px solid rgba(141, 124, 247, 0.32);
@@ -286,7 +289,7 @@
       object-fit: contain;
       border-radius: 50%;
       filter: drop-shadow(0 0 6px rgba(122, 240, 198, 0.74));
-      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-88px) rotate(calc(-1 * var(--angle)));
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-63px) rotate(calc(-1 * var(--angle)));
       animation: ipfs-icon-sparkle 2.8s ease-in-out infinite;
       animation-delay: var(--spark-delay, 0s);
     }
@@ -310,14 +313,14 @@
       object-fit: contain;
       border-radius: 50%;
       filter: drop-shadow(0 0 6px rgba(122, 240, 198, 0.78));
-      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle)));
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-63px) rotate(calc(-1 * var(--angle)));
       animation: ipfs-gap-icon-upright 18s linear infinite, ipfs-icon-sparkle 2.8s ease-in-out infinite;
       animation-delay: 0s, var(--spark-delay, 0s);
     }
 
     @keyframes ipfs-gap-icon-upright {
-      from { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle))) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-82px) rotate(calc(-1 * var(--angle))) rotate(-360deg); }
+      from { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-63px) rotate(calc(-1 * var(--angle))) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-63px) rotate(calc(-1 * var(--angle))) rotate(-360deg); }
     }
 
     .ipfs-links {
@@ -440,6 +443,11 @@
     .ipfs-provider-row button[data-selected="true"] { border-color: var(--accent); color: var(--accent); }
     .ipfs-cid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
     .ipfs-cid code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); }
+    .fund-metadata-builder { display: grid; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(122, 240, 198, 0.14); }
+    .fund-metadata-fields { display: grid; gap: 8px; }
+    .fund-metadata-row { display: grid; grid-template-columns: minmax(110px, 0.75fr) minmax(0, 1.25fr) auto; gap: 8px; align-items: center; }
+    .fund-metadata-row input { min-width: 0; }
+    .fund-metadata-preview { margin: 0; max-height: 180px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 0.72rem/1.4 ui-monospace, monospace; color: var(--muted); background: rgba(3, 7, 18, 0.65); border: 1px solid rgba(122, 240, 198, 0.12); border-radius: 8px; padding: 10px; }
 
     .site-brand {
       grid-column: 2;
@@ -1445,6 +1453,64 @@
       color: var(--muted);
     }
 
+    .public-treasury {
+      width: min(1120px, 100%);
+      margin-top: 24px;
+      padding: 20px;
+      border: 1px solid rgba(122, 240, 198, 0.2);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(10, 22, 36, 0.92), rgba(17, 24, 43, 0.88));
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28), 0 0 34px rgba(122, 240, 198, 0.08);
+    }
+
+    .public-treasury::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(112deg, transparent 15%, rgba(255, 215, 116, 0.12) 47%, transparent 68%);
+      transform: translateX(-110%);
+      animation: treasury-glint 8s ease-in-out infinite;
+    }
+
+    @keyframes treasury-glint {
+      0%, 55% { transform: translateX(-110%); }
+      78%, 100% { transform: translateX(110%); }
+    }
+
+    .public-treasury-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .public-treasury-head h2 { margin: 0 0 6px; font-size: 1.7rem; color: #ffe39a; text-shadow: 0 0 18px rgba(255, 205, 92, 0.28); }
+    .treasury-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; color: #8ff5d3; font: 700 0.72rem ui-monospace, monospace; letter-spacing: 0.14em; text-transform: uppercase; }
+    .treasury-kicker img { width: 18px; height: 18px; object-fit: contain; filter: drop-shadow(0 0 7px rgba(122, 240, 198, 0.72)); }
+    .treasury-light { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #ffd66d; box-shadow: 0 0 12px #ffd66d; animation: treasury-pulse 2.2s ease-in-out infinite; }
+    @keyframes treasury-pulse { 50% { opacity: 0.42; transform: scale(0.72); } }
+    .treasury-overview, .treasury-fund-grid { display: grid; gap: 10px; }
+    .treasury-overview { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 14px; }
+    .treasury-stat, .treasury-fund { padding: 14px; border: 1px solid rgba(122, 240, 198, 0.16); border-radius: 14px; background: linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.018)); }
+    .treasury-stat { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 18px rgba(122, 240, 198, 0.04); }
+    .treasury-stat strong, .treasury-fund strong { display: block; margin-bottom: 5px; }
+    .treasury-stat strong { color: #ffd66d; font-size: 1.1rem; text-shadow: 0 0 14px rgba(255, 214, 109, 0.38); }
+    .treasury-stat small, .treasury-fund small { color: var(--muted); overflow-wrap: anywhere; }
+    .treasury-fund-grid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+    .treasury-fund[data-funded="false"] { border-color: rgba(255, 107, 107, 0.2); }
+    .treasury-fund[data-funded="true"] { border-color: rgba(255, 214, 109, 0.52); box-shadow: 0 0 22px rgba(255, 214, 109, 0.1), inset 0 1px 0 rgba(255, 231, 161, 0.16); }
+    .treasury-status { display: inline-block; margin-top: 10px; color: var(--accent); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .token-badge { display: inline-flex; align-items: center; gap: 5px; vertical-align: middle; color: #ffe39a; white-space: nowrap; }
+    .token-badge img { width: 18px; height: 18px; object-fit: contain; border-radius: 50%; filter: drop-shadow(0 0 6px rgba(255, 214, 109, 0.45)); }
+    .token-registry { display: grid; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(122, 240, 198, 0.14); }
+    .token-registry-row { display: grid; grid-template-columns: 0.7fr 1.4fr 0.6fr auto; gap: 8px; align-items: center; }
+    .token-registry-row input { min-width: 0; }
+    .token-image-preview { width: 30px; height: 30px; object-fit: contain; border-radius: 50%; background: rgba(255,255,255,0.08); }
+
     .empty-state {
       padding: 14px;
       border-radius: 16px;
@@ -1565,6 +1631,7 @@
       .site-header {
         grid-template-columns: minmax(136px, 1fr) minmax(136px, 1fr);
         grid-template-rows: 153px auto;
+      .treasury-overview { grid-template-columns: 1fr; }
         padding-inline: 6px;
         column-gap: 6px;
       }
@@ -1674,7 +1741,7 @@
             <span><strong>2.</strong> Register the node with your connected wallet, then wait for admin approval.</span>
             <span><strong>3.</strong> Approved checkers spot-check your node and record successful checks for rewards.</span>
           </div>
-          <input id="network-registry-address" class="storage-email" value="0xF23718174B365be3AA85F2202655c5678a77BD66" placeholder="ArtFiNetworkRegistry address" />
+          <input id="network-registry-address" class="storage-email" value="0x4F1E3f275a24Ef108fe3C47AA9AaE11b1d869484" placeholder="ArtFiNetworkRegistry address" />
           <input id="node-did-hash" class="storage-email" placeholder="Node DID hash (bytes32)" />
           <input id="node-peer-id-hash" class="storage-email" placeholder="Peer ID hash (bytes32)" />
           <input id="node-software-version" class="storage-email" value="kubo/ipfs-desktop" placeholder="Software version" />
@@ -1953,6 +2020,7 @@
             <select id="request-asset">
               <option value="ART" selected>ART</option>
               <option value="USDC">USDC</option>
+              <option value="BNUT">BNUT</option>
             </select>
           </div>
           <div class="field">
@@ -1987,6 +2055,7 @@
             <select id="offer-asset">
               <option value="ART" selected>ART</option>
               <option value="USDC">USDC</option>
+              <option value="BNUT">BNUT</option>
             </select>
           </div>
           <div class="field">
@@ -2028,6 +2097,7 @@
               <option value="all">All</option>
               <option value="ART">ART</option>
               <option value="USDC">USDC</option>
+              <option value="BNUT">BNUT</option>
             </select>
           </label>
           <button id="canopy-toggle-links" class="btn secondary" type="button" aria-pressed="true">Connections</button>
@@ -2067,6 +2137,24 @@
       </div>
     </section>
 
+    <section class="public-treasury" aria-label="Public treasury holdings">
+      <div class="public-treasury-head">
+        <div>
+          <div class="treasury-kicker"><span class="treasury-light"></span><img src="./Artizen_LOGO.png" alt="" aria-hidden="true" />ArtFi worklight</div>
+          <h2>Where the work is funded</h2>
+          <p class="muted">A live view of ART glowing behind approved repository work on Base.</p>
+        </div>
+        <button id="public-treasury-refresh" class="btn secondary" type="button"><img src="./IPFS_Logo.png" alt="" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px;" />Refresh holdings</button>
+      </div>
+      <div class="treasury-overview">
+        <div class="treasury-stat"><strong id="public-treasury-held">ART held: --</strong><small>Tokens currently held by the settlement router.</small></div>
+        <div class="treasury-stat"><strong id="public-treasury-allocated">ART allocated: --</strong><small>Tokens reserved across repository funds.</small></div>
+        <div class="treasury-stat"><strong id="public-treasury-unallocated">ART unallocated: --</strong><small>Tokens not assigned to a repository fund.</small></div>
+      </div>
+      <div id="public-treasury-funds" class="treasury-fund-grid"><div class="empty-state">Loading public treasury holdings…</div></div>
+      <p id="public-treasury-status" class="note">Reading the settlement router on Base…</p>
+    </section>
+
     <section id="admin-panel" class="admin-panel" data-visible="false" aria-label="Payroll admin panel">
       <div class="admin-head">
         <div>
@@ -2082,26 +2170,168 @@
           <div class="field-grid">
             <div class="field">
               <label for="router-address">Settlement router</label>
-              <input id="router-address" placeholder="0x..." />
+              <input id="router-address" value="0xCe53017Fe1A0edBAb6146f2556e988498F0f9905" placeholder="0x..." />
             </div>
           </div>
-          <div class="batch-summary" id="batch-summary">No creators selected.</div>
+          <div class="field-grid" style="margin-top:12px;">
+            <div class="field">
+              <label for="selected-fund-id">Selected fund id</label>
+              <select id="selected-fund-id" aria-label="Select payout fund"></select>
+            </div>
+            <div class="field">
+              <label for="payout-mode">Payout source</label>
+              <select id="payout-mode">
+                <option value="fund">Funded repo treasury</option>
+                <option value="unallocated">Approved token not in a fund</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="payout-asset-address">Payout token</label>
+              <select id="payout-token-select" aria-label="Registered payout token">
+                <option value="">Choose registered token…</option>
+              </select>
+              <input id="payout-asset-address" value="0x44c4516768e47cd97cfF2561B81a74699F23f8Ec" placeholder="0x..." />
+              <div id="payout-token-badge" class="note">ART token</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:12px 0 16px;">
+            <div class="batch-summary" id="treasury-balance" style="margin:0; padding:10px 12px; min-height:52px;">ART: --</div>
+            <div class="batch-summary" id="treasury-allocated" style="margin:0; padding:10px 12px; min-height:52px;">Allocated: --</div>
+            <div class="batch-summary" id="treasury-excess" style="margin:0; padding:10px 12px; min-height:52px;">Excess: --</div>
+          </div>
+          <div class="batch-summary" id="batch-summary">No jobs selected.</div>
           <div class="creator-batch-list" id="creator-batch-list">
-            <div class="empty-state">Loading creators…</div>
+            <div class="empty-state">Loading selectors…</div>
           </div>
           <div class="admin-actions">
-            <button id="finalize-button" class="btn" type="button" disabled>Settle selected creators</button>
+            <button id="finalize-button" class="btn" type="button" disabled>Settle selected entries</button>
             <button id="refresh-button" class="btn secondary" type="button">Refresh queue</button>
           </div>
-          <p class="note" id="tx-note">Connect a wallet to unlock the settlement controls.</p>
+        </div>
+
+        <div class="card">
+          <h3>Fund treasury</h3>
+          <p class="muted">Create a fund or deposit approved tokens into a specific fund allocation.</p>
+          <div class="field-grid">
+            <div class="field">
+              <label for="new-fund-id">Fund id</label>
+              <input id="new-fund-id" value="artfi-repo-dev" placeholder="repo-slug-or-name" />
+            </div>
+            <div class="field">
+              <label for="new-fund-uri">Fund metadata URI</label>
+              <input id="new-fund-uri" value="ipfs://bafyartfirepodevfundmetadata000000000000000001" placeholder="ipfs://..." />
+            </div>
+          </div>
+          <div class="admin-actions">
+            <button id="create-fund-button" class="btn secondary" type="button" disabled>Create new fund</button>
+          </div>
+          <div class="fund-metadata-builder">
+            <strong>Fund metadata</strong>
+            <p class="muted" style="margin:0;font-size:.8rem;">Build the fund record, upload it to IPFS, and place the returned URI into the fund field above.</p>
+            <div class="field-grid">
+              <div class="field">
+                <label for="fund-metadata-title">Title</label>
+                <input id="fund-metadata-title" value="ArtFi repo development fund" placeholder="Fund title" />
+              </div>
+              <div class="field">
+                <label for="fund-metadata-repository">Repository</label>
+                <input id="fund-metadata-repository" value="TheJollyLaMa/ArtFi" placeholder="owner/repository" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="fund-metadata-field-select">Add metadata field</label>
+              <select id="fund-metadata-field-select">
+                <option value="">Choose a field…</option>
+                <option value="repositoryUrl">Repository URL</option>
+                <option value="purpose">Purpose</option>
+                <option value="asset">Asset</option>
+                <option value="network">Network</option>
+                <option value="createdAt">Created at</option>
+                <option value="contact">Contact</option>
+                <option value="custom">Custom field</option>
+              </select>
+            </div>
+            <div id="fund-metadata-fields" class="fund-metadata-fields"></div>
+            <pre id="fund-metadata-preview" class="fund-metadata-preview">{}</pre>
+            <div class="admin-actions">
+              <button id="fund-metadata-upload-button" class="btn secondary" type="button" disabled>Upload fund JSON to IPFS</button>
+            </div>
+            <p id="fund-metadata-status" class="note">Connect the owner wallet and choose an IPFS provider to upload fund metadata.</p>
+          </div>
+          <div class="field-grid" style="margin-top:16px;">
+            <div class="field">
+              <label for="deposit-fund-id">Deposit into fund</label>
+              <select id="deposit-fund-id" aria-label="Select deposit fund"></select>
+            </div>
+            <div class="field">
+              <label for="deposit-asset">Token contract</label>
+              <input id="deposit-asset" value="0x44c4516768e47cd97cfF2561B81a74699F23f8Ec" placeholder="0x..." />
+            </div>
+            <div class="field">
+              <label for="deposit-amount">Amount</label>
+              <input id="deposit-amount" value="5" inputmode="decimal" placeholder="5" />
+            </div>
+          </div>
+          <div class="admin-actions">
+            <button id="deposit-fund-button" class="btn secondary" type="button" disabled>Deposit to fund</button>
+          </div>
+          <div class="token-registry">
+            <strong>Token registry</strong>
+            <p class="muted" style="margin:0;font-size:.8rem;">Add payout tokens and their icons once; payroll and treasury labels will use them everywhere.</p>
+            <div id="token-registry-list"></div>
+            <div class="token-registry-row">
+              <input id="token-symbol-input" placeholder="BNUT" aria-label="Token symbol" />
+              <input id="token-address-input" placeholder="0x token contract" aria-label="Token contract" />
+              <input id="token-decimals-input" value="18" inputmode="numeric" placeholder="18" aria-label="Token decimals" />
+              <label class="btn secondary" for="token-image-input">Choose icon<input id="token-image-input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden /></label>
+            </div>
+            <div class="admin-actions">
+              <button id="add-token-button" class="btn secondary" type="button" disabled>Add token</button>
+            </div>
+            <p id="token-registry-status" class="note">ART and USDC are registered by default. Add BNUT when its contract address is ready.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Recover treasury funds</h3>
+          <p class="muted">Recover an allocation fund by fund, or sweep only unallocated tokens sitting directly on the router.</p>
+          <div class="field-grid">
+            <div class="field">
+              <label for="sweep-fund-id">Fund to sweep</label>
+              <select id="sweep-fund-id" aria-label="Select fund to sweep"></select>
+            </div>
+            <div class="field">
+              <label for="sweep-asset">Token contract</label>
+              <input id="sweep-asset" value="0x44c4516768e47cd97cfF2561B81a74699F23f8Ec" placeholder="0x..." />
+            </div>
+            <div class="field">
+              <label for="sweep-amount">Amount from fund</label>
+              <input id="sweep-amount" inputmode="decimal" placeholder="Amount" />
+            </div>
+          </div>
+          <div class="admin-actions">
+            <button id="sweep-fund-button" class="btn secondary" type="button" disabled>Sweep selected fund</button>
+          </div>
+          <label class="queue-select-all" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+            <input id="sweep-unallocated-checkbox" type="checkbox" />
+            <span>Confirm sweep of unallocated router balance</span>
+          </label>
+          <div class="admin-actions">
+            <button id="sweep-excess-button" class="btn secondary" type="button" disabled>Sweep unallocated balance</button>
+          </div>
         </div>
 
         <div class="card">
           <h3>Pending payroll queue</h3>
-          <p class="muted">Click an entry to prefill the payout form.</p>
+          <p class="muted">Choose each job individually, several jobs together, or select all pending entries.</p>
+          <label class="queue-select-all" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <input id="select-all-pending" type="checkbox" />
+            <span>Select all pending</span>
+          </label>
           <div id="queue-list" class="queue-list"><div class="empty-state">Loading payroll queue…</div></div>
         </div>
       </div>
+      <p class="note" id="tx-note">Connect a wallet to unlock the settlement controls.</p>
     </section>
   </main>
 
@@ -2116,7 +2346,7 @@
     }
   </script>
   <script type="module">
-    import { BrowserProvider, Contract, keccak256, parseUnits, solidityPackedKeccak256, toUtf8Bytes } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
+    import { BrowserProvider, Contract, JsonRpcProvider, formatUnits, keccak256, parseUnits, solidityPackedKeccak256, toUtf8Bytes } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
     import {
       consumeEmailAuthorizationFromLocation,
       createWalletAgentBinding,
@@ -2127,7 +2357,128 @@
     } from "./scripts/ucanStorage.mjs";
     import { createDirectPinataUploader, createIpfsDesktopUploader, createPinataUploader } from "./scripts/ucanStorage.mjs";
 
-    const routerAbi = ["function executeDisbursement(address _creator, uint256 _grossMatchAmount)"];
+    const routerAbi = [
+      "function createFund(bytes32 fundId, string metadataUri)",
+      "function setFundActive(bytes32 fundId, bool active)",
+      "function fundToken(bytes32 fundId, address asset, uint256 amount)",
+      "function payout(bytes32 fundId, address asset, address recipient, uint256 amount, bytes32 workReference, bytes32 repositoryIdHash, bytes32 contributorIdHash, string metadataUri, bytes32 metadataHash)",
+      "function payoutBatch(bytes32 fundId, address asset, address recipient, uint256[] amounts, bytes32[] workReferences, bytes32[] repositoryIdHashes, bytes32[] contributorIdHashes, string[] metadataUris, bytes32[] metadataHashes)",
+      "function payoutUnallocated(address asset, address recipient, uint256 amount, bytes32 workReference, bytes32 repositoryIdHash, bytes32 contributorIdHash, string metadataUri, bytes32 metadataHash)",
+      "function totalFundBalances(address asset) view returns (uint256)",
+      "function fundBalances(bytes32 fundId, address asset) view returns (uint256)",
+      "function completedWorkReferences(bytes32 fundId, bytes32 workReference) view returns (bool)",
+      "function recoverExcess(address asset, address recipient, uint256 amount)",
+      "function recoverFund(bytes32 fundId, address asset, address recipient, uint256 amount)",
+      "function funds(bytes32) view returns ((string,bool))",
+      "event FundCreated(bytes32 indexed fundId, string metadataUri)"
+    ];
+    const artTokenAddress = "0x44c4516768e47cd97cfF2561B81a74699F23f8Ec";
+    const publicRouterAddress = "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905";
+    const publicBaseRpc = "https://base-rpc.publicnode.com";
+    const settlementFundId = keccak256(toUtf8Bytes("artfi-repo-dev"));
+    const defaultFundRegistry = [
+      { id: "artfi-repo-dev", uri: "ipfs://bafyartfirepodevfundmetadata000000000000000001" },
+      { id: "bignuten-repo-dev", uri: "" },
+    ];
+    const knownFundAliases = new Map([
+      [keccak256(toUtf8Bytes("artfi-repo-dev")).toLowerCase(), "artfi-repo-dev"],
+      [keccak256(toUtf8Bytes("bignuten-repo-dev")).toLowerCase(), "bignuten-repo-dev"],
+    ]);
+    const normalizeFundRegistry = funds => {
+      const unique = new Map();
+      for (const fund of Array.isArray(funds) ? funds : []) {
+        const rawId = String(fund?.id || "").trim();
+        const id = knownFundAliases.get(rawId.toLowerCase()) || rawId;
+        if (!id) continue;
+        unique.set(id.toLowerCase(), { id, uri: String(fund.uri || "") });
+      }
+      return [...unique.values()];
+    };
+    const loadFundRegistry = () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem("artfi-fund-registry") || "null");
+        const normalized = normalizeFundRegistry([...(Array.isArray(stored) ? stored : []), ...defaultFundRegistry]);
+        return normalized.length ? normalized : defaultFundRegistry;
+      } catch (_) { return defaultFundRegistry; }
+    };
+    let fundRegistry = loadFundRegistry();
+    const saveFundRegistry = () => {
+      fundRegistry = normalizeFundRegistry(fundRegistry);
+      localStorage.setItem("artfi-fund-registry", JSON.stringify(fundRegistry));
+    };
+    saveFundRegistry();
+    const defaultTokenRegistry = [
+      { symbol: "ART", address: artTokenAddress, decimals: 18, image: "./Artizen_LOGO.png" },
+      { symbol: "USDC", address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", decimals: 6, image: "./usdc.png" },
+      { symbol: "BNUT", address: "", decimals: 18, image: "./BigNuten.png" },
+    ];
+
+    const loadTokenRegistry = () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem("artfi-token-registry") || "null");
+        return Array.isArray(stored) ? stored : defaultTokenRegistry;
+      } catch (_) { return defaultTokenRegistry; }
+    };
+
+    let tokenRegistry = loadTokenRegistry();
+    const saveTokenRegistry = () => localStorage.setItem("artfi-token-registry", JSON.stringify(tokenRegistry));
+    const escapeHtml = value => String(value || "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
+    const tokenForAddress = address => tokenRegistry.find(token => token.address && token.address.toLowerCase() === String(address || "").toLowerCase()) || { symbol: "TOKEN", image: "./Artizen_LOGO.png", decimals: 18 };
+    const tokenBadge = (symbol, image) => `<span class="token-badge"><img src="${escapeHtml(image || "./Artizen_LOGO.png")}" alt="" aria-hidden="true">${escapeHtml(symbol)}</span>`;
+    const tokenInfoForEntry = entry => tokenRegistry.find(token => token.symbol.toUpperCase() === String(entry.currency || "ART").toUpperCase()) || tokenForAddress(artTokenAddress);
+
+    const renderTokenRegistry = () => {
+      tokenRegistryList.innerHTML = tokenRegistry.map(token => `
+        <div class="token-registry-row" data-token-address="${escapeHtml(token.address)}">
+          <strong>${tokenBadge(token.symbol, token.image)}</strong>
+          <small class="muted">${escapeHtml(token.address || "Address not configured")}</small>
+          <small class="muted">${token.decimals} decimals</small>
+          <img class="token-image-preview" src="${escapeHtml(token.image)}" alt="${escapeHtml(token.symbol)} icon" />
+        </div>
+      `).join("");
+      payoutTokenSelect.innerHTML = `<option value="">Choose registered token…</option>${tokenRegistry.filter(token => token.address).map(token => `<option value="${escapeHtml(token.address)}">${escapeHtml(token.symbol)}</option>`).join("")}`;
+      const selectedToken = tokenRegistry.find(token => token.address && token.address.toLowerCase() === payoutAssetAddress.value.trim().toLowerCase());
+      payoutTokenSelect.value = selectedToken?.address || "";
+      const payoutToken = tokenForAddress(payoutAssetAddress.value.trim());
+      payoutTokenBadge.innerHTML = tokenBadge(payoutToken.symbol, payoutToken.image);
+    };
+
+    const addRegisteredToken = async () => {
+      const symbol = tokenSymbolInput.value.trim().toUpperCase();
+      const address = tokenAddressInput.value.trim();
+      const decimals = Number(tokenDecimalsInput.value.trim());
+      if (!symbol || !/^0x[a-fA-F0-9]{40}$/.test(address) || !Number.isInteger(decimals) || decimals < 0 || decimals > 36) {
+        tokenRegistryStatus.textContent = "Enter a symbol, valid token address, and decimals from 0 to 36.";
+        return;
+      }
+      let image = "./Artizen_LOGO.png";
+      const file = tokenImageInput.files?.[0];
+      if (file) image = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
+      tokenRegistry = [...tokenRegistry.filter(token => token.symbol !== symbol && token.address.toLowerCase() !== address.toLowerCase()), { symbol, address, decimals, image }];
+      saveTokenRegistry();
+      renderTokenRegistry();
+      tokenRegistryStatus.innerHTML = `${tokenBadge(symbol, image)} registered for payouts and treasury labels.`;
+      tokenSymbolInput.value = "";
+      tokenAddressInput.value = "";
+      tokenImageInput.value = "";
+    };
+
+    const renderFundRegistry = () => {
+      const options = fundRegistry.map(fund => `<option value="${escapeHtml(fund.id)}">${escapeHtml(fund.id)}</option>`).join("");
+      [selectedFundId, depositFundId, sweepFundId].forEach(select => {
+        const currentValue = select.value || "artfi-repo-dev";
+        select.innerHTML = options;
+        select.value = fundRegistry.some(fund => fund.id === currentValue) ? currentValue : fundRegistry[0]?.id || "";
+      });
+    };
+
+    const registerFundLocally = (id, uri = "") => {
+      const normalizedId = String(id || "").trim();
+      if (!normalizedId) return;
+      fundRegistry = [...fundRegistry.filter(fund => fund.id.toLowerCase() !== normalizedId.toLowerCase()), { id: normalizedId, uri }];
+      saveFundRegistry();
+      renderFundRegistry();
+    };
 
     const walletButton = document.getElementById("wallet-button");
     const accountOrbit = document.getElementById("account-orbit");
@@ -2137,10 +2488,45 @@
     const adminPanel = document.getElementById("admin-panel");
     const adminStatus = document.getElementById("admin-status");
     const queueList = document.getElementById("queue-list");
+    const selectAllPending = document.getElementById("select-all-pending");
     const routerAddress = document.getElementById("router-address");
+    const createFundButton = document.getElementById("create-fund-button");
+    const depositFundButton = document.getElementById("deposit-fund-button");
     const finalizeButton = document.getElementById("finalize-button");
+    const sweepFundButton = document.getElementById("sweep-fund-button");
+    const sweepExcessButton = document.getElementById("sweep-excess-button");
+    const sweepUnallocatedCheckbox = document.getElementById("sweep-unallocated-checkbox");
     const refreshButton = document.getElementById("refresh-button");
     const txNote = document.getElementById("tx-note");
+    const newFundId = document.getElementById("new-fund-id");
+    const newFundUri = document.getElementById("new-fund-uri");
+    const selectedFundId = document.getElementById("selected-fund-id");
+    const depositFundId = document.getElementById("deposit-fund-id");
+    const depositAsset = document.getElementById("deposit-asset");
+    const depositAmount = document.getElementById("deposit-amount");
+    const sweepFundId = document.getElementById("sweep-fund-id");
+    const sweepAsset = document.getElementById("sweep-asset");
+    const sweepAmount = document.getElementById("sweep-amount");
+    const payoutMode = document.getElementById("payout-mode");
+    const payoutTokenSelect = document.getElementById("payout-token-select");
+    const payoutAssetAddress = document.getElementById("payout-asset-address");
+    const payoutTokenBadge = document.getElementById("payout-token-badge");
+    const tokenRegistryList = document.getElementById("token-registry-list");
+    const tokenSymbolInput = document.getElementById("token-symbol-input");
+    const tokenAddressInput = document.getElementById("token-address-input");
+    const tokenDecimalsInput = document.getElementById("token-decimals-input");
+    const tokenImageInput = document.getElementById("token-image-input");
+    const addTokenButton = document.getElementById("add-token-button");
+    const tokenRegistryStatus = document.getElementById("token-registry-status");
+    const treasuryBalance = document.getElementById("treasury-balance");
+    const treasuryAllocated = document.getElementById("treasury-allocated");
+    const treasuryExcess = document.getElementById("treasury-excess");
+    const publicTreasuryRefresh = document.getElementById("public-treasury-refresh");
+    const publicTreasuryHeld = document.getElementById("public-treasury-held");
+    const publicTreasuryAllocated = document.getElementById("public-treasury-allocated");
+    const publicTreasuryUnallocated = document.getElementById("public-treasury-unallocated");
+    const publicTreasuryFunds = document.getElementById("public-treasury-funds");
+    const publicTreasuryStatus = document.getElementById("public-treasury-status");
     const creatorBatchList = document.getElementById("creator-batch-list");
     const batchSummary = document.getElementById("batch-summary");
     const browserLinkButton = document.getElementById("browser-link-button");
@@ -2173,6 +2559,13 @@
     const ipfsStatus = document.getElementById("ipfs-status");
     const pinataJwt = document.getElementById("pinata-jwt");
     const pinataWarning = document.getElementById("pinata-warning");
+    const fundMetadataTitle = document.getElementById("fund-metadata-title");
+    const fundMetadataRepository = document.getElementById("fund-metadata-repository");
+    const fundMetadataFieldSelect = document.getElementById("fund-metadata-field-select");
+    const fundMetadataFields = document.getElementById("fund-metadata-fields");
+    const fundMetadataPreview = document.getElementById("fund-metadata-preview");
+    const fundMetadataUploadButton = document.getElementById("fund-metadata-upload-button");
+    const fundMetadataStatus = document.getElementById("fund-metadata-status");
     const nodeRewardOptin = document.getElementById("node-reward-optin");
     const nodeRewardPanel = document.getElementById("node-reward-panel");
     const networkRegistryAddress = document.getElementById("network-registry-address");
@@ -2227,6 +2620,77 @@
       showLinks: true,
     };
 
+    const EXPECTED_CHAIN_ID = 8453;
+    const BASE_CHAIN_HEX = "0x2105";
+
+    const ensureBaseNetwork = async () => {
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      if (Number.parseInt(chainId, 16) === EXPECTED_CHAIN_ID) return;
+
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: BASE_CHAIN_HEX }],
+        });
+      } catch (error) {
+        if (error?.code !== 4902) throw error;
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: BASE_CHAIN_HEX,
+            chainName: "Base",
+            nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+            rpcUrls: ["https://mainnet.base.org"],
+            blockExplorerUrls: ["https://basescan.org"],
+          }],
+        });
+      }
+    };
+
+    const assertBaseNetwork = async () => {
+      if (!state.provider) throw new Error("Connect MetaMask before reading treasury data.");
+      const network = await state.provider.getNetwork();
+      const chainId = Number(network.chainId || 0);
+      if (chainId !== EXPECTED_CHAIN_ID) {
+        throw new Error(`Wrong network: MetaMask is on chain ${chainId}, but the settlement router is deployed on Base (chain ID ${EXPECTED_CHAIN_ID}). Switch MetaMask to Base and retry.`);
+      }
+    };
+
+    const assertContractAtAddress = async (address, label) => {
+      if (!/^0x[a-fA-F0-9]{40}$/.test(String(address || ""))) {
+        throw new Error(`${label} is not a valid address: ${address}`);
+      }
+      const code = await state.provider.getCode(address);
+      if (!code || code === "0x") {
+        throw new Error(`${label} has no deployed code at ${address} on the active Base network.`);
+      }
+    };
+
+    const assertRouterMethodAvailable = async (router, signature, label) => {
+      const code = await state.provider.getCode(router);
+      const selector = keccak256(toUtf8Bytes(signature)).slice(2, 10).toLowerCase();
+      if (!code.toLowerCase().includes(selector)) {
+        throw new Error(`${label} is not available on the deployed settlement router. Use funded repo payouts or deploy the router version that includes ${label}.`);
+      }
+    };
+
+    const readableContractError = (error) => {
+      const data = error?.data || error?.info?.error?.data || error?.error?.data;
+      if (typeof data === "string" && data.startsWith("0x08c379a0")) {
+        try {
+          const reason = new Contract("0x0000000000000000000000000000000000000001", ["function Error(string)"], state.provider)
+            .interface.decodeFunctionData("Error", data)[0];
+          return String(reason);
+        } catch (_) {}
+      }
+      return error?.shortMessage || error?.reason || error?.message || "Contract call reverted.";
+    };
+
+    const refreshAfterWalletTransaction = (message = "Transaction confirmed. Refreshing ArtFi…") => {
+      txNote.textContent = message;
+      window.setTimeout(() => window.location.reload(), 2000);
+    };
+
     const setIpfsSpaceDid = (did) => {
       const value = String(did || "").trim();
       ipfsSpaceDidPrefix.textContent = value ? value.slice(0, 6) : "IPFS";
@@ -2258,6 +2722,7 @@
       pinataWarning.hidden = provider !== "pinata";
       if (provider === "desktop") probeIpfsDesktop();
       else setIpfsSpaceDid("");
+      if (fundMetadataUploadButton) fundMetadataUploadButton.disabled = !(state.connected && state.account === ADMIN_WALLET);
     };
 
     const ADMIN_WALLET = "0x807061df657a7697c04045da7d16d941861caabc";
@@ -2282,7 +2747,13 @@
       const isAdmin = connected && state.account === ADMIN_WALLET;
       walletButton.dataset.state = connected ? "connected" : "disconnected";
       walletButton.setAttribute("aria-label", connected ? "Disconnect wallet" : "Connect MetaMask");
+      createFundButton.disabled = !isAdmin;
+      depositFundButton.disabled = !isAdmin;
+      addTokenButton.disabled = !isAdmin;
+      fundMetadataUploadButton.disabled = !isAdmin;
       finalizeButton.disabled = !isAdmin;
+      sweepFundButton.disabled = !isAdmin;
+      sweepExcessButton.disabled = !isAdmin || !sweepUnallocatedCheckbox.checked;
       adminPanel.dataset.visible = isAdmin ? "true" : "false";
       adminStatus.textContent = connected ? (isAdmin ? `Owner ${shortAccount(state.account).join(" • ")}` : "Wallet connected") : "Wallet disconnected";
       txNote.textContent = connected ? (isAdmin ? "Owner connected. You can now queue and finalize payroll settlements." : "Wallet connected.") : "Connect a wallet to unlock the settlement controls.";
@@ -2299,6 +2770,265 @@
         loadEmailAuthorization().then(authorization => {
           if (authorization && browserLinkStatus) browserLinkStatus.textContent = "Email authorized";
         }).catch(() => {});
+        loadQueue();
+      }
+      refreshTreasuryStatus();
+    };
+
+    const refreshTreasuryStatus = async () => {
+      const router = routerAddress.value.trim();
+      if (!router || !window.ethereum) {
+        if (treasuryBalance) treasuryBalance.textContent = "ART: --";
+        if (treasuryAllocated) treasuryAllocated.textContent = "Allocated: --";
+        if (treasuryExcess) treasuryExcess.textContent = "Excess: --";
+        if (sweepExcessButton) sweepExcessButton.disabled = true;
+        return;
+      }
+
+      try {
+        await assertBaseNetwork();
+        const provider = state.provider || new BrowserProvider(window.ethereum);
+        state.provider = provider;
+        const routerContract = new Contract(router, routerAbi, provider);
+        await assertContractAtAddress(router, "Settlement Router");
+        await assertContractAtAddress(artTokenAddress, "ART token");
+        const artToken = new Contract(artTokenAddress, [
+          "function balanceOf(address who) view returns (uint256)"
+        ], provider);
+
+        const heldArt = await artToken.balanceOf(router);
+        const allocatedArt = await routerContract.totalFundBalances(artTokenAddress);
+        const excessArt = heldArt > allocatedArt ? heldArt - allocatedArt : 0n;
+
+        const artBadge = tokenBadge("ART", tokenForAddress(artTokenAddress).image);
+        if (treasuryBalance) treasuryBalance.innerHTML = `${artBadge}: ${formatUnits(heldArt, 18)}`;
+        if (treasuryAllocated) treasuryAllocated.innerHTML = `Allocated ${artBadge}: ${formatUnits(allocatedArt, 18)}`;
+        if (treasuryExcess) treasuryExcess.innerHTML = `Excess ${artBadge}: ${formatUnits(excessArt, 18)}`;
+
+        const isAdmin = state.connected && state.account === ADMIN_WALLET;
+        if (sweepExcessButton) sweepExcessButton.disabled = !(isAdmin && sweepUnallocatedCheckbox.checked && excessArt > 0n);
+      } catch (_) {
+        const networkError = _?.message || String(_ || "");
+        txNote.textContent = networkError.includes("Wrong network") || networkError.includes("no deployed code")
+          ? networkError
+          : "The Settlement Router is unavailable on the active wallet network. Check the router address and switch MetaMask to Base.";
+        if (treasuryBalance) treasuryBalance.textContent = "ART: --";
+        if (treasuryAllocated) treasuryAllocated.textContent = "Allocated: --";
+        if (treasuryExcess) treasuryExcess.textContent = "Excess: --";
+        if (sweepExcessButton) sweepExcessButton.disabled = true;
+      }
+    };
+
+    const refreshPublicTreasury = async () => {
+      try {
+        const provider = new JsonRpcProvider(publicBaseRpc, 8453, { batchMaxCount: 1 });
+        const routerContract = new Contract(publicRouterAddress, routerAbi, provider);
+        const token = new Contract(artTokenAddress, ["function balanceOf(address) view returns (uint256)"], provider);
+        const [held, allocated] = await Promise.all([
+          token.balanceOf(publicRouterAddress),
+          routerContract.totalFundBalances(artTokenAddress),
+        ]);
+        const unallocated = held > allocated ? held - allocated : 0n;
+        const artBadge = tokenBadge("ART", tokenForAddress(artTokenAddress).image);
+        publicTreasuryHeld.innerHTML = `${artBadge} held: ${formatUnits(held, 18)}`;
+        publicTreasuryAllocated.innerHTML = `${artBadge} allocated: ${formatUnits(allocated, 18)}`;
+        publicTreasuryUnallocated.innerHTML = `${artBadge} unallocated: ${formatUnits(unallocated, 18)}`;
+
+        const discoveredFunds = new Map(fundRegistry.map(fund => [
+          keccak256(toUtf8Bytes(fund.id)).toLowerCase(),
+          { fundId: keccak256(toUtf8Bytes(fund.id)), metadataUri: fund.uri || "" },
+        ]));
+        const funds = await Promise.all([...discoveredFunds.values()].map(async discovered => {
+          const fundId = discovered.fundId;
+          const metadataUri = discovered.metadataUri;
+          const metadataPromise = metadataUri.includes("bafyartfirepodevfundmetadata000000000000000001")
+            ? Promise.resolve(null)
+            : Promise.race([
+                fetchIpfsJson(metadataUri),
+                new Promise(resolve => window.setTimeout(() => resolve(null), 2500)),
+              ]);
+          const [fundResult, balance, metadata] = await Promise.all([
+            routerContract.funds(fundId).then(fund => ({ fund, created: true })).catch(() => ({ fund: ["", false], created: false })),
+            routerContract.fundBalances(fundId, artTokenAddress),
+            metadataPromise,
+          ]);
+          const fund = fundResult.fund;
+          const knownName = knownFundAliases.get(fundId.toLowerCase()) || "";
+          return {
+            fundId,
+            label: metadata?.repository || metadata?.title || knownName || `${fundId.slice(0, 10)}…${fundId.slice(-8)}`,
+            metadataUri,
+            balance,
+            active: fund[1],
+            created: fundResult.created,
+          };
+        }));
+
+        publicTreasuryFunds.innerHTML = funds.length ? funds.map(fund => `
+          <article class="treasury-fund" data-funded="${fund.balance > 0n ? "true" : "false"}">
+            <strong>${fund.label}</strong>
+            <small>${formatUnits(fund.balance, 18)} ${tokenBadge("ART", tokenForAddress(artTokenAddress).image)} allocated</small>
+            <span class="treasury-status">${!fund.created ? "Not created on-chain" : fund.active ? (fund.balance > 0n ? "Funded" : "Awaiting allocation") : "Inactive"}</span>
+            ${fund.metadataUri ? `<small>${fund.metadataUri}</small>` : ""}
+          </article>
+        `).join("") : '<div class="empty-state">No repository funds have been created yet.</div>';
+        publicTreasuryStatus.textContent = "Updated from Base. The current deployment exposes the default repository allocation.";
+      } catch (error) {
+        publicTreasuryFunds.innerHTML = '<div class="empty-state">Treasury holdings are temporarily unavailable.</div>';
+        publicTreasuryStatus.textContent = error?.message || "Could not read public treasury holdings.";
+      }
+    };
+
+    const createFund = async () => {
+      const router = routerAddress.value.trim();
+      if (!state.connected || state.account !== ADMIN_WALLET || !router) {
+        txNote.textContent = "Connect the owner wallet before creating a treasury fund.";
+        return;
+      }
+
+      const fundIdText = newFundId.value.trim();
+      const fundUri = newFundUri.value.trim();
+      if (!fundIdText || !fundUri) {
+        txNote.textContent = "Enter both a fund id and a metadata URI before creating the fund.";
+        return;
+      }
+
+      try {
+        createFundButton.disabled = true;
+        txNote.textContent = `Creating a new settlement fund: ${fundIdText}…`;
+        const contract = new Contract(router, routerAbi, state.signer);
+        const fundHash = keccak256(toUtf8Bytes(fundIdText));
+        const tx = await contract.createFund(fundHash, fundUri);
+        await tx.wait();
+        registerFundLocally(fundIdText, fundUri);
+        refreshAfterWalletTransaction(`Fund created: ${fundIdText}. Refreshing ArtFi…`);
+      } catch (error) {
+        txNote.textContent = error?.shortMessage || error?.message || "Fund creation failed.";
+      } finally {
+        createFundButton.disabled = !(state.connected && state.account === ADMIN_WALLET);
+      }
+    };
+
+    const depositToFund = async () => {
+      const router = routerAddress.value.trim();
+      if (!state.connected || state.account !== ADMIN_WALLET || !router) {
+        txNote.textContent = "Connect the owner wallet before depositing to the treasury.";
+        return;
+      }
+
+      const fundIdText = (depositFundId.value.trim() || newFundId.value.trim() || "artfi-repo-dev");
+      const asset = depositAsset.value.trim();
+      const rawAmount = depositAmount.value.trim();
+      if (!asset || !/^0x[a-fA-F0-9]{40}$/.test(asset) || !rawAmount || Number(rawAmount) <= 0) {
+        txNote.textContent = "Enter a valid token address and a positive deposit amount.";
+        return;
+      }
+
+      try {
+        await assertBaseNetwork();
+        await assertContractAtAddress(router, "Settlement Router");
+        await assertContractAtAddress(asset, "Token contract");
+        const contract = new Contract(router, routerAbi, state.signer);
+        const token = new Contract(asset, [
+          "function allowance(address owner, address spender) view returns (uint256)",
+          "function approve(address spender, uint256 amount) returns (bool)",
+          "function balanceOf(address who) view returns (uint256)"
+        ], state.signer);
+
+        const amount = parseUnits(rawAmount, tokenForAddress(asset).decimals);
+        const signerBalance = await token.balanceOf(state.account);
+        if (BigInt(signerBalance) < amount) {
+          throw new Error(`Insufficient token balance to deposit ${rawAmount} into the fund.`);
+        }
+
+        const currentAllowance = await token.allowance(state.account, router);
+        if (BigInt(currentAllowance) < amount) {
+          const approvalTx = await token.approve(router, amount);
+          await approvalTx.wait();
+        }
+
+        depositFundButton.disabled = true;
+        txNote.textContent = `Depositing ${rawAmount} token units into ${fundIdText}…`;
+        const fundHash = keccak256(toUtf8Bytes(fundIdText));
+        const tx = await contract.fundToken(fundHash, asset, amount);
+        await tx.wait();
+        refreshAfterWalletTransaction(`Deposited ${rawAmount} into fund ${fundIdText}. Refreshing ArtFi…`);
+      } catch (error) {
+        txNote.textContent = error?.shortMessage || error?.message || "Treasury deposit failed.";
+      } finally {
+        depositFundButton.disabled = !(state.connected && state.account === ADMIN_WALLET);
+      }
+    };
+
+    const sweepFundToWallet = async () => {
+      const router = routerAddress.value.trim();
+      if (!state.connected || state.account !== ADMIN_WALLET || !router) {
+        txNote.textContent = "Connect the owner wallet before sweeping a fund allocation.";
+        return;
+      }
+
+      try {
+        await assertBaseNetwork();
+        await assertContractAtAddress(router, "Settlement Router");
+        const fundIdText = sweepFundId.value.trim();
+        const asset = sweepAsset.value.trim();
+        const rawAmount = sweepAmount.value.trim();
+        if (!fundIdText || !/^0x[a-fA-F0-9]{40}$/.test(asset) || !rawAmount || Number(rawAmount) <= 0) {
+          throw new Error("Enter a fund id, valid token address, and positive amount to sweep.");
+        }
+        await assertContractAtAddress(asset, "Sweep token");
+        const contract = new Contract(router, routerAbi, state.signer);
+        const fundId = keccak256(toUtf8Bytes(fundIdText));
+        const amount = parseUnits(rawAmount, tokenForAddress(asset).decimals);
+        const balance = await contract.fundBalances(fundId, asset);
+        if (BigInt(balance) < amount) throw new Error(`Fund ${fundIdText} has only ${formatUnits(balance, 18)} available.`);
+        sweepFundButton.disabled = true;
+        txNote.textContent = `Sweeping ${rawAmount} from fund ${fundIdText} back to the wallet…`;
+        const tx = await contract.recoverFund(fundId, asset, state.account, amount);
+        await tx.wait();
+        refreshAfterWalletTransaction(`Recovered ${rawAmount} from fund ${fundIdText}. Refreshing ArtFi…`);
+      } catch (error) {
+        txNote.textContent = error?.shortMessage || error?.message || "Fund sweep failed.";
+      } finally {
+        if (state.connected && state.account === ADMIN_WALLET) {
+          sweepFundButton.disabled = false;
+        }
+      }
+    };
+
+    const sweepUnallocatedToWallet = async () => {
+      const router = routerAddress.value.trim();
+      if (!state.connected || state.account !== ADMIN_WALLET || !router) {
+        txNote.textContent = "Connect the owner wallet before sweeping unallocated funds.";
+        return;
+      }
+      if (!sweepUnallocatedCheckbox.checked) {
+        txNote.textContent = "Check the confirmation box before sweeping the unallocated router balance.";
+        return;
+      }
+
+      try {
+        await assertBaseNetwork();
+        await assertContractAtAddress(router, "Settlement Router");
+        const asset = sweepAsset.value.trim();
+        await assertContractAtAddress(asset, "Sweep token");
+        const contract = new Contract(router, routerAbi, state.signer);
+        const token = new Contract(asset, [
+          "function balanceOf(address who) view returns (uint256)"
+        ], state.provider || state.signer);
+        const held = await token.balanceOf(router);
+        const allocated = await contract.totalFundBalances(asset);
+        const excess = held > allocated ? held - allocated : 0n;
+        if (excess <= 0n) throw new Error("No unallocated balance is available for this token.");
+        sweepExcessButton.disabled = true;
+        txNote.textContent = `Sweeping ${formatUnits(excess, 18)} unallocated tokens back to the wallet…`;
+        const tx = await contract.recoverExcess(asset, state.account, excess);
+        await tx.wait();
+        refreshAfterWalletTransaction(`Recovered ${formatUnits(excess, 18)} unallocated tokens. Refreshing ArtFi…`);
+      } catch (error) {
+        txNote.textContent = error?.shortMessage || error?.message || "Unallocated sweep failed.";
+      } finally {
+        sweepExcessButton.disabled = !(state.connected && state.account === ADMIN_WALLET && sweepUnallocatedCheckbox.checked);
       }
     };
 
@@ -2381,6 +3111,109 @@
       offerMetadataStatus.textContent = `Downloaded ${filename}. Upload it with IPFS storage, then publish it as an offer.`;
     };
 
+    const fundMetadataFieldDefinitions = {
+      repositoryUrl: { label: "Repository URL", value: "https://github.com/TheJollyLaMa/ArtFi" },
+      purpose: { label: "Purpose", value: "ART contributor payroll and repository development" },
+      asset: { label: "Asset", value: "ART" },
+      network: { label: "Network", value: "Base" },
+      createdAt: { label: "Created at", value: new Date().toISOString().slice(0, 10) },
+      contact: { label: "Contact", value: "" },
+    };
+
+    const fundMetadataValue = () => {
+      const metadata = {
+        schema: "artfi.treasury-fund.v1",
+        fundId: newFundId.value.trim(),
+        title: fundMetadataTitle.value.trim(),
+        repository: fundMetadataRepository.value.trim(),
+      };
+      fundMetadataFields.querySelectorAll(".fund-metadata-row").forEach(row => {
+        const key = row.dataset.key || row.querySelector("input")?.value.trim();
+        const value = row.querySelectorAll("input")[1]?.value.trim() || "";
+        if (key) metadata[key] = value;
+      });
+      return metadata;
+    };
+
+    const updateFundMetadataPreview = () => {
+      fundMetadataPreview.textContent = JSON.stringify(fundMetadataValue(), null, 2);
+    };
+
+    const addFundMetadataField = (key, label, value = "") => {
+      if (key !== "custom" && fundMetadataFields.querySelector(`[data-key="${CSS.escape(key)}"]`)) return;
+      const row = document.createElement("div");
+      row.className = "fund-metadata-row";
+      row.dataset.key = key === "custom" ? "" : key;
+      row.innerHTML = `
+        <input aria-label="Metadata field name" value="${key === "custom" ? "" : label}" placeholder="Field name" ${key === "custom" ? "" : "readonly"} />
+        <input aria-label="Metadata field value" value="${value}" placeholder="Value" />
+        <button class="btn secondary" type="button" aria-label="Remove metadata field">Remove</button>
+      `;
+      row.querySelector("button").addEventListener("click", () => { row.remove(); updateFundMetadataPreview(); });
+      row.querySelectorAll("input").forEach(input => input.addEventListener("input", updateFundMetadataPreview));
+      fundMetadataFields.appendChild(row);
+      updateFundMetadataPreview();
+    };
+
+    const uploadJsonBytes = async ({ bytes, name }) => {
+      const uploader = state.ipfsProvider === "desktop"
+        ? createIpfsDesktopUploader()
+        : pinataJwt.value.trim()
+          ? createDirectPinataUploader({ jwt: pinataJwt.value.trim() })
+          : createPinataUploader({
+              signingEndpoint: document.querySelector('meta[name="artfi-pinata-endpoint"]')?.content,
+              serviceDid: document.querySelector('meta[name="artfi-ucan-service-did"]')?.content,
+            });
+      return uploader({ bytes, name });
+    };
+
+    const uploadFundMetadata = async () => {
+      if (!state.connected || state.account !== ADMIN_WALLET) {
+        fundMetadataStatus.textContent = "Connect the owner wallet before uploading fund metadata.";
+        return;
+      }
+      try {
+        fundMetadataUploadButton.disabled = true;
+        fundMetadataStatus.textContent = "Uploading fund metadata to IPFS…";
+        const metadata = fundMetadataValue();
+        const bytes = new TextEncoder().encode(`${JSON.stringify(metadata, null, 2)}\n`);
+        const uri = await uploadJsonBytes({ bytes, name: `${slugify(metadata.fundId || "artfi-fund")}-fund.json` });
+        newFundUri.value = uri;
+        fundMetadataStatus.textContent = `Uploaded ${uri}. The URI is ready for fund creation.`;
+      } catch (error) {
+        fundMetadataStatus.textContent = error?.message || "Fund metadata upload failed.";
+      } finally {
+        fundMetadataUploadButton.disabled = !(state.connected && state.account === ADMIN_WALLET);
+      }
+    };
+
+    const queueEntryKey = (entry) => {
+      const role = String(entry.role || "contributor");
+      const contributor = String(entry.contributorGithub || "unknown");
+      const issue = String(entry.issueRef || "unknown");
+      const amount = String(entry.amount || "0");
+      return `${issue}|${contributor}|${role}|${amount}`;
+    };
+
+    const settledQueueStorageKey = (router) => `artfi-settled-queue:${String(router || "").toLowerCase()}`;
+
+    const locallySettledQueueEntries = (router) => {
+      try {
+        const stored = JSON.parse(localStorage.getItem(settledQueueStorageKey(router)) || "[]");
+        return new Set(Array.isArray(stored) ? stored : []);
+      } catch (_) {
+        return new Set();
+      }
+    };
+
+    const markQueueEntrySettled = (router, entry) => {
+      try {
+        const settled = locallySettledQueueEntries(router);
+        settled.add(queueEntryKey(entry));
+        localStorage.setItem(settledQueueStorageKey(router), JSON.stringify([...settled]));
+      } catch (_) {}
+    };
+
     const setQueueOptions = () => {
       const grouped = new Map();
       for (const entry of state.queue) {
@@ -2393,13 +3226,13 @@
       creatorBatchList.innerHTML = "";
       if (!grouped.size) {
         creatorBatchList.innerHTML = '<div class="empty-state">No pending creators found.</div>';
-        batchSummary.textContent = "No creators selected.";
+        batchSummary.textContent = "No jobs selected.";
         return;
       }
       for (const group of grouped.values()) {
         const label = document.createElement("label");
         label.className = "creator-batch-item";
-        label.innerHTML = `<input type="checkbox" data-creator="${group.github}"><span><strong>@${group.github}</strong><small>${group.entries} entr${group.entries === 1 ? "y" : "ies"} • ${group.amount.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")} ART • ${group.wallet.slice(0, 10)}…</small></span>`;
+        label.innerHTML = `<input type="checkbox" data-creator="${group.github}"><span><strong>@${group.github}</strong><small>${group.entries} entr${group.entries === 1 ? "y" : "ies"} • ${tokenBadge("ART", tokenForAddress(artTokenAddress).image)} ${group.amount.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")} • ${group.wallet.slice(0, 10)}…</small></span>`;
         creatorBatchList.appendChild(label);
       }
       creatorBatchList.querySelectorAll("input").forEach(input => input.addEventListener("change", updateBatchSummary));
@@ -2408,41 +3241,86 @@
 
     const selectedCreators = () => [...creatorBatchList.querySelectorAll("input:checked")].map(input => input.dataset.creator);
 
+    const selectedEntries = () => {
+      const queueSelectionKeys = new Set([...queueList.querySelectorAll("input[data-entry-key]:checked")].map(input => input.dataset.entryKey));
+      const creatorSelections = new Set(selectedCreators());
+      const selected = state.queue.filter(entry => {
+        const key = queueEntryKey(entry);
+        return queueSelectionKeys.has(key) || creatorSelections.has(String(entry.contributorGithub || ""));
+      });
+      return selected;
+    };
+
     const updateBatchSummary = () => {
-      const creators = selectedCreators();
-      const entries = state.queue.filter(entry => creators.includes(String(entry.contributorGithub || "")));
+      const entries = selectedEntries();
+      const creators = [...new Set(entries.map(entry => String(entry.contributorGithub || "unknown")))];
       const total = entries.reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
-      batchSummary.textContent = creators.length
-        ? `${creators.length} creator${creators.length === 1 ? "" : "s"} selected • ${entries.length} entr${entries.length === 1 ? "y" : "ies"} • ${total.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")} ART`
-        : "No creators selected.";
-      finalizeButton.disabled = !(state.connected && state.account === ADMIN_WALLET && creators.length && routerAddress.value.trim());
+      batchSummary.innerHTML = entries.length
+        ? `${entries.length} job${entries.length === 1 ? "" : "s"} selected • ${creators.length} creator${creators.length === 1 ? "" : "s"} • ${tokenBadge("ART", tokenForAddress(artTokenAddress).image)} ${total.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")}`
+        : "No jobs selected.";
+      finalizeButton.disabled = !(state.connected && state.account === ADMIN_WALLET && entries.length && routerAddress.value.trim());
+      if (selectAllPending) {
+        const allQueueSelected = state.queue.length > 0 && state.queue.every(entry => {
+          const item = queueList.querySelector(`input[data-entry-key="${CSS.escape(queueEntryKey(entry))}"]`);
+          return !item || item.checked;
+        });
+        selectAllPending.checked = allQueueSelected;
+      }
     };
 
     const renderQueue = () => {
       queueList.innerHTML = "";
       if (!state.queue.length) {
         queueList.innerHTML = '<div class="empty-state">No pending payouts found in payroll-queue.json.</div>';
+        if (selectAllPending) selectAllPending.checked = false;
         return;
       }
       for (const entry of state.queue) {
-        const item = document.createElement("button");
-        item.type = "button";
+        const item = document.createElement("label");
         item.className = "queue-item";
-        item.innerHTML = `<strong>@${entry.contributorGithub} — ${entry.amount} ${entry.currency || "ART"}</strong><small>${entry.issueRef} • ${entry.contributor?.slice(0, 10) || "wallet unknown"}…</small>`;
-        item.addEventListener("click", () => {
-          const checkbox = creatorBatchList.querySelector(`input[data-creator="${CSS.escape(entry.contributorGithub || "")}"]`);
-          if (checkbox) checkbox.checked = true;
-          updateBatchSummary();
-        });
+        const key = queueEntryKey(entry);
+        item.innerHTML = `
+          <input type="checkbox" data-entry-key="${key}" />
+          <span>
+            <strong>@${entry.contributorGithub} — ${entry.amount} ${tokenBadge(tokenInfoForEntry(entry).symbol, tokenInfoForEntry(entry).image)}</strong>
+            <small>${entry.issueRef} • ${entry.role || "contributor"} • ${entry.contributor?.slice(0, 10) || "wallet unknown"}…</small>
+          </span>
+        `;
+        item.addEventListener("change", updateBatchSummary);
         queueList.appendChild(item);
       }
+      updateBatchSummary();
     };
 
     const loadQueue = async () => {
       try {
         const response = await fetch("./payroll-queue.json", { cache: "no-store" });
         const queue = await response.json();
-        state.queue = Array.isArray(queue.pending) ? queue.pending : [];
+        const settled = locallySettledQueueEntries(routerAddress.value.trim());
+        let pending = Array.isArray(queue.pending)
+          ? queue.pending.filter(entry => !settled.has(queueEntryKey(entry)))
+          : [];
+
+        if (pending.length && state.provider && routerAddress.value.trim()) {
+          try {
+            await assertBaseNetwork();
+            const contract = new Contract(routerAddress.value.trim(), routerAbi, state.provider);
+            const fundId = keccak256(toUtf8Bytes(selectedFundId?.value.trim() || "artfi-repo-dev"));
+            const settledOnChain = await Promise.all(pending.map(async entry => {
+              const workReference = keccak256(toUtf8Bytes(`${entry.issueRef || ""}:${entry.contributorGithub || ""}:${entry.role || "contributor"}`));
+              const [fundSettled, unallocatedSettled] = await Promise.all([
+                contract.completedWorkReferences(fundId, workReference),
+                contract.completedWorkReferences("0x" + "00".repeat(32), workReference),
+              ]);
+              return [queueEntryKey(entry), fundSettled || unallocatedSettled];
+            }));
+            settledOnChain.forEach(([key, isSettled]) => {
+              if (isSettled) settled.add(key);
+            });
+            pending = pending.filter(entry => !settled.has(queueEntryKey(entry)));
+          } catch (_) {}
+        }
+        state.queue = pending;
       } catch (_) {
         state.queue = [];
       }
@@ -2821,15 +3699,7 @@
         ipfsUploadButton.disabled = true;
         ipfsStatus.textContent = "Uploading…";
         const bytes = new Uint8Array(await file.arrayBuffer());
-        const uploader = state.ipfsProvider === "desktop"
-          ? createIpfsDesktopUploader()
-          : pinataJwt.value.trim()
-            ? createDirectPinataUploader({ jwt: pinataJwt.value.trim() })
-            : createPinataUploader({
-                signingEndpoint: document.querySelector('meta[name="artfi-pinata-endpoint"]')?.content,
-                serviceDid: document.querySelector('meta[name="artfi-ucan-service-did"]')?.content,
-              });
-        const uri = await uploader({ bytes, name: file.name });
+        const uri = await uploadJsonBytes({ bytes, name: file.name });
         state.lastCid = uri;
         ipfsCid.hidden = false;
         ipfsCidValue.textContent = uri;
@@ -2848,6 +3718,20 @@
       await navigator.clipboard.writeText(state.lastCid);
       ipfsStatus.textContent = "CID copied.";
     });
+
+    fundMetadataFieldSelect.addEventListener("change", () => {
+      const key = fundMetadataFieldSelect.value;
+      if (!key) return;
+      if (key === "custom") addFundMetadataField("custom", "", "");
+      else {
+        const definition = fundMetadataFieldDefinitions[key];
+        addFundMetadataField(key, definition.label, definition.value);
+      }
+      fundMetadataFieldSelect.value = "";
+    });
+    [fundMetadataTitle, fundMetadataRepository, newFundId].forEach(input => input.addEventListener("input", updateFundMetadataPreview));
+    fundMetadataUploadButton.addEventListener("click", uploadFundMetadata);
+    updateFundMetadataPreview();
 
     nodeRewardOptin.addEventListener("change", () => {
       nodeRewardPanel.hidden = !nodeRewardOptin.checked;
@@ -2895,7 +3779,8 @@
         );
         nodeRewardStatus.textContent = `Node registration sent: ${transaction.hash}`;
         await transaction.wait();
-        nodeRewardStatus.textContent = "Node registered. An administrator must approve it before heartbeats count.";
+        nodeRewardStatus.textContent = "Node registered. Refreshing ArtFi…";
+        window.setTimeout(() => window.location.reload(), 2000);
         heartbeatButton.disabled = false;
       } catch (error) {
         nodeRewardStatus.textContent = error?.shortMessage || error?.message || "Node registration failed.";
@@ -2932,10 +3817,12 @@
 
       try {
         txNote.textContent = "Requesting wallet connection…";
-        const provider = new BrowserProvider(window.ethereum);
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
         const account = (accounts?.[0] || "").toLowerCase();
         if (!account) throw new Error("No wallet account was returned.");
+        txNote.textContent = "Switching MetaMask to Base…";
+        await ensureBaseNetwork();
+        const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner(account);
 
         state.provider = provider;
@@ -2972,6 +3859,17 @@
         setWalletUI(true);
       } catch (_) {}
     };
+
+    window.ethereum?.on?.("chainChanged", () => {
+      if (!state.connected) return;
+      state.connected = false;
+      state.provider = new BrowserProvider(window.ethereum);
+      state.signer = null;
+      state.account = "";
+      setAccountOrbit("");
+      txNote.textContent = "Network changed. Click Connect MetaMask to switch back to Base.";
+      setWalletUI(false);
+    });
 
     const linkBrowser = async () => {
       if (!state.connected || !state.signer || !state.provider) return;
@@ -3013,29 +3911,151 @@
       if (!state.connected || !state.signer) return;
 
       const router = routerAddress.value.trim();
-      const creators = selectedCreators();
+      const entries = selectedEntries();
 
-      if (!router || !creators.length) {
-        txNote.textContent = "Enter the router and select at least one creator.";
+      if (!router || !entries.length) {
+        txNote.textContent = "Enter the router and select at least one pending job.";
         return;
       }
 
       try {
+        await assertBaseNetwork();
+        await assertContractAtAddress(router, "Settlement Router");
         finalizeButton.disabled = true;
-        txNote.textContent = `Submitting ${creators.length} creator payout${creators.length === 1 ? "" : "s"}…`;
+        txNote.textContent = `Funding and submitting ${entries.length} payout${entries.length === 1 ? "" : "s"}…`;
 
         const contract = new Contract(router, routerAbi, state.signer);
-        const transactions = [];
-        for (const creator of creators) {
-          const amount = state.queue
-            .filter(entry => String(entry.contributorGithub || "") === creator)
-            .reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
-          const tx = await contract.executeDisbursement(creator, parseUnits(amount.toFixed(8), 18));
-          transactions.push(tx);
-          txNote.textContent = `Submitted @${creator} (${transactions.length}/${creators.length})…`;
-          await tx.wait();
+        const mode = payoutMode?.value || "fund";
+        const selectedFund = keccak256(toUtf8Bytes((selectedFundId?.value.trim() || "artfi-repo-dev")));
+        const settledAsset = payoutAssetAddress.value.trim();
+        if (mode === "unallocated") {
+          await assertRouterMethodAvailable(
+            router,
+            "payoutUnallocated(address,address,uint256,bytes32,bytes32,bytes32,string,bytes32)",
+            "Unallocated payouts"
+          );
         }
-        txNote.textContent = `Batch complete: ${transactions.length} creator payout${transactions.length === 1 ? "" : "s"} finalized.`;
+        if (!settledAsset || !/^0x[a-fA-F0-9]{40}$/.test(settledAsset)) {
+          throw new Error("Provide a valid token address for the selected payout source.");
+        }
+
+        await assertContractAtAddress(settledAsset, "Payout token");
+        const payoutToken = tokenForAddress(settledAsset);
+
+        const token = new Contract(settledAsset, [
+          "function allowance(address owner, address spender) view returns (uint256)",
+          "function approve(address spender, uint256 amount) returns (bool)",
+          "function balanceOf(address who) view returns (uint256)"
+        ], state.signer);
+
+        const totalRequired = entries.reduce((sum, entry) => sum + parseUnits(String(Number(entry.amount || 0).toFixed(payoutToken.decimals)), payoutToken.decimals), 0n);
+        const selectedFundBalance = mode === "fund"
+          ? await contract.fundBalances(selectedFund, settledAsset)
+          : 0n;
+        const routerTokenBalance = await token.balanceOf(router);
+        const allocatedTokenBalance = await contract.totalFundBalances(settledAsset);
+        const unallocatedBalance = routerTokenBalance > allocatedTokenBalance
+          ? routerTokenBalance - allocatedTokenBalance
+          : 0n;
+        const availableBalance = mode === "fund" ? selectedFundBalance : unallocatedBalance;
+        const fundingAmount = mode === "fund" && availableBalance < totalRequired
+          ? totalRequired - availableBalance
+          : 0n;
+
+        if (mode === "fund" && fundingAmount > 0n) {
+          const signerBalance = await token.balanceOf(state.account);
+          if (BigInt(signerBalance) < fundingAmount) {
+            throw new Error(`Insufficient ${payoutToken.symbol} balance for the selected fund (${formatUnits(totalRequired, payoutToken.decimals)} required, ${formatUnits(selectedFundBalance, payoutToken.decimals)} already allocated).`);
+          }
+
+          const currentAllowance = await token.allowance(state.account, router);
+          if (BigInt(currentAllowance) < fundingAmount) {
+            const approvalTx = await token.approve(router, fundingAmount);
+            await approvalTx.wait();
+          }
+
+          const fundTx = await contract.fundToken(selectedFund, settledAsset, fundingAmount);
+          await fundTx.wait();
+        } else if (mode === "unallocated" && unallocatedBalance < totalRequired) {
+          throw new Error(`Insufficient unallocated ${payoutToken.symbol} balance (${formatUnits(totalRequired, payoutToken.decimals)} required, ${formatUnits(unallocatedBalance, payoutToken.decimals)} available). Deposit with the unallocated treasury flow or use a fund payout.`);
+        }
+
+        const sameRecipient = entries.length > 1 && entries.every(entry =>
+          String(entry.contributor || state.account).toLowerCase() === String(entries[0].contributor || state.account).toLowerCase()
+        );
+        const batchSelector = keccak256(toUtf8Bytes("payoutBatch(bytes32,address,address,uint256[],bytes32[],bytes32[],bytes32[],string[],bytes32[])"))
+          .slice(2, 10).toLowerCase();
+        const routerCode = (await state.provider.getCode(router)).toLowerCase();
+        if (mode === "fund" && sameRecipient && routerCode.includes(batchSelector)) {
+          const batchAmounts = [];
+          const batchWorkReferences = [];
+          const batchRepositoryHashes = [];
+          const batchContributorHashes = [];
+          const batchMetadataUris = [];
+          const batchMetadataHashes = [];
+          for (const entry of entries) {
+            const amount = parseUnits(String(Number(entry.amount || 0).toFixed(payoutToken.decimals)), payoutToken.decimals);
+            const issueRef = String(entry.issueRef || "");
+            const repositorySlug = issueRef.includes("#") ? issueRef.slice(0, issueRef.lastIndexOf("#")) : "artfi";
+            const contributorGithub = String(entry.contributorGithub || "");
+            const workReference = keccak256(toUtf8Bytes(`${issueRef}:${contributorGithub}:${entry.role || "contributor"}`));
+            batchAmounts.push(amount);
+            batchWorkReferences.push(workReference);
+            batchRepositoryHashes.push(keccak256(toUtf8Bytes(repositorySlug)));
+            batchContributorHashes.push(keccak256(toUtf8Bytes(contributorGithub)));
+            batchMetadataUris.push(`ipfs://artfi/payroll/${slugify(issueRef)}-${slugify(contributorGithub)}-${slugify(entry.role || "contributor")}`);
+            batchMetadataHashes.push(keccak256(toUtf8Bytes(JSON.stringify({ issueRef, contributorGithub, role: entry.role || "contributor", amount: entry.amount, currency: entry.currency || payoutToken.symbol }))));
+          }
+          const batchArgs = [selectedFund, settledAsset, String(entries[0].contributor || state.account), batchAmounts, batchWorkReferences, batchRepositoryHashes, batchContributorHashes, batchMetadataUris, batchMetadataHashes];
+          try {
+            await contract.payoutBatch.staticCall(...batchArgs);
+          } catch (error) {
+            throw new Error(`Settlement preflight failed for creator batch: ${readableContractError(error)}`);
+          }
+          const batchTx = await contract.payoutBatch(...batchArgs);
+          await batchTx.wait();
+          entries.forEach(entry => markQueueEntrySettled(router, entry));
+          refreshAfterWalletTransaction(`Creator batch complete: ${entries.length} jobs settled in one transaction. Refreshing ArtFi…`);
+          return;
+        }
+
+        const transactions = [];
+        for (const entry of entries) {
+          const amount = parseUnits(String(Number(entry.amount || 0).toFixed(payoutToken.decimals)), payoutToken.decimals);
+          const issueRef = String(entry.issueRef || "");
+          const repositorySlug = issueRef.includes("#") ? issueRef.slice(0, issueRef.lastIndexOf("#")) : "artfi";
+          const contributorGithub = String(entry.contributorGithub || "");
+          const workReference = keccak256(toUtf8Bytes(`${issueRef}:${contributorGithub}:${entry.role || "contributor"}`));
+          const repositoryIdHash = keccak256(toUtf8Bytes(repositorySlug));
+          const contributorIdHash = keccak256(toUtf8Bytes(contributorGithub));
+          const metadataUri = `ipfs://artfi/payroll/${slugify(issueRef)}-${slugify(contributorGithub)}-${slugify(entry.role || "contributor")}`;
+          const metadataHash = keccak256(toUtf8Bytes(JSON.stringify({
+            issueRef,
+            contributorGithub,
+            role: entry.role || "contributor",
+            amount: entry.amount,
+            currency: entry.currency || "ART",
+          })));
+
+          const payoutArgs = mode === "unallocated"
+            ? [settledAsset, String(entry.contributor || state.account), amount, workReference, repositoryIdHash, contributorIdHash, metadataUri, metadataHash]
+            : [selectedFund, settledAsset, String(entry.contributor || state.account), amount, workReference, repositoryIdHash, contributorIdHash, metadataUri, metadataHash];
+          const payoutMethod = mode === "unallocated" ? "payoutUnallocated" : "payout";
+          try {
+            await contract[payoutMethod].staticCall(...payoutArgs);
+          } catch (error) {
+            throw new Error(`Settlement preflight failed for ${issueRef}: ${readableContractError(error)}`);
+          }
+
+          const tx = await contract[payoutMethod](...payoutArgs);
+
+          transactions.push(tx);
+          txNote.textContent = `Submitted @${contributorGithub} (${transactions.length}/${entries.length})…`;
+          await tx.wait();
+          markQueueEntrySettled(router, entry);
+        }
+
+        refreshAfterWalletTransaction(`Batch complete: ${transactions.length} payout${transactions.length === 1 ? "" : "s"} finalized. Refreshing ArtFi…`);
       } catch (error) {
         txNote.textContent = error?.shortMessage || error?.message || "Payout failed.";
       } finally {
@@ -3043,9 +4063,47 @@
       }
     };
 
+    selectAllPending?.addEventListener("change", () => {
+      if (!state.queue.length) return;
+      const selectedKeys = new Set(selectedEntries().map(entry => queueEntryKey(entry)));
+      for (const entry of state.queue) {
+        const checkbox = queueList.querySelector(`input[data-entry-key="${CSS.escape(queueEntryKey(entry))}"]`);
+        if (checkbox) checkbox.checked = selectAllPending.checked;
+      }
+      updateBatchSummary();
+    });
+
+    selectAllPending?.addEventListener("change", () => {
+      if (!state.queue.length) return;
+      for (const entry of state.queue) {
+        const checkbox = queueList.querySelector(`input[data-entry-key="${CSS.escape(queueEntryKey(entry))}"]`);
+        if (checkbox) checkbox.checked = selectAllPending.checked;
+      }
+      updateBatchSummary();
+    });
+
     walletButton.addEventListener("click", connectWallet);
+    addTokenButton.addEventListener("click", addRegisteredToken);
+    selectedFundId.addEventListener("change", updateBatchSummary);
+    payoutTokenSelect.addEventListener("change", () => {
+      if (!payoutTokenSelect.value) return;
+      payoutAssetAddress.value = payoutTokenSelect.value;
+      renderTokenRegistry();
+    });
+    payoutAssetAddress.addEventListener("input", renderTokenRegistry);
+    createFundButton.addEventListener("click", createFund);
+    depositFundButton.addEventListener("click", depositToFund);
     finalizeButton.addEventListener("click", finalizePayout);
-    refreshButton.addEventListener("click", loadQueue);
+    sweepFundButton.addEventListener("click", sweepFundToWallet);
+    sweepExcessButton.addEventListener("click", sweepUnallocatedToWallet);
+    sweepUnallocatedCheckbox.addEventListener("change", () => {
+      sweepExcessButton.disabled = !(state.connected && state.account === ADMIN_WALLET && sweepUnallocatedCheckbox.checked);
+      refreshTreasuryStatus();
+    });
+    refreshButton.addEventListener("click", async () => {
+      await loadQueue();
+      await refreshTreasuryStatus();
+    });
     browserLinkButton?.addEventListener("click", linkBrowser);
     requestJsonButton.addEventListener("click", prepareRequestMetadata);
     offerJsonButton.addEventListener("click", prepareOfferMetadata);
@@ -3078,7 +4136,10 @@
       drawCanopy();
     });
     canopyResetView?.addEventListener("click", resetCanopyCamera);
-    routerAddress.addEventListener("input", updateBatchSummary);
+    routerAddress.addEventListener("input", () => {
+      updateBatchSummary();
+      refreshTreasuryStatus();
+    });
 
     if (window.ethereum) {
       window.ethereum.on?.("accountsChanged", (accounts) => {
@@ -3103,6 +4164,9 @@
 
     setAccountOrbit("");
     setWalletUI(false);
+    renderFundRegistry();
+    renderTokenRegistry();
+    publicTreasuryRefresh.addEventListener("click", refreshPublicTreasury);
     loadOrCreateBrowserAgent()
       .then(agent => consumeEmailAuthorizationFromLocation({ signer: agent }))
       .then(authorization => {
@@ -3117,6 +4181,7 @@
     bindCanopyEvents();
     loadQueue();
     loadNetworkIndex();
+    refreshPublicTreasury();
     probeIpfsDesktop();
   </script>
 </body>

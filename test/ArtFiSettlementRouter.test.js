@@ -67,6 +67,67 @@ describe("ArtFiSettlementRouter", function () {
     expect(await token.balanceOf(contributor.address)).to.equal(ethers.parseEther("2"));
   });
 
+  it("settles multiple jobs for one creator in one aggregate payout transaction", async function () {
+    const tokenAddress = await token.getAddress();
+    const firstReference = ethers.id("job-one");
+    const secondReference = ethers.id("job-two");
+    await token.approve(await router.getAddress(), ethers.parseEther("5"));
+    await router.fundToken(FUND_ID, tokenAddress, ethers.parseEther("5"));
+
+    const tx = await router.connect(payroll).payoutBatch(
+      FUND_ID,
+      tokenAddress,
+      contributor.address,
+      [ethers.parseEther("2"), ethers.parseEther("1")],
+      [firstReference, secondReference],
+      [ethers.id("repo"), ethers.id("repo")],
+      [ethers.id("creator"), ethers.id("creator")],
+      ["ipfs://job-one", "ipfs://job-two"],
+      [ethers.id("job-one"), ethers.id("job-two")]
+    );
+
+    await expect(tx).to.emit(router, "PayrollPaid").withArgs(
+      FUND_ID,
+      tokenAddress,
+      contributor.address,
+      ethers.parseEther("2"),
+      firstReference,
+      ethers.id("repo"),
+      ethers.id("creator"),
+      "ipfs://job-one",
+      ethers.id("job-one")
+    );
+    expect(await router.fundBalances(FUND_ID, tokenAddress)).to.equal(ethers.parseEther("2"));
+    expect(await token.balanceOf(contributor.address)).to.equal(ethers.parseEther("3"));
+    expect(await router.completedWorkReferences(FUND_ID, secondReference)).to.equal(true);
+  });
+
+  it("pays from approved token balances that are not assigned to a fund", async function () {
+    const tokenAddress = await token.getAddress();
+    await token.approve(await router.getAddress(), ethers.parseEther("5"));
+    await router.fundToken(FUND_ID, tokenAddress, ethers.parseEther("2"));
+    await router.connect(payroll).payout(...Object.values(payoutArgs({
+      asset: tokenAddress,
+      recipient: contributor.address,
+      amount: ethers.parseEther("1"),
+    })));
+    await token.transfer(await router.getAddress(), ethers.parseEther("2"));
+
+    const tx = await router.connect(payroll).payoutUnallocated(
+      tokenAddress,
+      contributor.address,
+      ethers.parseEther("1"),
+      ethers.id("unused-token-bounty"),
+      ethers.id("TheJollyLaMa/ArtFi"),
+      ethers.id("TheJollyLaMa"),
+      "ipfs://bafyfreebalancepay000000000000000000000001",
+      ethers.id("free-balance-payout")
+    );
+
+    await expect(tx).to.emit(router, "PayrollPaid");
+    expect(await token.balanceOf(contributor.address)).to.equal(ethers.parseEther("2"));
+  });
+
   it("rejects unauthorized payouts and duplicate work references", async function () {
     await router.fundNative(FUND_ID, { value: ethers.parseEther("2") });
     await expect(router.connect(outsider).payout(
@@ -86,6 +147,33 @@ describe("ArtFiSettlementRouter", function () {
     await ForceSend.deploy(await router.getAddress(), { value: ethers.parseEther("1") });
     await expect(router.recoverExcess(NATIVE_ASSET, admin.address, ethers.parseEther("1")))
       .to.emit(router, "ExcessRecovered");
+  });
+
+  it("allows the admin to recover an individual fund allocation", async function () {
+    const tokenAddress = await token.getAddress();
+    await token.approve(await router.getAddress(), ethers.parseEther("5"));
+    await router.fundToken(FUND_ID, tokenAddress, ethers.parseEther("5"));
+
+    await expect(router.recoverFund(
+      FUND_ID,
+      tokenAddress,
+      admin.address,
+      ethers.parseEther("2")
+    )).to.emit(router, "ExcessRecovered");
+
+    expect(await router.fundBalances(FUND_ID, tokenAddress)).to.equal(ethers.parseEther("3"));
+    expect(await router.totalFundBalances(tokenAddress)).to.equal(ethers.parseEther("3"));
+    expect(await token.balanceOf(admin.address)).to.equal(ethers.parseEther("999997"));
+  });
+
+  it("does not allow fund recovery to exceed the selected allocation", async function () {
+    await router.fundNative(FUND_ID, { value: ethers.parseEther("1") });
+    await expect(router.recoverFund(
+      FUND_ID,
+      NATIVE_ASSET,
+      admin.address,
+      ethers.parseEther("2")
+    )).to.be.revertedWith("Amount exceeds fund balance");
   });
 
   it("pauses deposits and payouts", async function () {
