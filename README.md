@@ -141,8 +141,7 @@ ArtFi payroll automation now recognizes **$ART-only** payout labels on GitHub is
 Examples:
 
 - `bounty: 25 ART`
-- `bounty: 100 ART`
-- `bounty: 0.5 USDC`
+- `bounty: 100 $ART`
 - `test-bounty: 10 ART`
 - `idea-credit: @octocat`
 
