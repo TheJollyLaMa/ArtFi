@@ -219,8 +219,8 @@ async function main() {
       }),
     },
   });
-  const port = Number(process.env.ARTFI_AUTH_PORT || 8787);
-  server.listen(port, process.env.ARTFI_AUTH_HOST || "127.0.0.1", () => {
+  const port = Number(process.env.PORT || process.env.ARTFI_AUTH_PORT || 8787);
+  server.listen(port, process.env.ARTFI_AUTH_HOST || "0.0.0.0", () => {
     console.log(`ArtFi browser auth listening on port ${port}`);
   });
 }

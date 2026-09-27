@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="artfi-auth-endpoint" content="/api/browser-auth/start" />
+  <meta name="artfi-auth-base-url" content="https://artfi.onrender.com" />
   <link rel="icon" type="image/png" href="./favicon.png" />
   <title>ArtFi</title>
   <style>
@@ -3104,7 +3104,18 @@
     const canopyAssetFilter = document.getElementById("canopy-asset-filter");
     const canopyToggleLinks = document.getElementById("canopy-toggle-links");
     const canopyResetView = document.getElementById("canopy-reset-view");
-    const authEndpoint = document.querySelector('meta[name="artfi-auth-endpoint"]')?.content || "/api/browser-auth/start";
+    const authServiceBaseUrl = document.querySelector('meta[name="artfi-auth-base-url"]')?.content.trim().replace(/\/+$/, "") || "";
+    const authServiceEndpoint = path => `${authServiceBaseUrl}${path}`;
+    const authEndpoint = authServiceEndpoint("/api/browser-auth/start");
+    let authServiceConfigPromise;
+    const getAuthServiceConfig = () => {
+      authServiceConfigPromise ||= fetch(authServiceEndpoint("/api/browser-auth/config"))
+        .then(async response => {
+          if (!response.ok) throw new Error(`Auth service configuration failed (${response.status})`);
+          return response.json();
+        });
+      return authServiceConfigPromise;
+    };
 
     const state = {
       provider: null,
@@ -4308,13 +4319,15 @@
     };
 
     const uploadJsonBytes = async ({ bytes, name }) => {
+      const usesSharedPinata = state.ipfsProvider === "pinata" && !pinataJwt.value.trim();
+      const authConfig = usesSharedPinata ? await getAuthServiceConfig() : null;
       const uploader = state.ipfsProvider === "desktop"
         ? createIpfsDesktopUploader()
         : pinataJwt.value.trim()
           ? createDirectPinataUploader({ jwt: pinataJwt.value.trim() })
           : createPinataUploader({
-              signingEndpoint: document.querySelector('meta[name="artfi-pinata-endpoint"]')?.content,
-              serviceDid: document.querySelector('meta[name="artfi-ucan-service-did"]')?.content,
+              signingEndpoint: authServiceEndpoint("/api/pinata-upload-url"),
+              serviceDid: authConfig.serviceDid,
             });
       return uploader({
         bytes,
