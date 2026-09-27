@@ -6,6 +6,7 @@ on:
     paths:
       - index.html
       - Artizen_LOGO.png
+      - ArtFi_Demo_min_qrcode.jpeg
       - Ens_Eth_Breathe.gif
       - metamask.png
       - IPFS_Logo.png
@@ -14,8 +15,14 @@ on:
       - BigNuten.png
       - payroll-queue.json
       - scripts/ucanStorage.mjs
+      - scripts/adminContractAbis.mjs
+      - scripts/indexNetwork.mjs
+      - package.json
+      - package-lock.json
       - .github/workflows/deploy-pages.yml
       - docs/PAGES.md
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -37,14 +44,32 @@ jobs:
       - name: Checkout site source
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install indexer dependencies
+        run: npm ci
+
+      - name: Rebuild public Canopy index from Base events
+        env:
+          BASE_RPC_URL: https://mainnet.base.org
+          ARTFI_NETWORK_REGISTRY_ADDRESS: 0x4e70AC13Ea266D76d872411DA8b4E80460Af4423
+          ARTFI_PROTOCOL_ADDRESS: 0xA90f10a2205f392b3d79382409475e66767588a4
+          ARTFI_NETWORK_FROM_BLOCK: "51430773"
+        run: npm run index:network
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Assemble public site
         run: |
           mkdir -p _site/scripts
-          cp index.html Artizen_LOGO.png Ens_Eth_Breathe.gif metamask.png IPFS_Logo.png favicon.png usdc.png BigNuten.png payroll-queue.json _site/
-          cp scripts/ucanStorage.mjs _site/scripts/
+          cp index.html Artizen_LOGO.png ArtFi_Demo_min_qrcode.jpeg Ens_Eth_Breathe.gif metamask.png IPFS_Logo.png favicon.png usdc.png BigNuten.png payroll-queue.json _site/
+          cp scripts/ucanStorage.mjs scripts/adminContractAbis.mjs _site/scripts/
+          cp artizen-network-index.json _site/
           touch _site/.nojekyll
 
       - name: Upload Pages artifact

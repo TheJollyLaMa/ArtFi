@@ -2,6 +2,9 @@
 pragma solidity ^0.8.20;
 
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 interface IArtFiProfileReader {
     function profiles(address account)
@@ -10,7 +13,28 @@ interface IArtFiProfileReader {
         returns (bytes32 emailHash, bytes32 agentDidHash, string memory profileUri);
 }
 
-contract ArtFiNetworkRegistry is AccessControl {
+interface IArtFiRewardRouter {
+    function PAYROLL_ROLE() external view returns (bytes32);
+    function hasRole(bytes32 role, address account) external view returns (bool);
+    function approvedAssets(address asset) external view returns (bool);
+    function funds(bytes32 fundId) external view returns (string memory metadataUri, bool active, bool exists);
+    function isApprovedRecipient(address wallet) external view returns (bool);
+    function payout(
+        bytes32 fundId,
+        address asset,
+        address payable recipient,
+        uint256 amount,
+        bytes32 workReference,
+        bytes32 repositoryIdHash,
+        bytes32 contributorIdHash,
+        string calldata metadataUri,
+        bytes32 metadataHash
+    ) external;
+}
+
+contract ArtFiNetworkRegistry is AccessControl, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     bytes32 public constant NETWORK_ADMIN_ROLE = keccak256("NETWORK_ADMIN_ROLE");
     bytes32 public constant NODE_CHECKER_ROLE = keccak256("NODE_CHECKER_ROLE");
     uint256 public constant MONTHLY_NODE_REWARD = 10 ether;
@@ -41,6 +65,7 @@ contract ArtFiNetworkRegistry is AccessControl {
 
     struct MonthStats {
         uint32 checks;
+        uint32 checkerChecks;
         uint64 firstHeartbeat;
         uint64 lastHeartbeat;
         bytes32 lastSampleProofHash;
@@ -56,6 +81,10 @@ contract ArtFiNetworkRegistry is AccessControl {
     mapping(address => uint256[]) private _operatorNodes;
     mapping(uint256 => mapping(uint256 => MonthStats)) public monthStats;
     mapping(uint256 => bytes32) public monthChallenges;
+    IArtFiRewardRouter public nodeRewardRouter;
+    bytes32 public nodeRewardFundId;
+    address public nodeRewardAsset;
+    uint256 public nodeRewardAmount;
 
     event ContentPublished(
         uint256 indexed publicationId,
@@ -103,6 +132,8 @@ contract ArtFiNetworkRegistry is AccessControl {
         uint256 amount,
         bytes32 paymentReference
     );
+    event NodeRewardPayoutConfigured(address indexed router, bytes32 indexed fundId, address indexed asset, uint256 amount);
+    event UnencumberedFundsRecovered(address indexed asset, address indexed recipient, uint256 amount);
 
     constructor(address profileContract, address defaultAdmin) {
         require(profileContract != address(0), "Profile contract is required");
@@ -222,7 +253,7 @@ contract ArtFiNetworkRegistry is AccessControl {
     ) external {
         Node storage node = nodes[nodeId];
         require(node.operator == msg.sender, "Only node operator can heartbeat");
-        _recordNodeCheck(nodeId, month, challengeHash, sampleProofHash, sampleCount);
+        _recordNodeCheck(nodeId, month, challengeHash, sampleProofHash, sampleCount, false);
         node.softwareVersion = softwareVersion;
         emit NodeHeartbeat(nodeId, month, challengeHash, sampleProofHash, sampleCount, block.timestamp);
     }
@@ -234,7 +265,8 @@ contract ArtFiNetworkRegistry is AccessControl {
         bytes32 sampleProofHash,
         uint256 sampleCount
     ) external onlyRole(NODE_CHECKER_ROLE) {
-        _recordNodeCheck(nodeId, month, challengeHash, sampleProofHash, sampleCount);
+        require(msg.sender != nodes[nodeId].operator, "Node operator cannot check own node");
+        _recordNodeCheck(nodeId, month, challengeHash, sampleProofHash, sampleCount, true);
         emit NodeCheckRecorded(nodeId, month, msg.sender, challengeHash, sampleProofHash, sampleCount, block.timestamp);
     }
 
@@ -243,7 +275,8 @@ contract ArtFiNetworkRegistry is AccessControl {
         uint256 month,
         bytes32 challengeHash,
         bytes32 sampleProofHash,
-        uint256 sampleCount
+        uint256 sampleCount,
+        bool independentCheck
     ) internal {
         Node storage node = nodes[nodeId];
         require(node.approved && node.active, "Node is not approved and active");
@@ -256,29 +289,96 @@ contract ArtFiNetworkRegistry is AccessControl {
         stats.lastHeartbeat = uint64(block.timestamp);
         stats.lastSampleProofHash = sampleProofHash;
         ++stats.checks;
+        if (independentCheck) ++stats.checkerChecks;
     }
 
     function rewardEligible(uint256 nodeId, uint256 month) public view returns (bool) {
         MonthStats storage stats = monthStats[nodeId][month];
         Node storage node = nodes[nodeId];
-        return node.approved && node.active && stats.checks >= MIN_MONTHLY_CHECKS &&
+        return node.approved && node.active && stats.checkerChecks >= MIN_MONTHLY_CHECKS &&
             stats.lastSampleProofHash != bytes32(0) && !stats.rewardPaid;
     }
 
-    function markMonthlyRewardPaid(uint256 nodeId, uint256 month, bytes32 paymentReference)
+    function setNodeRewardPayout(address routerAddress, bytes32 fundId, address asset, uint256 amount)
         external
         onlyRole(NETWORK_ADMIN_ROLE)
     {
+        require(routerAddress.code.length > 0, "Reward router is not a contract");
+        require(fundId != bytes32(0), "Reward fund is required");
+        require(amount > 0, "Reward amount is required");
+        IArtFiRewardRouter router = IArtFiRewardRouter(routerAddress);
+        require(router.approvedAssets(asset), "Reward asset is not approved on router");
+        (, bool active, bool exists) = router.funds(fundId);
+        require(exists && active, "Reward fund is not active on router");
+        require(router.hasRole(router.PAYROLL_ROLE(), address(this)), "Registry needs PAYROLL_ROLE on router");
+
+        nodeRewardRouter = router;
+        nodeRewardFundId = fundId;
+        nodeRewardAsset = asset;
+        nodeRewardAmount = amount;
+        emit NodeRewardPayoutConfigured(routerAddress, fundId, asset, amount);
+    }
+
+    function markMonthlyRewardPaid(uint256 nodeId, uint256 month) external onlyRole(NETWORK_ADMIN_ROLE) nonReentrant {
         require(rewardEligible(nodeId, month), "Node is not reward eligible");
-        require(paymentReference != bytes32(0), "Payment reference is required");
+        require(address(nodeRewardRouter) != address(0), "Node reward payout is not configured");
+        Node storage node = nodes[nodeId];
+        require(nodeRewardRouter.isApprovedRecipient(node.operator), "Node operator is not whitelisted on router");
+
+        bytes32 workReference = keccak256(abi.encode(
+            "ARTFI_NODE_REWARD_V1",
+            address(this),
+            nodeId,
+            month,
+            nodeRewardFundId,
+            nodeRewardAsset
+        ));
+        bytes32 repositoryIdHash = keccak256(bytes("ArtFi/Network"));
+        bytes32 metadataHash = keccak256(abi.encode(
+            nodeId,
+            month,
+            node.operator,
+            nodeRewardAsset,
+            nodeRewardAmount,
+            monthStats[nodeId][month].lastSampleProofHash
+        ));
+
         monthStats[nodeId][month].rewardPaid = true;
+        nodeRewardRouter.payout(
+            nodeRewardFundId,
+            nodeRewardAsset,
+            payable(node.operator),
+            nodeRewardAmount,
+            workReference,
+            repositoryIdHash,
+            node.nodeDidHash,
+            "",
+            metadataHash
+        );
         emit MonthlyNodeRewardRecorded(
             nodeId,
             month,
-            nodes[nodeId].operator,
-            MONTHLY_NODE_REWARD,
-            paymentReference
+            node.operator,
+            nodeRewardAmount,
+            workReference
         );
+    }
+
+    function recoverUnencumberedFunds(address asset, address payable recipient, uint256 amount)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        nonReentrant
+    {
+        require(recipient != address(0), "Recipient is required");
+        require(amount > 0, "Amount is required");
+        if (asset == address(0)) {
+            require(address(this).balance >= amount, "Insufficient native balance");
+            (bool sent, ) = recipient.call{value: amount}("");
+            require(sent, "Native recovery failed");
+        } else {
+            IERC20(asset).safeTransfer(recipient, amount);
+        }
+        emit UnencumberedFundsRecovered(asset, recipient, amount);
     }
 
     function _requireIpfsUri(string calldata value) internal pure {

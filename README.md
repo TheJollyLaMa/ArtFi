@@ -1,176 +1,140 @@
-# ArtFi 
+# ArtFi
 
-![ArtFi branding](https://github.com/user-attachments/assets/58069599-d5d0-4bf3-a066-a2ac34234ff8)
+ArtFi is a simple soft-launch micro-liquidity layer for Artizen newcomers.
 
-Zero-to-no-profit micro-liquidity protocol for Artizen creators. 
-Automated grant advances, human-in-the-loop onboarding, and smart contract settlement.
+The core idea is straightforward: if someone is waiting for their first Artizen payout, they can post a request for ART (or another approved asset) with clear repayment terms. Another wallet can offer to fund it under those terms. Until that happens, or instead of it, people can also earn ART directly by contributing repo work or by running an IPFS node.
 
-## Base deployment
+There are no boost points or off-chain credits in ArtFi. Everything is either a request/offer you fund on-chain, or ART you earn directly from a settlement fund.
 
-ArtFi will operate on **Base** ...
+## The short version
 
-$ART - `0x44c4516768e47cd97cfF2561B81a74699F23f8Ec`
+There are two practical ways to earn ART today:
 
-... and currently uses the `$ART` token for payroll bot to help us get ArtFi started with a micro-economic spark!
+1. Post a request and get it filled
+   - A newcomer posts a request specifying the asset, principal amount, repayment amount, and deadlines.
+   - Another wallet reviews those terms and funds the request as an offer.
+   - The request and offer are escrowed, settled, and recorded on-chain.
+   - This is the centerpiece of ArtFi: a newcomer does not have to wait in limbo for their first Artizen payout.
 
-Need an advance? Attend all the quests and classes to show you're accountable and then use your boost points and Art tokens for access to loans from last season's successful creators according to your project momentum.  Once you've shown you're slightly accountable, access to offers will appear from creators who have a little extra to lend some cash in exchange for a similar portion of your seasonal payout to get you by until then.  Read the TERMS!  They are meant to be simple and inviting while still offering a basic guideline for the mercy and generosity of a sponsor. 
+2. Earn ART directly from the network
+   - Do repo work and claim a `bounty:` or `test-bounty:` labeled issue; payment comes from the `artfi-repo-dev` fund allocation.
+   - Run and register an IPFS/Kubo node; payment comes from the `node-reward-fund` allocation once you pass checker spot-checks.
 
-First season newcomers only!
-- meant for newcomers to have an easier time with the anticipation phase until their first payout while coming in hungry from the cold ...
-- introduces the community to new ways we can extend/receive agency to/from each other across borders with web3 tools, software, and frame of mind.
+## Ways to earn tokens
 
-## On-chain advance protocol
+### A. Request + offer flow
 
-`ArtFiProtocol` is the deployable escrow/NFT contract, `ArtFiNetworkRegistry` is the separate serverless CID discovery and node-reward registry, and `ArtFiSettlementRouter` is the isolated payroll/project treasury. Together they combine request discovery, sponsor escrow, receivable ownership, settlement, outcome attestations, participant history, community replication, and accountable payroll without an ArtFi-owned database.
+This is the main on-ramp for new Artizen participants.
 
-### NFT lifecycle
+- A creator posts a request: asset, principal, repayment amount, funding deadline, and repayment due date.
+- A sponsor reviews those terms and funds the request, which mints their offer NFT.
+- Funds are held in escrow until repayment or settlement.
+- Repayment or settlement is recorded on-chain against the original request and offer.
 
-1. A creator links a browser UCAN agent to their wallet, then registers the agent DID hash, an email hash made with a private high-entropy salt, and an IPFS profile URI. Plaintext email, salt, and private agent key never go on-chain.
-2. The creator uploads validated request metadata to Pinata or IPFS Desktop, then mints a non-transferable request NFT containing its `ipfs://` URI plus the asset, principal, repayment, deadlines, terms hash, and canonical Artizen project and fund links.
-3. A registered sponsor uploads offer metadata and funds the request with native currency or an administrator-approved ERC-20. Funding mints one offer NFT representing the sponsor's receivable.
-4. The creator accepts before the funding deadline. Request NFTs stay with their creators; offer NFTs can transfer only while an advance is active and only to another registered profile.
-5. Direct repayment and settlement payout recovery follow the current offer NFT owner. That owner may designate a recipient contract or wallet; transferring the NFT clears that destination.
-6. The original NFT pair remains after repayment, settlement, cancellation, expiry, or default. Each final participant may submit one immutable IPFS outcome document, updating only their corresponding NFT URI while the rating, hash, CID, participant, and timestamp remain on-chain.
+This is the path for “I need a little runway on clear terms while I wait for my first real Artizen payout.”
 
-Both final participants may submit one permanent 1-5 rating with a content hash and IPFS evidence URI. An `OutcomeFinalized` event is emitted when both sides have submitted. Wallet and salted-email-hash indexes retain request, funding, borrowing, repayment, recovery, payout, default, and outcome totals per asset.
+### B. Repo and issue work
 
-Rich NFT data is provider-neutral IPFS content. The dapp supports local IPFS Desktop uploads and Pinata through a server-issued short-lived upload URL; Pinata credentials are never exposed to the browser. Email confirmation delegates upload capability to that browser's UCAN agent, while wallet transactions remain authoritative for contract actions. Sensitive attachments can be encrypted locally before upload; public NFT metadata remains intentionally public. See [docs/IPFS_UCAN.md](docs/IPFS_UCAN.md).
-
-### Asset and escrow safety
-
-- The zero address identifies native currency; every ERC-20 must be explicitly approved by an administrator.
-- ERC-20 paths use `SafeERC20` and reject fee-on-transfer behavior. Native transfers use checked calls.
-- `totalLiabilities(asset)` tracks funded principal still held in escrow. An asset cannot be disabled while it backs escrow.
-- Administrators may recover only balances above recorded liabilities. There is no unrestricted drain.
-- Repayment fees remain capped at 5% of principal. State changes precede external transfers and all value-moving entry points are reentrancy guarded.
-
-The settlement role is trusted to report the correct gross payout. A short payout closes the advance as defaulted rather than preserving indefinite debt. Terms and outcome documents remain on IPFS, while their hashes, CIDs, canonical Artizen links, and financial results are anchored on-chain.
-
-`repaymentDueAt` is visible evidence of timeliness rather than a hard payment cutoff: creators may repay late until the settlement role closes the advance. This preserves a voluntary cure path while the recorded due date, close time, and final status make lateness inspectable. Cancelled and expired offers remain in NFT history but are not counted as completed loans because principal was never disbursed.
-
-### Local validation
-
-```bash
-npm test
-npm run test:storage
-```
-
-The deployment script reads optional `ADMIN_ADDRESS`, `ART_TOKEN_ADDRESS`, and comma-separated `SUPPORTED_ASSETS`. Native currency is enabled by default. The script deploys `ArtFiProtocol`, then `ArtFiNetworkRegistry` with the protocol address, then `ArtFiSettlementRouter` with the administrator. Configured ERC-20 assets are approved in both contracts, and the initial `artfi-repo-dev` settlement fund is created.
-
-### Settlement router and payroll fund
-
-`ArtFiSettlementRouter` keeps payroll funds isolated by `(fundId, asset)`. The initial fund is:
-
-```text
-fundId: artfi-repo-dev
-asset: ART
-purpose: contributor payroll for reviewed repository work
-```
-
-The router rejects duplicate issue/PR work references within a fund and emits a `PayrollPaid` ledger event containing the recipient, asset, amount, repository/contributor hashes, work reference, and metadata evidence. Recovery can only withdraw contract-level excess; allocated fund balances remain protected.
-
-Set `ARTFI_SETTLEMENT_ROUTER_ADDRESS` after deployment. Fund `artfi-repo-dev` with ART before enabling payroll settlement. The payroll UI must wait for the router transaction receipt before the off-chain queue is marked settled.
-
-### First network bootstrap
-
-After deployment, keep the deployed contract addresses in `.env` as `ARTFI_PROTOCOL_ADDRESS` and `ARTFI_NETWORK_REGISTRY_ADDRESS`. Do not commit `.env`.
-
-Check that both deployed addresses have code and that the configured signer can reach them:
-
-```bash
-npm run network:verify
-```
-
-Generate the two `bytes32` values needed to register a local IPFS Desktop/Kubo node:
-
-```bash
-npm run network:node-hashes
-```
-
-Copy `nodeDidHash` and `peerIdHash` into the IPFS storage panel, or register from the terminal:
-
-```bash
-ARTFI_NODE_DID_HASH=0x... \
-ARTFI_PEER_ID_HASH=0x... \
-npm run network:register-node
-```
-
-The administrator wallet must approve the new node before heartbeats count:
-
-```bash
-ARTFI_NODE_ID=1 npm run network:approve-node
-```
-
-Set the current monthly challenge:
-
-```bash
-ARTFI_NETWORK_MONTH=202609 npm run network:set-challenge
-```
-
-Once a profile and request metadata CID exist, publish the CID into the serverless registry and mint the request NFT:
-
-```bash
-ARTFI_CONTENT_KIND=request \
-ARTFI_CONTENT_CID=ipfs://... \
-ARTFI_CONTENT_FILE=request.json \
-ARTFI_PROJECT_URL=https://... \
-ARTFI_FUND_URL=https://... \
-npm run network:publish-content
-
-ARTFI_REQUEST_AMOUNT=100 \
-ARTFI_REQUEST_METADATA_URI=ipfs://... \
-ARTFI_PROJECT_URL=https://... \
-ARTFI_FUND_URL=https://... \
-npm run network:create-request
-```
-
-Rebuild the local read-only ledger view for the UI:
-
-```bash
-npm run index:network
-```
-
-## Payroll bounty labels
-
-ArtFi payroll automation now recognizes **$ART-only** payout labels on GitHub issues.
-
-- Contributor payout label format: `bounty: <amount> ART` (the `$` before `ART` is optional)
-- Testing payout label format: `test-bounty: <amount> ART` (the `$` before `ART` is optional)
-- Idea originator format: `idea-credit: @username`
-
-Examples:
+The payroll bot recognizes labels like:
 
 - `bounty: 25 ART`
 - `bounty: 100 ART`
 - `test-bounty: 10 ART`
-- `idea-credit: @octocat`
+- `idea-credit: @username`
 
-The merge bot runs only when a PR is merged into `main`; closing a PR without merging it never creates a payout automatically. Link the issue with `Closes #123` in the PR body, reference `#123` in the title, or use GitHub's Development sidebar. The bot checks the PR author and issue assignees against `contributor-accounts.json`, then records valid entries with `currency: "ART"` in `payroll-queue.json` for administrator review.
+If a PR is merged into `main` and linked to the issue, the payout is queued from the `artfi-repo-dev` settlement fund for administrator review.
 
-When an exact `idea-credit: @username` label is present, the bounty is split 80% to the whitelisted implementer and 20% to the whitelisted idea originator. A generic `idea-credit` label does not identify a payable originator and therefore does not trigger a split.
+### C. IPFS node rewards
 
-## Whitelist requests
+If you run a Kubo/IPFS node and register it through the ArtFi network registry:
 
-People can request whitelist access through the GitHub issue form at **Issues → New issue → Whitelist Request**. The form captures:
+- you must register the node and get admin approval
+- the node must pass 25 independent checker spot-checks in a month
+- once eligible, a configured ART reward is paid from the `node-reward-fund` allocation
 
-- GitHub username
-- email for follow-up
-- wallet address
-- desired role
-- contribution summary
+This is the “keep the decent-artizen data alive” path for people who want to help power the network without needing an immediate funding request.
 
-When a whitelist request issue is opened, the repo sends an admin email using the configured SMTP secrets. The email includes the request details and a direct link to the issue so the admin can approve the wallet and add them to `contributor-accounts.json`.
+## Getting started today
 
-To enable email delivery, set these repository secrets:
+### 1) Install and configure
 
-- `WHITELIST_REQUEST_TO`
-- `SMTP_HOST`
-- `SMTP_PORT`
-- `SMTP_USER`
-- `SMTP_PASS`
-- `SMTP_FROM`
+```bash
+npm install
+cp .env.example .env
+```
 
-For work intentionally closed without merge, or for an older PR that was not linked correctly, run **Actions → Bounty Bot → Run workflow** with the PR number and optional issue number. Testing bounties use `/test-complete` from an assigned tester followed by `/test-approved` from the repository owner. Finalized payments are moved from pending to settled through **Actions → Settle Payroll**.
+Fill in the essentials in `.env`:
 
-The Pages payroll admin panel can select one or more creators and submit their pending ART totals one creator at a time through the current settlement router. Wait for each transaction to confirm, then run **Settle Payroll** with the selected comma-separated GitHub handles. For distinct transaction hashes, provide matching `creator=transaction-hash` pairs in the `tx_hashes` input; a failed creator remains pending and can be retried without disturbing successful creators.
+- `ADMIN_ADDRESS`
+- `ARTFI_PROTOCOL_ADDRESS`
+- `ARTFI_NETWORK_REGISTRY_ADDRESS`
+- `ARTFI_SETTLEMENT_ROUTER_ADDRESS`
+- `ART_TOKEN_ADDRESS`
+
+### 2) Deploy the contracts
+
+Use the deployment script to deploy the three core contracts:
+
+```bash
+npx hardhat run scripts/deploy.js --network base
+```
+
+This deploys:
+
+- `ArtFiProtocol`
+- `ArtFiNetworkRegistry`
+- `ArtFiSettlementRouter`
+
+### 3) Configure the router and rewards
+
+After deploy:
+
+- approve supported ERC-20 assets
+- create the settlement fund, typically `artfi-repo-dev`
+- fund the router fund with ART or the approved asset
+- grant the Registry the router `PAYROLL_ROLE`
+- approve recipient wallets on the router
+
+### 4) Register and run a node (optional, but recommended)
+
+Generate the required node hashes and register the node:
+
+```bash
+npm run network:node-hashes
+npm run network:register-node
+```
+
+After admin approval, participate in the monthly reward flow:
+
+```bash
+ARTFI_NETWORK_MONTH=202609 npm run network:set-challenge
+npm run index:network
+```
+
+### 5) Run the tests
+
+```bash
+npm test
+```
+
+## Soft launch note
+
+ArtFi is ready for a soft launch with our first small group of participants.
+
+It is intentionally simple:
+
+- people can request ART on clear terms while waiting for a first Artizen payout
+- people can earn ART directly through repo work or by running node infrastructure
+- the protocol keeps requests, offers, and payouts transparent and auditable on-chain
+
+The point is not perfection; it is to get the first 12 people moving, earning, and connected without friction.
+
+If you are one of the first 12, start with one of these:
+
+- post a request with your terms (asset, amount, repayment, deadline)
+- review an open request and fund it as an offer
+- claim a `bounty:` or `test-bounty:` labeled issue
+- register an IPFS node and help keep the data layer alive
+
+That is enough to get going today.
 
