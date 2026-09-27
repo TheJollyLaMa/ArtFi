@@ -1,5 +1,78 @@
 {
-  "pending": [],
+  "pending": [
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#52",
+      "currency": "USDC",
+      "queuedAt": "2026-09-27T07:58:38.000Z",
+      "queuedBy": "github-actions[bot]",
+      "prNumber": 56,
+      "fund": "artfi-repo-dev",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "0.5"
+    },
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#52",
+      "currency": "ART",
+      "queuedAt": "2026-09-27T07:58:38.000Z",
+      "queuedBy": "github-actions[bot]",
+      "prNumber": 56,
+      "fund": "artfi-repo-dev",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "300"
+    },
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#52",
+      "currency": "BNUT",
+      "queuedAt": "2026-09-27T07:58:38.000Z",
+      "queuedBy": "github-actions[bot]",
+      "prNumber": 56,
+      "fund": "artfi-repo-dev",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "1000"
+    },
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#55",
+      "currency": "USDC",
+      "queuedAt": "2026-09-27T07:58:38.000Z",
+      "queuedBy": "github-actions[bot]",
+      "prNumber": 56,
+      "fund": "bignuten-repo-dev",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "0.5"
+    },
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#55",
+      "currency": "ART",
+      "queuedAt": "2026-09-27T07:58:38.000Z",
+      "queuedBy": "github-actions[bot]",
+      "prNumber": 56,
+      "fund": "bignuten-repo-dev",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "210"
+    },
+    {
+      "issueRef": "TheJollyLaMa/ArtFi#55",
+      "currency": "BNUT",
+      "queuedAt": "2026-09-27T07:58:38.000Z",
+      "queuedBy": "github-actions[bot]",
+      "prNumber": 56,
+      "fund": "bignuten-repo-dev",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
+      "contributorGithub": "TheJollyLaMa",
+      "amount": "1008"
+    }
+  ],
   "settled": [
     {
       "issueRef": "TheJollyLaMa/ArtFi#28",

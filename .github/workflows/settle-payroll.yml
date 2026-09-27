@@ -23,6 +23,7 @@ on:
 permissions:
   contents: write
   issues: write
+  pull-requests: write
 
 jobs:
   settle:
@@ -57,6 +58,8 @@ jobs:
         run: node scripts/validatePayrollQueue.js
 
       - name: Commit queue update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -66,5 +69,8 @@ jobs:
             exit 0
           fi
           git commit -m "chore: settle payroll entries"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          BRANCH="payroll/settle-${GITHUB_RUN_ID}"
+          git push origin "HEAD:${BRANCH}"
+          gh pr create --base main --head "$BRANCH" \
+            --title "chore: settle payroll entries" \
+            --body "Automated payroll settlement update. Main is protected, so the bot proposes queue changes through a pull request."

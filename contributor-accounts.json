@@ -6,7 +6,7 @@
       "role": "owner",
       "walletAddress": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "artEarned": 250,
-      "artPending": 0,
+      "artPending": 510,
       "ideasCredited": [
         "TheJollyLaMa/ArtFi#30",
         "TheJollyLaMa/ArtFi#36",
@@ -15,7 +15,7 @@
         "TheJollyLaMa/ArtFi#42"
       ],
       "bnutEarned": 0,
-      "bnutPending": 0,
+      "bnutPending": 2008,
       "issuesClosed": [
         "TheJollyLaMa/ArtFi#28",
         "TheJollyLaMa/ArtFi#30",
@@ -23,8 +23,11 @@
         "TheJollyLaMa/ArtFi#36",
         "TheJollyLaMa/ArtFi#38",
         "TheJollyLaMa/ArtFi#40",
-        "TheJollyLaMa/ArtFi#42"
-      ]
+        "TheJollyLaMa/ArtFi#42",
+        "TheJollyLaMa/ArtFi#52",
+        "TheJollyLaMa/ArtFi#55"
+      ],
+      "usdcPending": 1
     }
   ]
 }
