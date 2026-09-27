@@ -1,5 +1,7 @@
 # ArtFi
 
+![ArtFi branding](https://github.com/user-attachments/assets/58069599-d5d0-4bf3-a066-a2ac34234ff8)
+
 ArtFi is a simple soft-launch micro-liquidity layer for Artizen newcomers.
 
 The core idea is straightforward: if someone is waiting for their first Artizen payout, they can post a request for ART (or another approved asset) with clear repayment terms. Another wallet can offer to fund it under those terms. Until that happens, or instead of it, people can also earn ART directly by contributing repo work or by running an IPFS node.
@@ -56,66 +58,58 @@ This is the “keep the decent-artizen data alive” path for people who want to
 
 ## Getting started today
 
-### 1) Install and configure
+You do not need to deploy anything. ArtFi's contracts are already live; you just clone the repo, run it locally, and connect your wallet to the main deployed contracts.
+
+### 1) Clone and install
 
 ```bash
+git clone https://github.com/TheJollyLaMa/ArtFi.git
+cd ArtFi
 npm install
 cp .env.example .env
 ```
 
-Fill in the essentials in `.env`:
+### 2) Point your local setup at the live contracts
 
-- `ADMIN_ADDRESS`
+Fill in `.env` with the already-deployed addresses (do not generate new ones):
+
 - `ARTFI_PROTOCOL_ADDRESS`
 - `ARTFI_NETWORK_REGISTRY_ADDRESS`
 - `ARTFI_SETTLEMENT_ROUTER_ADDRESS`
 - `ART_TOKEN_ADDRESS`
 
-### 2) Deploy the contracts
+These are the same contracts everyone else in ArtFi is using. Your local setup calls and posts to them; it does not create separate copies of them.
 
-Use the deployment script to deploy the three core contracts:
+### 3) Run the app locally
 
 ```bash
-npx hardhat run scripts/deploy.js --network base
+npx http-server . -p 8002
 ```
 
-This deploys:
-
-- `ArtFiProtocol`
-- `ArtFiNetworkRegistry`
-- `ArtFiSettlementRouter`
-
-### 3) Configure the router and rewards
-
-After deploy:
-
-- approve supported ERC-20 assets
-- create the settlement fund, typically `artfi-repo-dev`
-- fund the router fund with ART or the approved asset
-- grant the Registry the router `PAYROLL_ROLE`
-- approve recipient wallets on the router
+Open `index.html` in the browser, connect your wallet, and you can create requests, fund offers, or manage your node reward settings against the live contracts.
 
 ### 4) Register and run a node (optional, but recommended)
 
-Generate the required node hashes and register the node:
+Generate the required node hashes and register the node against the live registry:
 
 ```bash
 npm run network:node-hashes
 npm run network:register-node
 ```
 
-After admin approval, participate in the monthly reward flow:
+An admin must approve your node before spot-checks count. Once approved, help build the read-only network index:
 
 ```bash
-ARTFI_NETWORK_MONTH=202609 npm run network:set-challenge
 npm run index:network
 ```
 
-### 5) Run the tests
+### 5) Run the tests (optional, for contributors)
 
 ```bash
 npm test
 ```
+
+Deploying your own copy of `ArtFiProtocol`, `ArtFiNetworkRegistry`, and `ArtFiSettlementRouter` with `scripts/deploy.js` is only for someone forking the entire system into their own independent network. That is not what we're suggesting here — everyone in this soft launch shares the same main contracts.
 
 ## Soft launch note
 
