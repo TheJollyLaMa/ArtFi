@@ -1,5 +1,6 @@
 {
-  "pending": [
+  "pending": [],
+  "settled": [
     {
       "issueRef": "TheJollyLaMa/ArtFi#28",
       "currency": "ART",
@@ -8,7 +9,12 @@
       "prNumber": 29,
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
-      "amount": "25"
+      "amount": "25",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x83305b7e9753050925403e4f30b567040a8b79b5fb46ce89fc0be937774b96dc",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#30",
@@ -19,7 +25,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "20",
-      "role": "implementer"
+      "role": "implementer",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x51b29e44f54f27844dc5903a90ef927502a20bc0c73e4775cb2427a370802aad",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#30",
@@ -30,7 +41,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "5",
-      "role": "idea-originator"
+      "role": "idea-originator",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0xa50a317788483099b952b1e0a1ed8d2ddcd7e809d073c8850c48518d874e52cf",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#31",
@@ -40,7 +56,12 @@
       "prNumber": 34,
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
-      "amount": "25"
+      "amount": "25",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x234baf7c81ab36bf718ad54e7a6794736ae4cf64bd0d0a24ca6b0c37cef6bb7d",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#36",
@@ -51,7 +72,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "20",
-      "role": "implementer"
+      "role": "implementer",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x3d59753251f79d3401c3e6cce7676e5f92152e490663264618e9b8f3c7fbab92",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#36",
@@ -62,7 +88,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "5",
-      "role": "idea-originator"
+      "role": "idea-originator",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x6aeadbc76864a3c0a3b396574e7765c78e243a9fee21ffee51e4a68870e7d221",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#38",
@@ -73,7 +104,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "20",
-      "role": "implementer"
+      "role": "implementer",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x9d90d20a9d9b10f3aec0bc2fd67129b96511afa814a335e73532ebeb54240415",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#38",
@@ -84,7 +120,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "5",
-      "role": "idea-originator"
+      "role": "idea-originator",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x5688199051964d498cb3a27bca3a0c4278b7bdcea636e0aa3009aade3effca13",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#40",
@@ -95,7 +136,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "80",
-      "role": "implementer"
+      "role": "implementer",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0xe4bed8eb4428e6b2849605d93afd711c7457506dacc79994a78cd718c428e071",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#40",
@@ -106,7 +152,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "20",
-      "role": "idea-originator"
+      "role": "idea-originator",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x10fda9e74fc7d6122dcdd09c6feac55f44369c4db648dcd105ab34f31cd3566a",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#42",
@@ -117,7 +168,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "20",
-      "role": "implementer"
+      "role": "implementer",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0xa71300d6b937f7f83d2062c5e8278daf3a911a55a3bc2d41d3ef77839a576070",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     },
     {
       "issueRef": "TheJollyLaMa/ArtFi#42",
@@ -128,8 +184,12 @@
       "contributor": "0x807061DF657A7697c04045dA7d16D941861cAABc",
       "contributorGithub": "TheJollyLaMa",
       "amount": "5",
-      "role": "idea-originator"
+      "role": "idea-originator",
+      "settledAt": "2026-09-27T07:52:20.992Z",
+      "settledBy": "TheJollyLaMa",
+      "txHash": "0x3fb3be1a5d56e9afc23545357e9febb7ee741467ff8f30896ef2c081eb5f0884",
+      "router": "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905",
+      "fund": "artfi-repo-dev"
     }
-  ],
-  "settled": []
+  ]
 }

@@ -23,6 +23,8 @@
     "node:spot-check": "node scripts/nodeKeeper.mjs spot-check",
     "node:heartbeat": "node scripts/nodeKeeper.mjs",
     "compile": "hardhat compile",
+    "whitelist:verify": "node scripts/syncContributorWhitelist.js verify",
+    "whitelist:plan": "node scripts/syncContributorWhitelist.js plan",
     "deploy:base": "hardhat run scripts/deploy.js --network base"
   },
   "repository": {

@@ -2216,7 +2216,7 @@
           <div class="field-grid">
             <div class="field">
               <label for="router-address">Settlement router</label>
-              <input id="router-address" value="0xCe53017Fe1A0edBAb6146f2556e988498F0f9905" placeholder="0x..." />
+              <input id="router-address" value="0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5" placeholder="0x..." />
             </div>
           </div>
           <div class="field-grid" style="margin-top:12px;">
@@ -2302,7 +2302,7 @@
               <div class="field"><label for="fund-metadata-repository">Repository</label><input id="fund-metadata-repository" placeholder="owner/repository" /></div>
               <div class="field"><label for="fund-metadata-website">Website or Pages URL</label><input id="fund-metadata-website" placeholder="https://..." /></div>
               <div class="field"><label for="fund-metadata-ens">ENS name</label><input id="fund-metadata-ens" placeholder="project.eth" /></div>
-              <div class="field"><label for="fund-metadata-treasury">Treasury contract</label><input id="fund-metadata-treasury" value="0xCe53017Fe1A0edBAb6146f2556e988498F0f9905" placeholder="0x..." /></div>
+              <div class="field"><label for="fund-metadata-treasury">Treasury contract</label><input id="fund-metadata-treasury" value="0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5" placeholder="0x..." /></div>
               <div class="field"><label for="fund-metadata-projects">Artizen project URLs</label><textarea id="fund-metadata-projects" placeholder="One project URL per line"></textarea></div>
             </div>
             <div class="field"><label for="fund-metadata-field-select">Add metadata field</label><select id="fund-metadata-field-select"><option value="">Choose a field…</option><option value="repositoryUrl">Repository URL</option><option value="purpose">Purpose</option><option value="asset">Asset</option><option value="network">Network</option><option value="createdAt">Created at</option><option value="contact">Contact</option><option value="custom">Custom field</option></select></div>
@@ -2347,6 +2347,7 @@
           <div class="admin-actions"><button id="sweep-fund-button" class="btn secondary" type="button" disabled>Sweep selected fund</button></div>
           <label class="queue-select-all" style="display:flex;align-items:center;gap:8px;margin-top:16px;"><input id="sweep-unallocated-checkbox" type="checkbox" /><span>Confirm sweep of unallocated router balance</span></label>
           <div class="admin-actions"><button id="sweep-excess-button" class="btn secondary" type="button" disabled>Sweep unallocated balance</button></div>
+          <p id="sweep-status" class="note">Connect the owner wallet to read the selected fund balance.</p>
         </div>
       </div>
     </section>
@@ -2386,14 +2387,26 @@
       "function payoutUnallocated(address asset, address recipient, uint256 amount, bytes32 workReference, bytes32 repositoryIdHash, bytes32 contributorIdHash, string metadataUri, bytes32 metadataHash)",
       "function totalFundBalances(address asset) view returns (uint256)",
       "function fundBalances(bytes32 fundId, address asset) view returns (uint256)",
-      "function completedWorkReferences(bytes32 fundId, bytes32 workReference) view returns (bool)",
+      "function completedWorkReferences(bytes32 workReference) view returns (bool)",
       "function recoverExcess(address asset, address recipient, uint256 amount)",
       "function recoverFund(bytes32 fundId, address asset, address recipient, uint256 amount)",
-      "function funds(bytes32) view returns ((string,bool))",
-      "event FundCreated(bytes32 indexed fundId, string metadataUri)"
+      "function funds(bytes32) view returns (string metadataUri, bool active, bool exists)",
+      "function fundCount() view returns (uint256)",
+      "function allFundIds() view returns (bytes32[])",
+      "function contributors(address) view returns (bytes32 githubIdHash, bool approved, bool exists)",
+      "function isApprovedRecipient(address wallet) view returns (bool)",
+      "function contributorCount() view returns (uint256)",
+      "function allContributorWallets() view returns (address[])",
+      "function setContributorApproved(address wallet, bytes32 githubIdHash, bool approved)",
+      "function setContributorsApproved(address[] wallets, bytes32[] githubIdHashes, bool[] approvals)",
+      "function VERSION() view returns (string)",
+      "event FundCreated(bytes32 indexed fundId, string metadataUri)",
+      "event FundMetadataUpdated(bytes32 indexed fundId, string metadataUri)",
+      "event FundRecovered(bytes32 indexed fundId, address indexed asset, address indexed recipient, uint256 amount)",
+      "event ContributorApprovalUpdated(address indexed wallet, bytes32 indexed githubIdHash, bool approved)"
     ];
     const artTokenAddress = "0x44c4516768e47cd97cfF2561B81a74699F23f8Ec";
-    const publicRouterAddress = "0xCe53017Fe1A0edBAb6146f2556e988498F0f9905";
+    const publicRouterAddress = "0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5";
     const publicBaseRpc = "https://base-rpc.publicnode.com";
     const settlementFundId = keccak256(toUtf8Bytes("artfi-repo-dev"));
     const defaultFundRegistry = [
@@ -2562,6 +2575,7 @@
       select.value = select === requestAsset || select === offerAsset ? token.symbol : token.address;
       if (select === payoutTokenSelect) payoutAssetAddress.value = token.address;
       renderTokenPickers();
+      if (select === sweepAsset) refreshSweepControls();
     };
     const renderTokenPicker = (select, basket) => {
       const selectedToken = tokenForPickerValue(select);
@@ -2672,6 +2686,7 @@
     const sweepFundId = document.getElementById("sweep-fund-id");
     const sweepAsset = document.getElementById("sweep-asset");
     const sweepAmount = document.getElementById("sweep-amount");
+    const sweepStatus = document.getElementById("sweep-status");
     const payoutMode = document.getElementById("payout-mode");
     const payoutTokenSelect = document.getElementById("payout-token-select");
     const payoutAssetAddress = document.getElementById("payout-asset-address");
@@ -2958,6 +2973,47 @@
       refreshTreasuryStatus();
     };
 
+    // Recovery feedback must land in the treasury card; #tx-note sits in the payroll panel.
+    const setSweepStatus = (message) => {
+      if (sweepStatus) sweepStatus.textContent = message;
+      txNote.textContent = message;
+    };
+
+    const refreshSweepControls = async () => {
+      const isAdmin = state.connected && state.account === ADMIN_WALLET;
+      const router = routerAddress.value.trim();
+      const asset = sweepAsset.value.trim();
+      if (sweepFundButton) sweepFundButton.disabled = !isAdmin;
+      if (sweepExcessButton) sweepExcessButton.disabled = !isAdmin || !sweepUnallocatedCheckbox.checked;
+      if (!router || !asset || !window.ethereum) return;
+
+      try {
+        await assertBaseNetwork();
+        const provider = state.provider || new BrowserProvider(window.ethereum);
+        state.provider = provider;
+        const routerContract = new Contract(router, routerAbi, provider);
+        const sweepToken = tokenForAddress(asset);
+        const token = new Contract(asset, [
+          "function balanceOf(address who) view returns (uint256)"
+        ], provider);
+        const fundId = keccak256(toUtf8Bytes(sweepFundId.value || "artfi-repo-dev"));
+        const [held, allocated, fundAvailable] = await Promise.all([
+          token.balanceOf(router),
+          routerContract.totalFundBalances(asset),
+          routerContract.fundBalances(fundId, asset),
+        ]);
+        const excess = held > allocated ? held - allocated : 0n;
+        if (sweepExcessButton) sweepExcessButton.disabled = !(isAdmin && sweepUnallocatedCheckbox.checked && excess > 0n);
+        if (sweepStatus) {
+          sweepStatus.innerHTML = `${tokenBadge(sweepToken.symbol, sweepToken.image)} in ${escapeHtml(sweepFundId.value)}: ${formatUnits(fundAvailable, sweepToken.decimals)} • unallocated: ${formatUnits(excess, sweepToken.decimals)}`;
+        }
+      } catch (error) {
+        if (sweepStatus) {
+          sweepStatus.textContent = error?.shortMessage || error?.message || "Unable to read treasury balances for the selected sweep token.";
+        }
+      }
+    };
+
     const refreshTreasuryStatus = async () => {
       const router = routerAddress.value.trim();
       if (!router || !window.ethereum) {
@@ -2993,8 +3049,7 @@
         if (treasuryAllocated) treasuryAllocated.innerHTML = `${badge} available in ${escapeHtml(selectedFundId.value)}: ${formatUnits(fundAvailable, selectedToken.decimals)}`;
         if (treasuryExcess) treasuryExcess.innerHTML = `${badge} unallocated: ${formatUnits(excess, selectedToken.decimals)}`;
 
-        const isAdmin = state.connected && state.account === ADMIN_WALLET;
-        if (sweepExcessButton) sweepExcessButton.disabled = !(isAdmin && sweepUnallocatedCheckbox.checked && excess > 0n);
+        await refreshSweepControls();
       } catch (_) {
         const networkError = _?.message || String(_ || "");
         txNote.textContent = networkError.includes("Wrong network") || networkError.includes("no deployed code")
@@ -3198,13 +3253,14 @@
     const sweepFundToWallet = async () => {
       const router = routerAddress.value.trim();
       if (!state.connected || state.account !== ADMIN_WALLET || !router) {
-        txNote.textContent = "Connect the owner wallet before sweeping a fund allocation.";
+        setSweepStatus("Connect the owner wallet before sweeping a fund allocation.");
         return;
       }
 
       try {
         await assertBaseNetwork();
         await assertContractAtAddress(router, "Settlement Router");
+        await assertRouterMethodAvailable(router, "recoverFund(bytes32,address,address,uint256)", "Fund allocation recovery");
         const fundIdText = sweepFundId.value.trim();
         const asset = sweepAsset.value.trim();
         const rawAmount = sweepAmount.value.trim();
@@ -3214,16 +3270,17 @@
         await assertContractAtAddress(asset, "Sweep token");
         const contract = new Contract(router, routerAbi, state.signer);
         const fundId = keccak256(toUtf8Bytes(fundIdText));
-        const amount = parseUnits(rawAmount, tokenForAddress(asset).decimals);
+        const sweepToken = tokenForAddress(asset);
+        const amount = parseUnits(rawAmount, sweepToken.decimals);
         const balance = await contract.fundBalances(fundId, asset);
-        if (BigInt(balance) < amount) throw new Error(`Fund ${fundIdText} has only ${formatUnits(balance, 18)} available.`);
+        if (BigInt(balance) < amount) throw new Error(`Fund ${fundIdText} has only ${formatUnits(balance, sweepToken.decimals)} ${sweepToken.symbol} available.`);
         sweepFundButton.disabled = true;
-        txNote.textContent = `Sweeping ${rawAmount} from fund ${fundIdText} back to the wallet…`;
+        setSweepStatus(`Sweeping ${rawAmount} from fund ${fundIdText} back to the wallet…`);
         const tx = await contract.recoverFund(fundId, asset, state.account, amount);
         await tx.wait();
         refreshAfterWalletTransaction(`Recovered ${rawAmount} from fund ${fundIdText}. Refreshing ArtFi…`);
       } catch (error) {
-        txNote.textContent = error?.shortMessage || error?.message || "Fund sweep failed.";
+        setSweepStatus(error?.shortMessage || error?.message || "Fund sweep failed.");
       } finally {
         if (state.connected && state.account === ADMIN_WALLET) {
           sweepFundButton.disabled = false;
@@ -3234,11 +3291,11 @@
     const sweepUnallocatedToWallet = async () => {
       const router = routerAddress.value.trim();
       if (!state.connected || state.account !== ADMIN_WALLET || !router) {
-        txNote.textContent = "Connect the owner wallet before sweeping unallocated funds.";
+        setSweepStatus("Connect the owner wallet before sweeping unallocated funds.");
         return;
       }
       if (!sweepUnallocatedCheckbox.checked) {
-        txNote.textContent = "Check the confirmation box before sweeping the unallocated router balance.";
+        setSweepStatus("Check the confirmation box before sweeping the unallocated router balance.");
         return;
       }
 
@@ -3248,6 +3305,7 @@
         const asset = sweepAsset.value.trim();
         await assertContractAtAddress(asset, "Sweep token");
         const contract = new Contract(router, routerAbi, state.signer);
+        const sweepToken = tokenForAddress(asset);
         const token = new Contract(asset, [
           "function balanceOf(address who) view returns (uint256)"
         ], state.provider || state.signer);
@@ -3256,12 +3314,12 @@
         const excess = held > allocated ? held - allocated : 0n;
         if (excess <= 0n) throw new Error("No unallocated balance is available for this token.");
         sweepExcessButton.disabled = true;
-        txNote.textContent = `Sweeping ${formatUnits(excess, 18)} unallocated tokens back to the wallet…`;
+        setSweepStatus(`Sweeping ${formatUnits(excess, sweepToken.decimals)} unallocated tokens back to the wallet…`);
         const tx = await contract.recoverExcess(asset, state.account, excess);
         await tx.wait();
-        refreshAfterWalletTransaction(`Recovered ${formatUnits(excess, 18)} unallocated tokens. Refreshing ArtFi…`);
+        refreshAfterWalletTransaction(`Recovered ${formatUnits(excess, sweepToken.decimals)} unallocated tokens. Refreshing ArtFi…`);
       } catch (error) {
-        txNote.textContent = error?.shortMessage || error?.message || "Unallocated sweep failed.";
+        setSweepStatus(error?.shortMessage || error?.message || "Unallocated sweep failed.");
       } finally {
         sweepExcessButton.disabled = !(state.connected && state.account === ADMIN_WALLET && sweepUnallocatedCheckbox.checked);
       }
@@ -3477,7 +3535,56 @@
       const contributor = String(entry.contributorGithub || "unknown");
       const issue = String(entry.issueRef || "unknown");
       const amount = String(entry.amount || "0");
-      return `${issue}|${contributor}|${role}|${amount}`;
+      const currency = String(entry.currency || "ART").toUpperCase();
+      return `${issue}|${contributor}|${role}|${amount}${currency === "ART" ? "" : `|${currency}`}`;
+    };
+
+    const payrollWorkReference = entry => {
+      const currency = String(entry.currency || "ART").toUpperCase();
+      const base = `${entry.issueRef || ""}:${entry.contributorGithub || ""}:${entry.role || "contributor"}`;
+      // ART references predate multi-currency payouts and stay unsuffixed to match settled history.
+      return keccak256(toUtf8Bytes(currency === "ART" ? base : `${base}:${currency}`));
+    };
+
+    const entryRouter = entry => /^0x[a-fA-F0-9]{40}$/.test(String(entry.router || ""))
+      ? String(entry.router)
+      : routerAddress.value.trim();
+
+    const entryFundSlug = entry => String(entry.fund || selectedFundId?.value.trim() || "artfi-repo-dev");
+
+    const isLegacyRouterEntry = entry => entryRouter(entry).toLowerCase() !== routerAddress.value.trim().toLowerCase();
+
+    const tokenForCurrency = currency => {
+      const symbol = String(currency || "ART").toUpperCase();
+      const token = tokenRegistry.find(entry => entry.symbol === symbol && /^0x[a-fA-F0-9]{40}$/.test(entry.address));
+      if (!token) throw new Error(`No ${symbol} token address is registered. Add it in the token registry before settling.`);
+      return token;
+    };
+
+    const formatCurrencyTotals = entries => {
+      const totals = new Map();
+      for (const entry of entries) {
+        const symbol = String(entry.currency || "ART").toUpperCase();
+        totals.set(symbol, (totals.get(symbol) || 0) + (Number(entry.amount) || 0));
+      }
+      return [...totals].map(([symbol, total]) => {
+        const token = tokenRegistry.find(candidate => candidate.symbol === symbol);
+        return `${tokenBadge(symbol, token?.image)} ${total.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")}`;
+      }).join(" + ");
+    };
+
+    const legacyWorkReferenceAbi = ["function completedWorkReferences(bytes32 fundId, bytes32 workReference) view returns (bool)"];
+
+    const isEntryPaidOnChain = async entry => {
+      const router = entryRouter(entry);
+      const workReference = payrollWorkReference(entry);
+      try {
+        return await new Contract(router, routerAbi, state.provider).completedWorkReferences(workReference);
+      } catch (_) {
+        // v1 routers track work references per fund.
+        const legacy = new Contract(router, legacyWorkReferenceAbi, state.provider);
+        return await legacy.completedWorkReferences(keccak256(toUtf8Bytes(entryFundSlug(entry))), workReference);
+      }
     };
 
     const settledQueueStorageKey = (router) => `artfi-settled-queue:${String(router || "").toLowerCase()}`;
@@ -3503,9 +3610,8 @@
       const grouped = new Map();
       for (const entry of state.queue) {
         const key = String(entry.contributorGithub || "unknown");
-        const group = grouped.get(key) || { github: key, wallet: entry.contributor || "", amount: 0, entries: 0 };
-        group.amount += Number(entry.amount) || 0;
-        group.entries += 1;
+        const group = grouped.get(key) || { github: key, wallet: entry.contributor || "", entries: [] };
+        group.entries.push(entry);
         grouped.set(key, group);
       }
       creatorBatchList.innerHTML = "";
@@ -3517,7 +3623,7 @@
       for (const group of grouped.values()) {
         const label = document.createElement("label");
         label.className = "creator-batch-item";
-        label.innerHTML = `<input type="checkbox" data-creator="${group.github}"><span><strong>@${group.github}</strong><small>${group.entries} entr${group.entries === 1 ? "y" : "ies"} • ${tokenBadge("ART", tokenForAddress(artTokenAddress).image)} ${group.amount.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")} • ${group.wallet.slice(0, 10)}…</small></span>`;
+        label.innerHTML = `<input type="checkbox" data-creator="${escapeHtml(group.github)}"><span><strong>@${escapeHtml(group.github)}</strong><small>${group.entries.length} entr${group.entries.length === 1 ? "y" : "ies"} • ${formatCurrencyTotals(group.entries)} • ${escapeHtml(group.wallet.slice(0, 10))}…</small></span>`;
         creatorBatchList.appendChild(label);
       }
       creatorBatchList.querySelectorAll("input").forEach(input => input.addEventListener("change", updateBatchSummary));
@@ -3539,9 +3645,8 @@
     const updateBatchSummary = () => {
       const entries = selectedEntries();
       const creators = [...new Set(entries.map(entry => String(entry.contributorGithub || "unknown")))];
-      const total = entries.reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
       batchSummary.innerHTML = entries.length
-        ? `${entries.length} job${entries.length === 1 ? "" : "s"} selected • ${creators.length} creator${creators.length === 1 ? "" : "s"} • ${tokenBadge("ART", tokenForAddress(artTokenAddress).image)} ${total.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")}`
+        ? `${entries.length} job${entries.length === 1 ? "" : "s"} selected • ${creators.length} creator${creators.length === 1 ? "" : "s"} • ${formatCurrencyTotals(entries)}`
         : "No jobs selected.";
       finalizeButton.disabled = !(state.connected && state.account === ADMIN_WALLET && entries.length && routerAddress.value.trim());
       if (selectAllPending) {
@@ -3565,10 +3670,10 @@
         item.className = "queue-item";
         const key = queueEntryKey(entry);
         item.innerHTML = `
-          <input type="checkbox" data-entry-key="${key}" />
+          <input type="checkbox" data-entry-key="${escapeHtml(key)}" />
           <span>
-            <strong>@${entry.contributorGithub} — ${entry.amount} ${tokenBadge(tokenInfoForEntry(entry).symbol, tokenInfoForEntry(entry).image)}</strong>
-            <small>${entry.issueRef} • ${entry.role || "contributor"} • ${entry.contributor?.slice(0, 10) || "wallet unknown"}…</small>
+            <strong>@${escapeHtml(entry.contributorGithub)} — ${escapeHtml(entry.amount)} ${tokenBadge(tokenInfoForEntry(entry).symbol, tokenInfoForEntry(entry).image)}</strong>
+            <small>${escapeHtml(entry.issueRef)} • ${escapeHtml(entry.role || "contributor")} • ${escapeHtml(entry.contributor?.slice(0, 10) || "wallet unknown")}…${entry.fund ? ` • fund ${escapeHtml(entry.fund)}` : ""}${isLegacyRouterEntry(entry) ? ` • legacy router ${escapeHtml(entryRouter(entry).slice(0, 10))}…` : ""}</small>
           </span>
         `;
         item.addEventListener("change", updateBatchSummary);
@@ -3589,15 +3694,12 @@
         if (pending.length && state.provider && routerAddress.value.trim()) {
           try {
             await assertBaseNetwork();
-            const contract = new Contract(routerAddress.value.trim(), routerAbi, state.provider);
-            const fundId = keccak256(toUtf8Bytes(selectedFundId?.value.trim() || "artfi-repo-dev"));
             const settledOnChain = await Promise.all(pending.map(async entry => {
-              const workReference = keccak256(toUtf8Bytes(`${entry.issueRef || ""}:${entry.contributorGithub || ""}:${entry.role || "contributor"}`));
-              const [fundSettled, unallocatedSettled] = await Promise.all([
-                contract.completedWorkReferences(fundId, workReference),
-                contract.completedWorkReferences("0x" + "00".repeat(32), workReference),
-              ]);
-              return [queueEntryKey(entry), fundSettled || unallocatedSettled];
+              try {
+                return [queueEntryKey(entry), await isEntryPaidOnChain(entry)];
+              } catch (_) {
+                return [queueEntryKey(entry), false];
+              }
             }));
             settledOnChain.forEach(([key, isSettled]) => {
               if (isSettled) settled.add(key);
@@ -4206,6 +4308,108 @@
       }
     };
 
+    const settlePayrollGroup = async ({ router, fundSlug, token, entries, mode, legacy }) => {
+      await assertContractAtAddress(router, legacy ? "Legacy settlement router" : "Settlement Router");
+      await assertContractAtAddress(token.address, `${token.symbol} token`);
+      const contract = new Contract(router, routerAbi, state.signer);
+      const selectedFund = keccak256(toUtf8Bytes(fundSlug));
+      const erc20 = new Contract(token.address, [
+        "function allowance(address owner, address spender) view returns (uint256)",
+        "function approve(address spender, uint256 amount) returns (bool)",
+        "function balanceOf(address who) view returns (uint256)"
+      ], state.signer);
+      const amountOf = entry => parseUnits(String(Number(entry.amount || 0).toFixed(token.decimals)), token.decimals);
+      const totalRequired = entries.reduce((sum, entry) => sum + amountOf(entry), 0n);
+      const label = `${formatUnits(totalRequired, token.decimals)} ${token.symbol} from ${legacy ? "legacy " : ""}${mode === "unallocated" ? "unallocated balance" : fundSlug}`;
+
+      if (mode === "fund") {
+        const available = await contract.fundBalances(selectedFund, token.address);
+        if (available < totalRequired) {
+          if (legacy) {
+            throw new Error(`Legacy fund ${fundSlug} holds only ${formatUnits(available, token.decimals)} ${token.symbol}; ${formatUnits(totalRequired, token.decimals)} is required. Legacy routers are never topped up.`);
+          }
+          const fundingAmount = totalRequired - available;
+          if (BigInt(await erc20.balanceOf(state.account)) < fundingAmount) {
+            throw new Error(`Insufficient ${token.symbol} balance to top up ${fundSlug} (${formatUnits(totalRequired, token.decimals)} required, ${formatUnits(available, token.decimals)} already allocated).`);
+          }
+          if (BigInt(await erc20.allowance(state.account, router)) < fundingAmount) {
+            await (await erc20.approve(router, fundingAmount)).wait();
+          }
+          await (await contract.fundToken(selectedFund, token.address, fundingAmount)).wait();
+        }
+      } else {
+        const held = await erc20.balanceOf(router);
+        const allocated = await contract.totalFundBalances(token.address);
+        const unallocated = held > allocated ? held - allocated : 0n;
+        if (unallocated < totalRequired) {
+          throw new Error(`Insufficient unallocated ${token.symbol} balance (${formatUnits(totalRequired, token.decimals)} required, ${formatUnits(unallocated, token.decimals)} available).`);
+        }
+      }
+
+      const describe = entry => {
+        const issueRef = String(entry.issueRef || "");
+        const contributorGithub = String(entry.contributorGithub || "");
+        const role = entry.role || "contributor";
+        const repositorySlug = issueRef.includes("#") ? issueRef.slice(0, issueRef.lastIndexOf("#")) : "artfi";
+        return {
+          issueRef,
+          contributorGithub,
+          recipient: String(entry.contributor || state.account),
+          amount: amountOf(entry),
+          workReference: payrollWorkReference(entry),
+          repositoryIdHash: keccak256(toUtf8Bytes(repositorySlug)),
+          contributorIdHash: keccak256(toUtf8Bytes(contributorGithub)),
+          metadataUri: `ipfs://artfi/payroll/${slugify(issueRef)}-${slugify(contributorGithub)}-${slugify(role)}-${slugify(token.symbol)}`,
+          metadataHash: keccak256(toUtf8Bytes(JSON.stringify({ issueRef, contributorGithub, role, amount: entry.amount, currency: token.symbol, fund: fundSlug }))),
+        };
+      };
+      const jobs = entries.map(describe);
+
+      const sameRecipient = jobs.length > 1 && jobs.every(job => job.recipient.toLowerCase() === jobs[0].recipient.toLowerCase());
+      const batchSelector = keccak256(toUtf8Bytes("payoutBatch(bytes32,address,address,uint256[],bytes32[],bytes32[],bytes32[],string[],bytes32[])")).slice(2, 10).toLowerCase();
+      const routerCode = (await state.provider.getCode(router)).toLowerCase();
+      if (mode === "fund" && sameRecipient && routerCode.includes(batchSelector)) {
+        const batchArgs = [
+          selectedFund,
+          token.address,
+          jobs[0].recipient,
+          jobs.map(job => job.amount),
+          jobs.map(job => job.workReference),
+          jobs.map(job => job.repositoryIdHash),
+          jobs.map(job => job.contributorIdHash),
+          jobs.map(job => job.metadataUri),
+          jobs.map(job => job.metadataHash),
+        ];
+        try {
+          await contract.payoutBatch.staticCall(...batchArgs);
+        } catch (error) {
+          throw new Error(`Settlement preflight failed for ${label}: ${readableContractError(error)}`);
+        }
+        txNote.textContent = `Submitting ${label} in one transaction…`;
+        await (await contract.payoutBatch(...batchArgs)).wait();
+        entries.forEach(entry => markQueueEntrySettled(routerAddress.value.trim(), entry));
+        return entries.length;
+      }
+
+      let settledCount = 0;
+      for (const [index, job] of jobs.entries()) {
+        const payoutArgs = mode === "unallocated"
+          ? [token.address, job.recipient, job.amount, job.workReference, job.repositoryIdHash, job.contributorIdHash, job.metadataUri, job.metadataHash]
+          : [selectedFund, token.address, job.recipient, job.amount, job.workReference, job.repositoryIdHash, job.contributorIdHash, job.metadataUri, job.metadataHash];
+        const payoutMethod = mode === "unallocated" ? "payoutUnallocated" : "payout";
+        try {
+          await contract[payoutMethod].staticCall(...payoutArgs);
+        } catch (error) {
+          throw new Error(`Settlement preflight failed for ${job.issueRef} (${token.symbol}): ${readableContractError(error)}`);
+        }
+        txNote.textContent = `Submitting @${job.contributorGithub} ${token.symbol} (${index + 1}/${jobs.length})…`;
+        await (await contract[payoutMethod](...payoutArgs)).wait();
+        markQueueEntrySettled(routerAddress.value.trim(), entries[index]);
+        settledCount += 1;
+      }
+      return settledCount;
+    };
+
     const finalizePayout = async () => {
       if (!state.connected || !state.signer) return;
 
@@ -4219,142 +4423,36 @@
 
       try {
         await assertBaseNetwork();
-        await assertContractAtAddress(router, "Settlement Router");
         finalizeButton.disabled = true;
-        txNote.textContent = `Funding and submitting ${entries.length} payout${entries.length === 1 ? "" : "s"}…`;
+        const requestedMode = payoutMode?.value || "fund";
 
-        const contract = new Contract(router, routerAbi, state.signer);
-        const mode = payoutMode?.value || "fund";
-        const selectedFund = keccak256(toUtf8Bytes((selectedFundId?.value.trim() || "artfi-repo-dev")));
-        const settledAsset = payoutAssetAddress.value.trim();
-        if (mode === "unallocated") {
+        const groups = new Map();
+        for (const entry of entries) {
+          const legacy = isLegacyRouterEntry(entry);
+          const mode = legacy ? "fund" : requestedMode;
+          const token = tokenForCurrency(entry.currency);
+          const groupRouter = entryRouter(entry);
+          const fundSlug = entryFundSlug(entry);
+          const key = `${groupRouter.toLowerCase()}|${mode}|${fundSlug}|${token.address.toLowerCase()}`;
+          const group = groups.get(key) || { router: groupRouter, fundSlug, token, entries: [], mode, legacy };
+          group.entries.push(entry);
+          groups.set(key, group);
+        }
+
+        if ([...groups.values()].some(group => group.mode === "unallocated")) {
           await assertRouterMethodAvailable(
             router,
             "payoutUnallocated(address,address,uint256,bytes32,bytes32,bytes32,string,bytes32)",
             "Unallocated payouts"
           );
         }
-        if (!settledAsset || !/^0x[a-fA-F0-9]{40}$/.test(settledAsset)) {
-          throw new Error("Provide a valid token address for the selected payout source.");
+
+        let settledCount = 0;
+        for (const group of groups.values()) {
+          settledCount += await settlePayrollGroup(group);
         }
 
-        await assertContractAtAddress(settledAsset, "Payout token");
-        const payoutToken = tokenForAddress(settledAsset);
-
-        const token = new Contract(settledAsset, [
-          "function allowance(address owner, address spender) view returns (uint256)",
-          "function approve(address spender, uint256 amount) returns (bool)",
-          "function balanceOf(address who) view returns (uint256)"
-        ], state.signer);
-
-        const totalRequired = entries.reduce((sum, entry) => sum + parseUnits(String(Number(entry.amount || 0).toFixed(payoutToken.decimals)), payoutToken.decimals), 0n);
-        const selectedFundBalance = mode === "fund"
-          ? await contract.fundBalances(selectedFund, settledAsset)
-          : 0n;
-        const routerTokenBalance = await token.balanceOf(router);
-        const allocatedTokenBalance = await contract.totalFundBalances(settledAsset);
-        const unallocatedBalance = routerTokenBalance > allocatedTokenBalance
-          ? routerTokenBalance - allocatedTokenBalance
-          : 0n;
-        const availableBalance = mode === "fund" ? selectedFundBalance : unallocatedBalance;
-        const fundingAmount = mode === "fund" && availableBalance < totalRequired
-          ? totalRequired - availableBalance
-          : 0n;
-
-        if (mode === "fund" && fundingAmount > 0n) {
-          const signerBalance = await token.balanceOf(state.account);
-          if (BigInt(signerBalance) < fundingAmount) {
-            throw new Error(`Insufficient ${payoutToken.symbol} balance for the selected fund (${formatUnits(totalRequired, payoutToken.decimals)} required, ${formatUnits(selectedFundBalance, payoutToken.decimals)} already allocated).`);
-          }
-
-          const currentAllowance = await token.allowance(state.account, router);
-          if (BigInt(currentAllowance) < fundingAmount) {
-            const approvalTx = await token.approve(router, fundingAmount);
-            await approvalTx.wait();
-          }
-
-          const fundTx = await contract.fundToken(selectedFund, settledAsset, fundingAmount);
-          await fundTx.wait();
-        } else if (mode === "unallocated" && unallocatedBalance < totalRequired) {
-          throw new Error(`Insufficient unallocated ${payoutToken.symbol} balance (${formatUnits(totalRequired, payoutToken.decimals)} required, ${formatUnits(unallocatedBalance, payoutToken.decimals)} available). Deposit with the unallocated treasury flow or use a fund payout.`);
-        }
-
-        const sameRecipient = entries.length > 1 && entries.every(entry =>
-          String(entry.contributor || state.account).toLowerCase() === String(entries[0].contributor || state.account).toLowerCase()
-        );
-        const batchSelector = keccak256(toUtf8Bytes("payoutBatch(bytes32,address,address,uint256[],bytes32[],bytes32[],bytes32[],string[],bytes32[])"))
-          .slice(2, 10).toLowerCase();
-        const routerCode = (await state.provider.getCode(router)).toLowerCase();
-        if (mode === "fund" && sameRecipient && routerCode.includes(batchSelector)) {
-          const batchAmounts = [];
-          const batchWorkReferences = [];
-          const batchRepositoryHashes = [];
-          const batchContributorHashes = [];
-          const batchMetadataUris = [];
-          const batchMetadataHashes = [];
-          for (const entry of entries) {
-            const amount = parseUnits(String(Number(entry.amount || 0).toFixed(payoutToken.decimals)), payoutToken.decimals);
-            const issueRef = String(entry.issueRef || "");
-            const repositorySlug = issueRef.includes("#") ? issueRef.slice(0, issueRef.lastIndexOf("#")) : "artfi";
-            const contributorGithub = String(entry.contributorGithub || "");
-            const workReference = keccak256(toUtf8Bytes(`${issueRef}:${contributorGithub}:${entry.role || "contributor"}`));
-            batchAmounts.push(amount);
-            batchWorkReferences.push(workReference);
-            batchRepositoryHashes.push(keccak256(toUtf8Bytes(repositorySlug)));
-            batchContributorHashes.push(keccak256(toUtf8Bytes(contributorGithub)));
-            batchMetadataUris.push(`ipfs://artfi/payroll/${slugify(issueRef)}-${slugify(contributorGithub)}-${slugify(entry.role || "contributor")}`);
-            batchMetadataHashes.push(keccak256(toUtf8Bytes(JSON.stringify({ issueRef, contributorGithub, role: entry.role || "contributor", amount: entry.amount, currency: entry.currency || payoutToken.symbol }))));
-          }
-          const batchArgs = [selectedFund, settledAsset, String(entries[0].contributor || state.account), batchAmounts, batchWorkReferences, batchRepositoryHashes, batchContributorHashes, batchMetadataUris, batchMetadataHashes];
-          try {
-            await contract.payoutBatch.staticCall(...batchArgs);
-          } catch (error) {
-            throw new Error(`Settlement preflight failed for creator batch: ${readableContractError(error)}`);
-          }
-          const batchTx = await contract.payoutBatch(...batchArgs);
-          await batchTx.wait();
-          entries.forEach(entry => markQueueEntrySettled(router, entry));
-          refreshAfterWalletTransaction(`Creator batch complete: ${entries.length} jobs settled in one transaction. Refreshing ArtFi…`);
-          return;
-        }
-
-        const transactions = [];
-        for (const entry of entries) {
-          const amount = parseUnits(String(Number(entry.amount || 0).toFixed(payoutToken.decimals)), payoutToken.decimals);
-          const issueRef = String(entry.issueRef || "");
-          const repositorySlug = issueRef.includes("#") ? issueRef.slice(0, issueRef.lastIndexOf("#")) : "artfi";
-          const contributorGithub = String(entry.contributorGithub || "");
-          const workReference = keccak256(toUtf8Bytes(`${issueRef}:${contributorGithub}:${entry.role || "contributor"}`));
-          const repositoryIdHash = keccak256(toUtf8Bytes(repositorySlug));
-          const contributorIdHash = keccak256(toUtf8Bytes(contributorGithub));
-          const metadataUri = `ipfs://artfi/payroll/${slugify(issueRef)}-${slugify(contributorGithub)}-${slugify(entry.role || "contributor")}`;
-          const metadataHash = keccak256(toUtf8Bytes(JSON.stringify({
-            issueRef,
-            contributorGithub,
-            role: entry.role || "contributor",
-            amount: entry.amount,
-            currency: entry.currency || "ART",
-          })));
-
-          const payoutArgs = mode === "unallocated"
-            ? [settledAsset, String(entry.contributor || state.account), amount, workReference, repositoryIdHash, contributorIdHash, metadataUri, metadataHash]
-            : [selectedFund, settledAsset, String(entry.contributor || state.account), amount, workReference, repositoryIdHash, contributorIdHash, metadataUri, metadataHash];
-          const payoutMethod = mode === "unallocated" ? "payoutUnallocated" : "payout";
-          try {
-            await contract[payoutMethod].staticCall(...payoutArgs);
-          } catch (error) {
-            throw new Error(`Settlement preflight failed for ${issueRef}: ${readableContractError(error)}`);
-          }
-
-          const tx = await contract[payoutMethod](...payoutArgs);
-
-          transactions.push(tx);
-          txNote.textContent = `Submitted @${contributorGithub} (${transactions.length}/${entries.length})…`;
-          await tx.wait();
-          markQueueEntrySettled(router, entry);
-        }
-
-        refreshAfterWalletTransaction(`Batch complete: ${transactions.length} payout${transactions.length === 1 ? "" : "s"} finalized. Refreshing ArtFi…`);
+        refreshAfterWalletTransaction(`Settlement complete: ${settledCount} job${settledCount === 1 ? "" : "s"} across ${groups.size} payout group${groups.size === 1 ? "" : "s"}. Refreshing ArtFi…`);
       } catch (error) {
         txNote.textContent = error?.shortMessage || error?.message || "Payout failed.";
       } finally {
@@ -4384,7 +4482,11 @@
     walletButton.addEventListener("click", connectWallet);
     addTokenButton.addEventListener("click", addRegisteredToken);
     depositAsset.addEventListener("change", renderTokenPickers);
-    sweepAsset.addEventListener("change", renderTokenPickers);
+    sweepAsset.addEventListener("change", () => {
+      renderTokenPickers();
+      refreshSweepControls();
+    });
+    sweepFundId.addEventListener("change", refreshSweepControls);
     selectedFundId.addEventListener("change", updateBatchSummary);
     payoutTokenSelect.addEventListener("change", () => {
       if (!payoutTokenSelect.value) return;
