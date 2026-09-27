@@ -23,7 +23,7 @@ function writeJson(filePath, value) {
 
 function buildMergedPayrollComment({ entries, isManual, prNumber, issueNumber }) {
   const lines = entries.map(entry =>
-    `- **${entry.amount} ART** to @${entry.contributorGithub}${entry.role ? ` (${entry.role})` : ''}`
+    `- **${entry.amount} ${entry.currency || 'ART'}** to @${entry.contributorGithub}${entry.role ? ` (${entry.role})` : ''}${entry.fund ? ` from \`${entry.fund}\`` : ''}`
   );
   const body = [
     `✅ Payroll queued from ${isManual ? 'manual recovery for' : 'merged'} PR #${prNumber}:`,
@@ -117,7 +117,7 @@ async function main() {
       queuedBy: process.env.GITHUB_ACTOR || 'github-actions[bot]',
     });
     if (result.reason === 'missing-bounty-label') {
-      console.log(`Skipping issue #${issueNumber}: no label matching "bounty: <amount> ART".`);
+      console.log(`Skipping issue #${issueNumber}: no label matching "bounty: <amount> <ART|BNUT|USDC>".`);
       continue;
     }
 
@@ -155,7 +155,7 @@ async function main() {
     fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, [
       '## Payroll queue updated',
       '',
-      `Queued ${planned.length} ART payout entr${planned.length === 1 ? 'y' : 'ies'} from PR #${pr.number}.`,
+      `Queued ${planned.length} payout entr${planned.length === 1 ? 'y' : 'ies'} from PR #${pr.number}.`,
       '',
     ].join('\n'));
   }

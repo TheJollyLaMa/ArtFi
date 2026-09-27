@@ -18,3 +18,21 @@ contract ForceSend {
         selfdestruct(recipient);
     }
 }
+
+contract FeeOnTransferToken is ERC20 {
+    uint256 public constant FEE_BPS = 100;
+
+    constructor() ERC20("Fee On Transfer Token", "FEET") {
+        _mint(msg.sender, 1_000_000 ether);
+    }
+
+    function _update(address from, address to, uint256 value) internal override {
+        if (from == address(0) || to == address(0)) {
+            super._update(from, to, value);
+            return;
+        }
+        uint256 fee = (value * FEE_BPS) / 10_000;
+        super._update(from, to, value - fee);
+        if (fee > 0) super._update(from, address(0xdead), fee);
+    }
+}

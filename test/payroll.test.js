@@ -274,3 +274,80 @@ test('parses per-creator transaction hashes for batch settlement', () => {
     bob: '0xbbb',
   });
 });
+
+test('queues one entry per currency with fund and legacy router routing', () => {
+  const router = '0xCe53017Fe1A0edBAb6146f2556e988498F0f9905';
+  const result = createBountyEntries(fixture({
+    issue: {
+      number: 55,
+      labels: [
+        { name: 'bounty: 300 ART' },
+        { name: 'bounty: 1000 BNUT' },
+        { name: 'bounty: 0.5 USDC' },
+        { name: 'fund: artfi-repo-dev' },
+        { name: `router: ${router}` },
+      ],
+      assignees: [{ login: 'TheJollyLaMa' }],
+    },
+  }));
+
+  assert.deepEqual(result.entries.map(entry => [entry.currency, entry.amount, entry.fund, entry.router]), [
+    ['ART', '300', 'artfi-repo-dev', router],
+    ['BNUT', '1000', 'artfi-repo-dev', router],
+    ['USDC', '0.5', 'artfi-repo-dev', router],
+  ]);
+});
+
+test('does not treat payouts in different currencies on one issue as duplicates', () => {
+  const art = createBountyEntries(fixture({
+    issue: { number: 55, labels: [{ name: 'bounty: 300 ART' }], assignees: [{ login: 'TheJollyLaMa' }] },
+  })).entries;
+  const result = createBountyEntries(fixture({
+    issue: {
+      number: 55,
+      labels: [{ name: 'bounty: 300 ART' }, { name: 'bounty: 1000 BNUT' }],
+      assignees: [{ login: 'TheJollyLaMa' }],
+    },
+    queue: { pending: art, settled: [] },
+  }));
+
+  assert.deepEqual(result.entries.map(entry => entry.currency), ['BNUT']);
+  assert.equal(result.skippedDuplicates, 1);
+});
+
+test('rejects ambiguous routing and repeated currency labels', () => {
+  const base = { number: 56, assignees: [{ login: 'TheJollyLaMa' }] };
+  assert.throws(
+    () => createBountyEntries(fixture({ issue: { ...base, labels: [{ name: 'bounty: 5 ART' }, { name: 'bounty: 6 ART' }] } })),
+    /more than one ART bounty/
+  );
+  assert.throws(
+    () => createBountyEntries(fixture({ issue: { ...base, labels: [{ name: 'bounty: 5 ART' }, { name: 'fund: a' }, { name: 'fund: b' }] } })),
+    /more than one fund/
+  );
+});
+
+test('ignores unsupported currency bounty labels', () => {
+  const result = createBountyEntries(fixture({
+    issue: { number: 57, labels: [{ name: 'bounty: 5 DOGE' }], assignees: [{ login: 'TheJollyLaMa' }] },
+  }));
+  assert.equal(result.reason, 'missing-bounty-label');
+});
+
+test('tracks pending and earned balances per currency', () => {
+  const accounts = { contributors: [{ ...owner, artPending: 0, bnutPending: 0 }] };
+  const entries = [
+    { issueRef: 'TheJollyLaMa/ArtFi#55', contributorGithub: owner.github, amount: '1000', currency: 'BNUT' },
+    { issueRef: 'TheJollyLaMa/ArtFi#55', contributorGithub: owner.github, amount: '0.5', currency: 'USDC' },
+  ];
+  applyAccountAccrual(accounts, entries);
+  assert.equal(accounts.contributors[0].bnutPending, 1000);
+  assert.equal(accounts.contributors[0].usdcPending, 0.5);
+  assert.equal(accounts.contributors[0].artPending, 0);
+
+  const queue = { pending: entries.map(entry => ({ ...entry })), settled: [] };
+  settleEntries({ queue, accounts, issueRef: 'TheJollyLaMa/ArtFi#55', settledAt: 'now', settledBy: 'TheJollyLaMa' });
+  assert.equal(accounts.contributors[0].bnutPending, 0);
+  assert.equal(accounts.contributors[0].bnutEarned, 1000);
+  assert.equal(accounts.contributors[0].usdcEarned, 0.5);
+});

@@ -5,8 +5,8 @@
       "displayName": "TheJollyLaMa",
       "role": "owner",
       "walletAddress": "0x807061DF657A7697c04045dA7d16D941861cAABc",
-      "artEarned": 0,
-      "artPending": 250,
+      "artEarned": 250,
+      "artPending": 0,
       "ideasCredited": [
         "TheJollyLaMa/ArtFi#30",
         "TheJollyLaMa/ArtFi#36",

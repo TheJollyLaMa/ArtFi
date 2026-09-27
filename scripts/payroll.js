@@ -1,6 +1,9 @@
-const BOUNTY_LABEL_RE = /^bounty:\s*(\d+(?:\.\d+)?)\s*\$?ART$/i;
+const SUPPORTED_CURRENCIES = ['ART', 'BNUT', 'USDC'];
+const BOUNTY_LABEL_RE = /^bounty:\s*(\d+(?:\.\d+)?)\s*\$?([A-Za-z][A-Za-z0-9]{1,9})$/i;
 const TEST_BOUNTY_LABEL_RE = /^test-bounty:\s*(\d+(?:\.\d+)?)\s*\$?ART$/i;
 const IDEA_CREDIT_LABEL_RE = /^idea-credit:\s*@?([-\w]+)$/i;
+const FUND_LABEL_RE = /^fund:\s*([a-z0-9][a-z0-9-]*)$/i;
+const ROUTER_LABEL_RE = /^router:\s*(0x[a-fA-F0-9]{40})$/;
 const CLOSING_ISSUE_RE = /(?:closes?|fixes?|resolves?)\s+(?:[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)?#(\d+)/gi;
 const TITLE_ISSUE_RE = /#(\d+)/g;
 
@@ -21,9 +24,31 @@ function labelNames(issue) {
 function parseAmountLabel(issue, pattern = BOUNTY_LABEL_RE) {
   for (const label of labelNames(issue)) {
     const match = String(label || '').match(pattern);
-    if (match) return { label, amount: normalizeAmount(match[1]) };
+    if (match) return { label, amount: normalizeAmount(match[1]), currency: String(match[2] || 'ART').toUpperCase() };
   }
   return null;
+}
+
+function parseAmountLabels(issue) {
+  const bounties = new Map();
+  for (const label of labelNames(issue)) {
+    const match = String(label || '').match(BOUNTY_LABEL_RE);
+    if (!match) continue;
+    const currency = match[2].toUpperCase();
+    if (!SUPPORTED_CURRENCIES.includes(currency)) continue;
+    if (bounties.has(currency)) throw new Error(`Issue has more than one ${currency} bounty label`);
+    bounties.set(currency, { label, amount: normalizeAmount(match[1]), currency });
+  }
+  return [...bounties.values()];
+}
+
+function parseSingleLabel(issue, pattern, description) {
+  const values = labelNames(issue)
+    .map(label => String(label || '').match(pattern))
+    .filter(Boolean)
+    .map(match => match[1]);
+  if (values.length > 1) throw new Error(`Issue has more than one ${description} label`);
+  return values[0] || null;
 }
 
 function parseIdeaCredit(issue) {
@@ -83,13 +108,24 @@ function entryRole(entry) {
   return String(entry.role || 'contributor').toLowerCase();
 }
 
+function entryCurrency(entry) {
+  return String(entry.currency || 'ART').toUpperCase();
+}
+
+function balanceFields(currency) {
+  const key = String(currency || 'ART').toLowerCase();
+  return { pending: `${key}Pending`, earned: `${key}Earned` };
+}
+
 function isDuplicate(queue, candidate) {
   const candidateIssueRef = String(candidate.issueRef || '').trim();
   const candidateGithub = String(candidate.contributorGithub || '').trim().toLowerCase();
   const candidateRole = entryRole(candidate);
+  const candidateCurrency = entryCurrency(candidate);
 
   return [...(queue.pending || []), ...(queue.settled || [])].some(entry => {
     if (String(entry.issueRef || '').trim() !== candidateIssueRef) return false;
+    if (entryCurrency(entry) !== candidateCurrency) return false;
 
     const entryGithub = String(entry.contributorGithub || '').trim().toLowerCase();
     const entryRoleName = entryRole(entry);
@@ -124,57 +160,66 @@ function pickWhitelistedTester({ assigneeLogins = [], accounts, commenter = '' }
 }
 
 function createBountyEntries({ issue, pr, accounts, queue, repoSlug, queuedAt, queuedBy }) {
-  const bounty = parseAmountLabel(issue);
-  if (!bounty) return { entries: [], reason: 'missing-bounty-label' };
+  const bounties = parseAmountLabels(issue);
+  if (!bounties.length) return { entries: [], reason: 'missing-bounty-label' };
 
   const prAuthor = normalizeLogin(pr.user && pr.user.login);
   const assignees = (issue.assignees || []).map(assignee => normalizeLogin(assignee.login));
   const candidates = [...new Set([prAuthor, ...assignees].filter(Boolean))];
   const implementer = requireWhitelistedAccount(accounts, candidates, 'PR author or issue assignee');
   const ideaOriginatorLogin = parseIdeaCredit(issue);
+  const originator = ideaOriginatorLogin
+    ? requireWhitelistedAccount(accounts, [ideaOriginatorLogin], 'idea originator')
+    : null;
+  const fund = parseSingleLabel(issue, FUND_LABEL_RE, 'fund');
+  const router = parseSingleLabel(issue, ROUTER_LABEL_RE, 'router');
   const issueRef = `${repoSlug}#${issue.number}`;
-  const common = {
-    issueRef,
-    currency: 'ART',
-    queuedAt,
-    queuedBy,
-    prNumber: pr.number,
-  };
 
-  let entries;
-  if (ideaOriginatorLogin) {
-    const originator = requireWhitelistedAccount(accounts, [ideaOriginatorLogin], 'idea originator');
-    const split = splitIdeaCredit(bounty.amount);
-    entries = [
-      {
+  const entries = [];
+  for (const bounty of bounties) {
+    const common = {
+      issueRef,
+      currency: bounty.currency,
+      queuedAt,
+      queuedBy,
+      prNumber: pr.number,
+      ...(fund ? { fund: fund.toLowerCase() } : {}),
+      ...(router ? { router } : {}),
+    };
+
+    if (originator) {
+      const split = splitIdeaCredit(bounty.amount);
+      entries.push(
+        {
+          ...common,
+          contributor: implementer.walletAddress,
+          contributorGithub: implementer.github,
+          amount: split.implementer,
+          role: 'implementer',
+        },
+        {
+          ...common,
+          contributor: originator.walletAddress,
+          contributorGithub: originator.github,
+          amount: split.originator,
+          role: 'idea-originator',
+        }
+      );
+    } else {
+      entries.push({
         ...common,
         contributor: implementer.walletAddress,
         contributorGithub: implementer.github,
-        amount: split.implementer,
-        role: 'implementer',
-      },
-      {
-        ...common,
-        contributor: originator.walletAddress,
-        contributorGithub: originator.github,
-        amount: split.originator,
-        role: 'idea-originator',
-      },
-    ];
-  } else {
-    entries = [{
-      ...common,
-      contributor: implementer.walletAddress,
-      contributorGithub: implementer.github,
-      amount: bounty.amount,
-    }];
+        amount: bounty.amount,
+      });
+    }
   }
 
   const newEntries = entries.filter(entry => !isDuplicate(queue, entry));
   return {
     entries: newEntries,
     skippedDuplicates: entries.length - newEntries.length,
-    bountyLabel: bounty.label,
+    bountyLabel: bounties.map(bounty => bounty.label).join(', '),
   };
 }
 
@@ -182,7 +227,8 @@ function applyAccountAccrual(accounts, entries) {
   for (const entry of entries) {
     const account = findAccount(accounts, entry.contributorGithub);
     if (!account) continue;
-    account.artPending = Number(((Number(account.artPending) || 0) + Number(entry.amount)).toFixed(8));
+    const { pending } = balanceFields(entry.currency);
+    account[pending] = Number(((Number(account[pending]) || 0) + Number(entry.amount)).toFixed(8));
     if (!Array.isArray(account.issuesClosed)) account.issuesClosed = [];
     if (!account.issuesClosed.includes(entry.issueRef)) account.issuesClosed.push(entry.issueRef);
     if (entry.role === 'idea-originator') {
@@ -216,14 +262,18 @@ function settleEntries({ queue, accounts, contributorGithub = '', issueRef = '',
   for (const entry of settled) {
     const account = findAccount(accounts, entry.contributorGithub);
     if (!account) continue;
-    account.artPending = Number(Math.max(0, (Number(account.artPending) || 0) - Number(entry.amount)).toFixed(8));
-    account.artEarned = Number(((Number(account.artEarned) || 0) + Number(entry.amount)).toFixed(8));
+    const { pending, earned } = balanceFields(entry.currency);
+    account[pending] = Number(Math.max(0, (Number(account[pending]) || 0) - Number(entry.amount)).toFixed(8));
+    account[earned] = Number(((Number(account[earned]) || 0) + Number(entry.amount)).toFixed(8));
   }
   return settled;
 }
 
 module.exports = {
   BOUNTY_LABEL_RE,
+  FUND_LABEL_RE,
+  ROUTER_LABEL_RE,
+  SUPPORTED_CURRENCIES,
   TEST_BOUNTY_LABEL_RE,
   createBountyEntries,
   extractIssueNumbers,
@@ -232,6 +282,7 @@ module.exports = {
   normalizeAmount,
   normalizeLogin,
   parseAmountLabel,
+  parseAmountLabels,
   parseIdeaCredit,
   pickWhitelistedTester,
   splitIdeaCredit,

@@ -12,20 +12,35 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
 
     bytes32 public constant PAYROLL_ROLE = keccak256("PAYROLL_ROLE");
     bytes32 public constant ASSET_ADMIN_ROLE = keccak256("ASSET_ADMIN_ROLE");
+    bytes32 public constant CONTRIBUTOR_ADMIN_ROLE = keccak256("CONTRIBUTOR_ADMIN_ROLE");
+    string public constant VERSION = "2.1.0";
 
     struct Fund {
         string metadataUri;
         bool active;
+        bool exists;
+    }
+
+    struct Contributor {
+        bytes32 githubIdHash;
+        bool approved;
+        bool exists;
     }
 
     mapping(bytes32 => Fund) public funds;
     mapping(bytes32 => mapping(address => uint256)) public fundBalances;
     mapping(address => uint256) public totalFundBalances;
     mapping(address => bool) public approvedAssets;
-    mapping(bytes32 => mapping(bytes32 => bool)) public completedWorkReferences;
+    mapping(address => Contributor) public contributors;
+    // Global namespace: a work reference already encodes issue, contributor, and role.
+    mapping(bytes32 => bool) public completedWorkReferences;
+    bytes32[] private _fundIds;
+    address[] private _contributorWallets;
 
     event FundCreated(bytes32 indexed fundId, string metadataUri);
+    event FundMetadataUpdated(bytes32 indexed fundId, string metadataUri);
     event FundStatusUpdated(bytes32 indexed fundId, bool active);
+    event ContributorApprovalUpdated(address indexed wallet, bytes32 indexed githubIdHash, bool approved);
     event AssetApprovalUpdated(address indexed asset, bool approved);
     event FundFunded(bytes32 indexed fundId, address indexed asset, address indexed funder, uint256 amount);
     event PayrollPaid(
@@ -40,12 +55,14 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         bytes32 metadataHash
     );
     event ExcessRecovered(address indexed asset, address indexed recipient, uint256 amount);
+    event FundRecovered(bytes32 indexed fundId, address indexed asset, address indexed recipient, uint256 amount);
 
     constructor(address defaultAdmin) {
         require(defaultAdmin != address(0), "Admin is required");
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
         _grantRole(PAYROLL_ROLE, defaultAdmin);
         _grantRole(ASSET_ADMIN_ROLE, defaultAdmin);
+        _grantRole(CONTRIBUTOR_ADMIN_ROLE, defaultAdmin);
         approvedAssets[address(0)] = true;
         emit AssetApprovalUpdated(address(0), true);
     }
@@ -56,13 +73,15 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
 
     function createFund(bytes32 fundId, string calldata metadataUri) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(fundId != bytes32(0), "Fund ID is required");
-        require(!funds[fundId].active, "Fund already exists");
-        funds[fundId] = Fund({metadataUri: metadataUri, active: true});
+        require(!funds[fundId].exists, "Fund already exists");
+        require(bytes(metadataUri).length > 0, "Fund metadata URI is required");
+        funds[fundId] = Fund({metadataUri: metadataUri, active: true, exists: true});
+        _fundIds.push(fundId);
         emit FundCreated(fundId, metadataUri);
     }
 
     function setFundActive(bytes32 fundId, bool active) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(bytes(funds[fundId].metadataUri).length > 0 || funds[fundId].active, "Fund does not exist");
+        require(funds[fundId].exists, "Fund does not exist");
         funds[fundId].active = active;
         emit FundStatusUpdated(fundId, active);
     }
@@ -71,15 +90,66 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(bytes(funds[fundId].metadataUri).length > 0 || funds[fundId].active, "Fund does not exist");
+        require(funds[fundId].exists, "Fund does not exist");
+        require(bytes(metadataUri).length > 0, "Fund metadata URI is required");
         funds[fundId].metadataUri = metadataUri;
-        emit FundCreated(fundId, metadataUri);
+        emit FundMetadataUpdated(fundId, metadataUri);
+    }
+
+    function fundCount() external view returns (uint256) {
+        return _fundIds.length;
+    }
+
+    function allFundIds() external view returns (bytes32[] memory) {
+        return _fundIds;
     }
 
     function setAssetApproved(address asset, bool approved) external onlyRole(ASSET_ADMIN_ROLE) {
         if (!approved) require(totalFundBalances[asset] == 0, "Asset is allocated to a fund");
         approvedAssets[asset] = approved;
         emit AssetApprovalUpdated(asset, approved);
+    }
+
+    function setContributorApproved(address wallet, bytes32 githubIdHash, bool approved)
+        public
+        onlyRole(CONTRIBUTOR_ADMIN_ROLE)
+    {
+        require(wallet != address(0), "Wallet is required");
+        if (approved) require(githubIdHash != bytes32(0), "GitHub ID hash is required");
+        Contributor storage contributor = contributors[wallet];
+        if (!contributor.exists) {
+            contributor.exists = true;
+            _contributorWallets.push(wallet);
+        }
+        if (githubIdHash != bytes32(0)) contributor.githubIdHash = githubIdHash;
+        contributor.approved = approved;
+        emit ContributorApprovalUpdated(wallet, contributor.githubIdHash, approved);
+    }
+
+    function setContributorsApproved(
+        address[] calldata wallets,
+        bytes32[] calldata githubIdHashes,
+        bool[] calldata approvals
+    ) external onlyRole(CONTRIBUTOR_ADMIN_ROLE) {
+        require(
+            wallets.length == githubIdHashes.length && wallets.length == approvals.length,
+            "Contributor lengths do not match"
+        );
+        for (uint256 index; index < wallets.length; index++) {
+            setContributorApproved(wallets[index], githubIdHashes[index], approvals[index]);
+        }
+    }
+
+    function isApprovedRecipient(address wallet) public view returns (bool) {
+        return contributors[wallet].approved;
+    }
+
+    function contributorCount() external view returns (uint256) {
+        return _contributorWallets.length;
+    }
+
+    function allContributorWallets() external view returns (address[] memory) {
+        return _contributorWallets;
     }
 
     function fundNative(bytes32 fundId) external payable whenNotPaused nonReentrant {
@@ -92,8 +162,10 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         nonReentrant
     {
         require(asset != address(0), "Use native funding");
-        _fund(fundId, asset, amount, msg.sender);
-        IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
+        require(amount > 0, "Amount is required");
+        // Credit the measured delta so fee-on-transfer tokens cannot overstate a fund.
+        uint256 received = _pullToken(asset, msg.sender, amount);
+        _fund(fundId, asset, received, msg.sender);
     }
 
     function fundTokenUnallocated(address asset, uint256 amount)
@@ -104,7 +176,7 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         require(asset != address(0), "Use native funding");
         require(approvedAssets[asset], "Asset is not approved");
         require(amount > 0, "Amount is required");
-        IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
+        _pullToken(asset, msg.sender, amount);
     }
 
     function payout(
@@ -119,13 +191,14 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         bytes32 metadataHash
     ) external onlyRole(PAYROLL_ROLE) whenNotPaused nonReentrant {
         require(recipient != address(0), "Recipient is required");
+        require(contributors[recipient].approved, "Recipient is not whitelisted");
         require(amount > 0, "Amount is required");
         require(workReference != bytes32(0), "Work reference is required");
-        require(!completedWorkReferences[fundId][workReference], "Work already paid");
+        require(!completedWorkReferences[workReference], "Work already paid");
         require(funds[fundId].active, "Fund is inactive");
         require(fundBalances[fundId][asset] >= amount, "Insufficient fund balance");
 
-        completedWorkReferences[fundId][workReference] = true;
+        completedWorkReferences[workReference] = true;
         fundBalances[fundId][asset] -= amount;
         totalFundBalances[asset] -= amount;
 
@@ -161,8 +234,9 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         bytes32[] calldata metadataHashes
     ) external onlyRole(PAYROLL_ROLE) whenNotPaused nonReentrant {
         require(recipient != address(0), "Recipient is required");
+        require(contributors[recipient].approved, "Recipient is not whitelisted");
         require(funds[fundId].active, "Fund is inactive");
-        require(amounts.length > 1, "Batch requires multiple payouts");
+        require(amounts.length > 0, "Batch requires a payout");
         require(
             amounts.length == workReferences.length &&
             amounts.length == repositoryIdHashes.length &&
@@ -176,13 +250,16 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         for (uint256 index; index < amounts.length; index++) {
             require(amounts[index] > 0, "Amount is required");
             require(workReferences[index] != bytes32(0), "Work reference is required");
-            require(!completedWorkReferences[fundId][workReferences[index]], "Work already paid");
+            require(!completedWorkReferences[workReferences[index]], "Work already paid");
+            for (uint256 inner = index + 1; inner < amounts.length; inner++) {
+                require(workReferences[index] != workReferences[inner], "Duplicate work reference");
+            }
             totalAmount += amounts[index];
         }
         require(fundBalances[fundId][asset] >= totalAmount, "Insufficient fund balance");
 
         for (uint256 index; index < amounts.length; index++) {
-            completedWorkReferences[fundId][workReferences[index]] = true;
+            completedWorkReferences[workReferences[index]] = true;
             emit PayrollPaid(
                 fundId,
                 asset,
@@ -217,15 +294,16 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         bytes32 metadataHash
     ) external onlyRole(PAYROLL_ROLE) whenNotPaused nonReentrant {
         require(recipient != address(0), "Recipient is required");
+        require(contributors[recipient].approved, "Recipient is not whitelisted");
         require(amount > 0, "Amount is required");
         require(workReference != bytes32(0), "Work reference is required");
         require(approvedAssets[asset], "Asset is not approved");
-        require(!completedWorkReferences[bytes32(0)][workReference], "Work already paid");
+        require(!completedWorkReferences[workReference], "Work already paid");
 
         uint256 held = asset == address(0) ? address(this).balance : IERC20(asset).balanceOf(address(this));
         require(held >= totalFundBalances[asset] + amount, "Insufficient unallocated balance");
 
-        completedWorkReferences[bytes32(0)][workReference] = true;
+        completedWorkReferences[workReference] = true;
 
         if (asset == address(0)) {
             (bool sent, ) = recipient.call{value: amount}("");
@@ -253,6 +331,7 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         nonReentrant
     {
         require(recipient != address(0), "Recipient is required");
+        require(amount > 0, "Amount is required");
         uint256 held = asset == address(0) ? address(this).balance : IERC20(asset).balanceOf(address(this));
         require(held >= totalFundBalances[asset] + amount, "Amount is allocated");
         if (asset == address(0)) {
@@ -281,7 +360,7 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         } else {
             IERC20(asset).safeTransfer(recipient, amount);
         }
-        emit ExcessRecovered(asset, recipient, amount);
+        emit FundRecovered(fundId, asset, recipient, amount);
     }
 
     function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -299,5 +378,13 @@ contract ArtFiSettlementRouter is AccessControl, Pausable, ReentrancyGuard {
         fundBalances[fundId][asset] += amount;
         totalFundBalances[asset] += amount;
         emit FundFunded(fundId, asset, funder, amount);
+    }
+
+    function _pullToken(address asset, address from, uint256 amount) internal returns (uint256 received) {
+        IERC20 token = IERC20(asset);
+        uint256 balanceBefore = token.balanceOf(address(this));
+        token.safeTransferFrom(from, address(this), amount);
+        received = token.balanceOf(address(this)) - balanceBefore;
+        require(received > 0, "No tokens received");
     }
 }

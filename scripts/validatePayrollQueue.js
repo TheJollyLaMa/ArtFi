@@ -4,11 +4,12 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const QUEUE_PATH = path.join(ROOT, 'payroll-queue.json');
 const ACCOUNTS_PATH = path.join(ROOT, 'contributor-accounts.json');
-const PAYOUT_CURRENCY = 'ART';
+const PAYOUT_CURRENCIES = new Set(['ART', 'BNUT', 'USDC']);
 const SUPPORTED_ROLES = new Set(['contributor', 'implementer', 'idea-originator', 'tester']);
 
 const ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
 const ISSUE_REF_RE = /^[^/]+\/[^/]+#\d+$/;
+const FUND_RE = /^[a-z0-9][a-z0-9-]*$/;
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -84,10 +85,12 @@ const validateEntry = (entry, section, index) => {
   if (!amount || !Number.isFinite(Number(amount)) || Number(amount) <= 0) {
     fail(`${section}[${index}].amount must be a positive number`);
   }
-  if (currency !== PAYOUT_CURRENCY) fail(`${section}[${index}].currency must be ${PAYOUT_CURRENCY}`);
+  if (!PAYOUT_CURRENCIES.has(currency)) fail(`${section}[${index}].currency must be one of ${[...PAYOUT_CURRENCIES].join(', ')}`);
   if (!SUPPORTED_ROLES.has(role)) fail(`${section}[${index}].role is not supported: ${role}`);
+  if (entry.fund !== undefined && !FUND_RE.test(String(entry.fund))) fail(`${section}[${index}].fund must be a lowercase fund slug`);
+  if (entry.router !== undefined && !ADDRESS_RE.test(String(entry.router))) fail(`${section}[${index}].router must be a valid address`);
 
-  const key = `${issueRef}:${contributorGithub.toLowerCase()}:${role}`;
+  const key = `${issueRef}:${contributorGithub.toLowerCase()}:${role}:${currency}`;
   if (seen.has(key)) fail(`duplicate payroll entry detected for ${issueRef} / ${contributorGithub}`);
   seen.add(key);
 
