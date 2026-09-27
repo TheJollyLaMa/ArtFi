@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="artfi-auth-base-url" content="https://artfi.onrender.com" />
+  <meta name="artfi-live-data-base-url" content="https://thejollylama.github.io/ArtFi" />
   <link rel="icon" type="image/png" href="./favicon.png" />
   <title>ArtFi</title>
   <style>
@@ -3107,6 +3108,24 @@
     const authServiceBaseUrl = document.querySelector('meta[name="artfi-auth-base-url"]')?.content.trim().replace(/\/+$/, "") || "";
     const authServiceEndpoint = path => `${authServiceBaseUrl}${path}`;
     const authEndpoint = authServiceEndpoint("/api/browser-auth/start");
+    const liveDataBaseUrl = document.querySelector('meta[name="artfi-live-data-base-url"]')?.content.trim().replace(/\/+$/, "") || "";
+    const fetchLiveJson = async filename => {
+      const paths = [
+        liveDataBaseUrl ? `${liveDataBaseUrl}/${filename}` : "",
+        `./${filename}`,
+      ].filter(Boolean);
+      let lastError;
+      for (const path of paths) {
+        try {
+          const response = await fetch(`${path}?ts=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`${filename} fetch failed (${response.status})`);
+          return await response.json();
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error(`${filename} is unavailable`);
+    };
     let authServiceConfigPromise;
     const getAuthServiceConfig = () => {
       authServiceConfigPromise ||= fetch(authServiceEndpoint("/api/browser-auth/config"))
@@ -4555,8 +4574,7 @@
 
     const loadQueue = async () => {
       try {
-        const response = await fetch("./payroll-queue.json", { cache: "no-store" });
-        const queue = await response.json();
+        const queue = await fetchLiveJson("payroll-queue.json");
         const settled = locallySettledQueueEntries(SETTLEMENT_ROUTER_ADDRESS);
         let pending = Array.isArray(queue.pending)
           ? queue.pending.filter(entry => !settled.has(queueEntryKey(entry)))
@@ -4631,15 +4649,13 @@
 
     const loadNetworkIndex = async () => {
       try {
-        const response = await fetch(`./artizen-network-index.json?ts=${Date.now()}`, { cache: "no-store" });
-        if (!response.ok) throw new Error("Network index not generated yet.");
-        const index = await response.json();
+        const index = await fetchLiveJson("artizen-network-index.json");
         await hydratePublicationMetadata(index);
         renderNetworkIndex(index);
         renderCanopyIndex(index);
       } catch (error) {
-        networkSummary.textContent = "Network index not generated yet.";
-        networkPublications.innerHTML = '<div class="empty-state">Run npm run index:network after publishing to refresh this view.</div>';
+        networkSummary.textContent = "Live network index is temporarily unavailable.";
+        networkPublications.innerHTML = '<div class="empty-state">Network data is temporarily unavailable. Try refreshing later.</div>';
         renderCanopyIndex({ publications: [], nodes: [], heartbeats: [], rewards: [] });
       }
     };

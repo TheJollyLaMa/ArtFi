@@ -56,8 +56,8 @@ jobs:
       - name: Rebuild public Canopy index from Base events
         env:
           BASE_RPC_URL: https://mainnet.base.org
-          ARTFI_NETWORK_REGISTRY_ADDRESS: 0x4e70AC13Ea266D76d872411DA8b4E80460Af4423
-          ARTFI_PROTOCOL_ADDRESS: 0xA90f10a2205f392b3d79382409475e66767588a4
+          ARTFI_NETWORK_REGISTRY_ADDRESS: "0x4e70AC13Ea266D76d872411DA8b4E80460Af4423"
+          ARTFI_PROTOCOL_ADDRESS: "0xA90f10a2205f392b3d79382409475e66767588a4"
           ARTFI_NETWORK_FROM_BLOCK: "51430773"
         run: npm run index:network
 
