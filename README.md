@@ -1,5 +1,9 @@
 # ArtFi
 
+![ArtFi ENS header banner with QR code](ArtFi_ens_header_banner_with_qrcode.png)
+
+[ArtFi ENS profile](https://app.ens.domains/artfi.thejollylama.eth)
+
 ![ArtFi branding](https://github.com/user-attachments/assets/58069599-d5d0-4bf3-a066-a2ac34234ff8)
 
 ArtFi is a simple soft-launch micro-liquidity layer for Artizen newcomers.
@@ -59,6 +63,8 @@ This is the “keep the decent-artizen data alive” path for people who want to
 ## Getting started today
 
 You do not need to deploy anything. ArtFi's contracts are already live; you just clone the repo, run it locally, and connect your wallet to the main deployed contracts.
+
+The app can also be mirrored on IPFS. The pinned interface loads current payroll and Canopy data from GitHub Pages; email verification and shared Pinata uploads use the hosted Render auth service. Local IPFS Desktop uploads go directly to your own node. A gateway origin must be allowed by the auth service before email and shared Pinata features work from that mirror.
 
 ### 1) Clone and install
 

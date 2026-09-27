@@ -7,6 +7,7 @@ on:
       - index.html
       - Artizen_LOGO.png
       - ArtFi_Demo_min_qrcode.jpeg
+      - ArtFi_dMTv_qrcode.png
       - Ens_Eth_Breathe.gif
       - metamask.png
       - IPFS_Logo.png
@@ -67,7 +68,7 @@ jobs:
       - name: Assemble public site
         run: |
           mkdir -p _site/scripts
-          cp index.html Artizen_LOGO.png ArtFi_Demo_min_qrcode.jpeg Ens_Eth_Breathe.gif metamask.png IPFS_Logo.png favicon.png usdc.png BigNuten.png payroll-queue.json _site/
+          cp index.html Artizen_LOGO.png ArtFi_Demo_min_qrcode.jpeg ArtFi_dMTv_qrcode.png Ens_Eth_Breathe.gif metamask.png IPFS_Logo.png favicon.png usdc.png BigNuten.png payroll-queue.json _site/
           cp scripts/ucanStorage.mjs scripts/adminContractAbis.mjs _site/scripts/
           cp artizen-network-index.json _site/
           touch _site/.nojekyll
