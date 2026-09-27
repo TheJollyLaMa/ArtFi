@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Contract, JsonRpcProvider } from "ethers";
+import { Contract, Interface, JsonRpcProvider } from "ethers";
 import { writeFile } from "node:fs/promises";
 
 const ABI = [
@@ -11,26 +11,86 @@ const ABI = [
   "event NodeCheckRecorded(uint256 indexed nodeId,uint256 indexed month,address indexed checker,bytes32 challengeHash,bytes32 sampleProofHash,uint256 sampleCount,uint256 timestamp)",
   "event MonthlyNodeRewardRecorded(uint256 indexed nodeId,uint256 indexed month,address indexed operator,uint256 amount,bytes32 paymentReference)",
 ];
+const PROTOCOL_ABI = [
+  "event AdvanceRequested(uint256 indexed requestTokenId,address indexed creator,address indexed asset,uint256 principal,uint256 repaymentAmount,uint256 fundingDeadline,uint256 repaymentDueAt,bytes32 termsHash,string metadataUri,string artizenProjectUrl,string artizenFundUrl)",
+];
 
 const rpcUrl = process.env.BASE_RPC_URL;
 const registryAddress = process.env.ARTFI_NETWORK_REGISTRY_ADDRESS;
+const protocolAddress = process.env.ARTFI_PROTOCOL_ADDRESS;
 const output = process.env.ARTFI_NETWORK_INDEX || "artizen-network-index.json";
 
 if (!rpcUrl || !registryAddress) throw new Error("BASE_RPC_URL and ARTFI_NETWORK_REGISTRY_ADDRESS are required");
 
-const registry = new Contract(registryAddress, ABI, new JsonRpcProvider(rpcUrl));
-const latestBlock = await registry.runner.provider.getBlockNumber();
-const fromBlock = Number(process.env.ARTFI_NETWORK_FROM_BLOCK || Math.max(0, latestBlock - 1999));
+const provider = new JsonRpcProvider(rpcUrl, 8453, { batchMaxCount: 1 });
+const registryInterface = new Interface(ABI);
+const protocolInterface = new Interface(PROTOCOL_ABI);
+const latestBlock = await provider.getBlockNumber();
+const fromBlock = Number(process.env.ARTFI_NETWORK_FROM_BLOCK || 51430773);
 const toBlock = Number(process.env.ARTFI_NETWORK_TO_BLOCK || latestBlock);
-const [published, statusUpdates, deactivated, nodes, heartbeats, checkerChecks, rewards] = await Promise.all([
-  registry.queryFilter(registry.filters.ContentPublished(), fromBlock, toBlock),
-  registry.queryFilter(registry.filters.ContentStatusUpdated(), fromBlock, toBlock),
-  registry.queryFilter(registry.filters.ContentDeactivated(), fromBlock, toBlock),
-  registry.queryFilter(registry.filters.NodeRegistered(), fromBlock, toBlock),
-  registry.queryFilter(registry.filters.NodeHeartbeat(), fromBlock, toBlock),
-  registry.queryFilter(registry.filters.NodeCheckRecorded(), fromBlock, toBlock),
-  registry.queryFilter(registry.filters.MonthlyNodeRewardRecorded(), fromBlock, toBlock),
-]);
+const fetchLogs = async address => {
+  const chunkSize = Number(process.env.ARTFI_NETWORK_CHUNK_SIZE || 20000);
+  const logs = [];
+  const fetchRange = async (start, end, attempt = 0) => {
+    const response = await fetch(rpcUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_getLogs",
+        params: [{ address, fromBlock: `0x${start.toString(16)}`, toBlock: `0x${end.toString(16)}` }],
+      }),
+    });
+    if (response.status === 413 && end - start > 1000) {
+      const midpoint = Math.floor((start + end) / 2);
+      const [left, right] = await Promise.all([fetchRange(start, midpoint), fetchRange(midpoint + 1, end)]);
+      return [...left, ...right];
+    }
+    if ((response.status === 429 || response.status >= 500) && attempt < 5) {
+      await new Promise(resolve => setTimeout(resolve, Math.min(15000, 500 * (2 ** attempt))));
+      return fetchRange(start, end, attempt + 1);
+    }
+    if (!response.ok) throw new Error(`Base RPC log query failed (${response.status}) for blocks ${start}-${end}`);
+    const result = await response.json();
+    if (result.error) {
+      if (end - start > 1000) {
+        const midpoint = Math.floor((start + end) / 2);
+        const [left, right] = await Promise.all([fetchRange(start, midpoint), fetchRange(midpoint + 1, end)]);
+        return [...left, ...right];
+      }
+      throw new Error(`Base RPC log query failed for blocks ${start}-${end}: ${result.error.message}`);
+    }
+    return result.result || [];
+  };
+
+  for (let start = fromBlock; start <= toBlock; start += chunkSize) {
+    const end = Math.min(toBlock, start + chunkSize - 1);
+    logs.push(...await fetchRange(start, end));
+  }
+  return logs;
+};
+
+const decodeEvents = (logs, iface) => logs.flatMap(log => {
+  try {
+    const parsed = iface.parseLog({ topics: log.topics, data: log.data });
+    return parsed ? [{ name: parsed.name, args: parsed.args, blockNumber: Number(log.blockNumber) }] : [];
+  } catch (_) { return []; }
+});
+
+const registryEvents = decodeEvents(await fetchLogs(registryAddress), registryInterface);
+const requestEvents = protocolAddress
+  ? decodeEvents(await fetchLogs(protocolAddress), protocolInterface)
+  : [];
+const events = name => registryEvents.filter(event => event.name === name);
+const published = events("ContentPublished");
+const statusUpdates = events("ContentStatusUpdated");
+const deactivated = events("ContentDeactivated");
+const nodes = events("NodeRegistered");
+const heartbeats = events("NodeHeartbeat");
+const checkerChecks = events("NodeCheckRecorded");
+const rewards = events("MonthlyNodeRewardRecorded");
+const requestTokenByUri = new Map(requestEvents.map(event => [event.args.metadataUri, event.args.requestTokenId.toString()]));
 
 const records = new Map();
 for (const event of published) {
@@ -46,6 +106,9 @@ for (const event of published) {
     publishedAt: args.publishedAt.toString(),
     artizenProjectUrl: args.artizenProjectUrl,
     artizenFundUrl: args.artizenFundUrl,
+    ...(Number(args.kind) === 1 && requestTokenByUri.has(args.cid)
+      ? { requestTokenId: requestTokenByUri.get(args.cid) }
+      : {}),
     active: true,
   });
 }

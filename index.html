@@ -644,6 +644,30 @@
       max-width: 52ch;
     }
 
+    .about-vision-video {
+      position: relative;
+      display: grid;
+      grid-template-columns: 132px minmax(0, 1fr);
+      align-items: center;
+      gap: 16px;
+      margin-top: 20px;
+      padding: 14px;
+      border: 1px solid rgba(122, 240, 198, 0.24);
+      border-radius: 8px;
+      background: rgba(4, 12, 20, 0.62);
+    }
+
+    .about-vision-video img {
+      display: block;
+      width: 132px;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .about-vision-video strong { display: block; margin-bottom: 5px; }
+    .about-vision-video p { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.45; }
+
     .about-links {
       position: relative;
       display: grid;
@@ -775,6 +799,31 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       margin-top: 24px;
     }
+
+    .loan-process-note {
+      grid-column: 1 / -1;
+      margin: 0;
+      padding: 12px 16px;
+      border: 1px solid rgba(122, 240, 198, 0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      background: rgba(6, 9, 18, 0.58);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .loan-card.request-card { border-top: 3px solid #56d6a5; }
+    .loan-card.offer-card { border-top: 3px solid #efbc65; }
+    .loan-stepper { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+    .loan-step { padding: 5px 9px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px; color: var(--muted); font-size: 0.78rem; }
+    .request-card .loan-step:first-child { border-color: rgba(86, 214, 165, 0.5); color: #9ce9ca; }
+    .offer-card .loan-step:first-child { border-color: rgba(239, 188, 101, 0.5); color: #f5d59e; }
+    .loan-card .loan-actions .btn { min-height: 44px; }
+    .loan-card .loan-actions .btn[disabled] { cursor: not-allowed; opacity: 0.45; }
+    .request-card .loan-actions .btn:not(.secondary) { background: #56d6a5; }
+    .offer-card .loan-actions .btn:not(.secondary) { background: #efbc65; }
+    .loan-cid-note { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
+    .loan-cid-note a { color: var(--accent); }
 
     .storage-link {
       grid-column: 1 / -1;
@@ -1320,6 +1369,41 @@
       display: block;
     }
 
+    .admin-panel > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      border: 1px solid rgba(122, 240, 198, 0.2);
+      border-radius: 10px;
+      background: rgba(6, 9, 18, 0.7);
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .admin-panel > summary::-webkit-details-marker { display: none; }
+    .admin-panel > summary::after { content: "+"; color: var(--accent); font-size: 1.35rem; line-height: 1; }
+    .admin-panel[open] > summary::after { content: "−"; }
+    .admin-panel-summary-copy { display: grid; gap: 3px; }
+    .admin-panel-summary-copy strong { color: var(--text); font-size: 1.05rem; }
+    .admin-panel-summary-copy small { color: var(--muted); }
+    .admin-panel-content { padding-top: 14px; }
+
+    .contract-address-badge { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; color: var(--muted); font: 0.76rem ui-monospace, monospace; overflow-wrap: anywhere; }
+    .contract-address-badge img { width: 18px; height: 18px; object-fit: contain; }
+    .contract-address-badge .address-network-icons { color: var(--accent); font: 0.7rem sans-serif; letter-spacing: 0; white-space: nowrap; }
+    .contract-console-list { display: grid; gap: 8px; }
+    .contract-console-function { padding: 10px 12px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; background: rgba(255,255,255,.025); }
+    .contract-console-function summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; cursor: pointer; }
+    .contract-console-function summary code { overflow-wrap: anywhere; color: var(--text); }
+    .contract-console-form { display: grid; gap: 9px; margin-top: 10px; }
+    .contract-console-arg { display: grid; gap: 4px; }
+    .contract-console-arg label { color: var(--muted); font-size: .78rem; }
+    .contract-console-arg input, .contract-console-arg textarea { width: 100%; min-width: 0; padding: 8px 10px; border: 1px solid rgba(255,255,255,.12); border-radius: 7px; background: rgba(6,9,18,.8); color: var(--text); font: .84rem ui-monospace, monospace; }
+    .contract-console-arg textarea { min-height: 66px; resize: vertical; }
+    .contract-console-output { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); font: .78rem ui-monospace, monospace; }
+
     .admin-head {
       display: flex;
       align-items: flex-start;
@@ -1550,6 +1634,7 @@
     .token-registry[hidden] { display: none; }
     .token-registry-row { display: grid; grid-template-columns: 0.7fr 1.4fr 0.6fr auto auto auto; gap: 8px; align-items: center; }
     .token-registry-row input { min-width: 0; }
+    .token-address-editor { display: grid; gap: 5px; min-width: 0; }
     .token-image-preview { width: 30px; height: 30px; object-fit: contain; border-radius: 50%; background: rgba(255,255,255,0.08); }
 
     .empty-state {
@@ -1662,6 +1747,8 @@
       .about-dialog h2 {
         font-size: 1.5rem;
       }
+      .about-vision-video { grid-template-columns: 104px minmax(0, 1fr); gap: 12px; padding: 10px; }
+      .about-vision-video img { width: 104px; }
       .about-kicker {
         font-size: 0.65rem;
         letter-spacing: 0.08em;
@@ -1782,7 +1869,8 @@
             <span><strong>2.</strong> Register the node with your connected wallet, then wait for admin approval.</span>
             <span><strong>3.</strong> Approved checkers spot-check your node and record successful checks for rewards.</span>
           </div>
-          <input id="network-registry-address" class="storage-email" value="0x4F1E3f275a24Ef108fe3C47AA9AaE11b1d869484" placeholder="ArtFiNetworkRegistry address" />
+          <input id="network-registry-address" class="storage-email" value="0x4e70AC13Ea266D76d872411DA8b4E80460Af4423" placeholder="ArtFiNetworkRegistry address" />
+          <div id="network-registry-address-badge"></div>
           <input id="node-did-hash" class="storage-email" placeholder="Node DID hash (bytes32)" />
           <input id="node-peer-id-hash" class="storage-email" placeholder="Peer ID hash (bytes32)" />
           <input id="node-software-version" class="storage-email" value="kubo/ipfs-desktop" placeholder="Software version" />
@@ -1861,6 +1949,13 @@
         <img class="about-ens-logo" src="./Ens_Eth_Breathe.gif" alt="ENS and Ethereum" />
       </div>
       <p class="about-copy">ArtFi helps first-season Artizen creators access zero-to-no-profit micro-liquidity, combining community onboarding with transparent, wallet-based settlement.</p>
+      <section class="about-vision-video" aria-label="ArtFi project vision video">
+        <img src="./ArtFi_Demo_min_qrcode.jpeg" alt="QR code linking to the ArtFi project vision and promotional video" />
+        <div>
+          <strong>See the ArtFi vision</strong>
+          <p>Scan this code with your phone camera to watch the project vision and promo video.</p>
+        </div>
+      </section>
       <nav class="about-links" aria-label="ArtFi links">
         <a class="about-link" href="https://github.com/TheJollyLaMa/ArtFi" target="_blank" rel="noreferrer">View repository</a>
         <a class="about-link" href="https://artizen.fund/" target="_blank" rel="noreferrer">Visit Artizen</a>
@@ -2044,9 +2139,10 @@
     </section>
 
     <section class="loan-panel" aria-label="Loan requests and offers">
-      <div class="loan-card">
-        <h2>Need an advance?</h2>
-        <p class="muted">Ask for help here. Keep it simple and clear.</p>
+      <p class="loan-process-note"><strong>How it works:</strong> Post a request for funding. A lender can fund it, then you choose whether to accept the advance. Repayment is made according to the terms you set.</p>
+      <div class="loan-card request-card">
+        <h2>Request a micro-advance</h2>
+        <p class="muted">For Artizen creators seeking initial project funding. Describe the request and link the project it supports.</p>
         <div class="loan-form">
           <div class="field">
             <label for="request-name">Name</label>
@@ -2054,40 +2150,56 @@
           </div>
           <div class="field">
             <label for="request-wallet">Creator wallet</label>
-            <input id="request-wallet" placeholder="0x..." />
+            <input id="request-wallet" placeholder="Connect your wallet" readonly />
           </div>
           <div class="field">
             <label for="request-amount">Amount</label>
             <input id="request-amount" placeholder="250" inputmode="decimal" />
           </div>
           <div class="field">
-            <label for="request-asset">Asset</label>
+            <label for="request-asset">Requested asset</label>
             <select id="request-asset" class="native-token-select" aria-hidden="true" tabindex="-1">
               <option value="ART" selected>ART</option>
               <option value="USDC">USDC</option>
               <option value="BNUT">BNUT</option>
             </select>
             <div id="request-token-picker" class="token-basket"></div>
+            <small id="request-asset-status" class="muted">Checking which assets are enabled for advances…</small>
           </div>
           <div class="field">
             <label for="request-note">Request</label>
             <textarea id="request-note" placeholder="What do you need the loan for?"></textarea>
           </div>
           <div class="field">
-            <label for="request-project-urls">Project/Fund URLs</label>
-            <textarea id="request-project-urls" placeholder="One project or fund URL per line"></textarea>
+            <label for="request-repayment-amount">Repayment amount</label>
+            <input id="request-repayment-amount" placeholder="Amount to repay" inputmode="decimal" />
+          </div>
+          <div class="field">
+            <label for="request-funding-days">Request open for (days)</label>
+            <input id="request-funding-days" value="14" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label for="request-repayment-days">Repayment due in (days)</label>
+            <input id="request-repayment-days" value="90" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label for="request-project-url">Artizen project URL</label>
+            <input id="request-project-url" placeholder="https://artizen.fund/project/..." />
+          </div>
+          <div class="field">
+            <label for="request-fund-url">Artizen fund URL</label>
+            <input id="request-fund-url" placeholder="https://artizen.fund/..." />
           </div>
           <div class="loan-actions">
-            <button id="request-json-button" class="btn" type="button">Prepare request JSON</button>
-            <button id="request-ipfs-button" class="btn secondary" type="button">Upload request to IPFS</button>
+            <button id="request-json-button" class="btn" type="button">Posting Decent Request</button>
           </div>
-          <p id="request-metadata-status" class="metadata-status">Prepare metadata, then upload it with IPFS storage.</p>
+          <p id="request-metadata-status" class="metadata-status">Connect your wallet, link your verified email, and complete the request terms.</p>
         </div>
       </div>
 
-      <div class="loan-card">
-        <h2>Want to offer?</h2>
-        <p class="muted">Share what you can lend and the terms you want.</p>
+      <div class="loan-card offer-card">
+        <h2>Offer micro-liquidity</h2>
+        <p class="muted">Fund an open request at its stated amount and asset. The creator must accept before receiving the advance.</p>
         <div class="loan-form">
           <div class="field">
             <label for="offer-name">Name</label>
@@ -2095,47 +2207,29 @@
           </div>
           <div class="field">
             <label for="offer-wallet">Wallet</label>
-            <input id="offer-wallet" placeholder="0x..." />
-          </div>
-          <div class="field">
-            <label for="offer-amount">Amount</label>
-            <input id="offer-amount" placeholder="250" inputmode="decimal" />
-          </div>
-          <div class="field">
-            <label for="offer-asset">Asset</label>
-            <select id="offer-asset" class="native-token-select" aria-hidden="true" tabindex="-1">
-              <option value="ART" selected>ART</option>
-              <option value="USDC">USDC</option>
-              <option value="BNUT">BNUT</option>
-            </select>
-            <div id="offer-token-picker" class="token-basket"></div>
+            <input id="offer-wallet" placeholder="Connect your wallet" readonly />
           </div>
           <div class="field">
             <label for="offer-note">Offer</label>
-            <textarea id="offer-note" placeholder="Terms, timing, or any note you want to add."></textarea>
+            <textarea id="offer-note" placeholder="Add a short note about your offer."></textarea>
           </div>
           <div class="field">
-            <label for="offer-project-urls">Project/Fund URLs</label>
-            <textarea id="offer-project-urls" placeholder="One project or fund URL per line"></textarea>
-          </div>
-          <div class="field cid-help">
-            <label for="offer-request-cid">Related request CID</label>
-            <input id="offer-request-cid" placeholder="ipfs://..." aria-describedby="offer-cid-help" />
-            <span id="offer-cid-help" class="cid-help-tooltip" role="tooltip">In the Decent Canopy (Request Canopy below), select the request you want to fund, then click "Offer against this request" in its details. Its CID will fill this field automatically. Complete your offer terms here; linking a request does not transfer funds.</span>
+            <label for="offer-request-id">Request number</label>
+            <input id="offer-request-id" inputmode="numeric" placeholder="Request number" />
+            <small id="offer-request-summary" class="muted">Enter the number shared by the creator to review its amount, asset, and deadline.</small>
           </div>
           <div class="loan-actions">
-            <button id="offer-json-button" class="btn secondary" type="button">Prepare offer JSON</button>
-            <button id="offer-ipfs-button" class="btn secondary" type="button">Upload offer to IPFS</button>
+            <button id="offer-json-button" class="btn" type="button">Filling Decent Offer</button>
           </div>
-          <p id="offer-metadata-status" class="metadata-status">Prepare offer metadata and link it to a request CID when available.</p>
+          <p id="offer-metadata-status" class="metadata-status">Connect your wallet, link your verified email, and enter an open request number.</p>
         </div>
       </div>
     </section>
 
-    <section class="canopy-panel" aria-label="ArtFi request offer canopy">
+    <section id="request-canopy" class="canopy-panel" aria-label="ArtFi request offer canopy">
       <div class="canopy-head">
         <div>
-          <h2>Request Canopy</h2>
+          <h2>Decent ArtFi Canopy</h2>
           <p class="muted">Discover requests, offers, projects, CIDs, and node references before terms are accepted.</p>
         </div>
         <div class="canopy-toolbar" aria-label="Canopy controls">
@@ -2209,14 +2303,9 @@
       <p id="public-treasury-status" class="note">Reading the settlement router on Base…</p>
     </section>
 
-    <section id="admin-panel" class="admin-panel" data-visible="false" aria-label="Payroll admin panel">
-      <div class="admin-head">
-        <div>
-          <h2>Payroll Admin</h2>
-          <p class="muted">Owner wallet can review the queue and finalize payments from here.</p>
-        </div>
-        <div class="status-pill" id="admin-status">Wallet disconnected</div>
-      </div>
+    <details id="admin-panel" class="admin-panel" data-visible="false" aria-label="Payroll admin panel">
+      <summary><span class="admin-panel-summary-copy"><strong>Payroll Admin</strong><small>Review the queue and settle contributor payments.</small></span><span class="status-pill" id="admin-status">Wallet disconnected</span></summary>
+      <div class="admin-panel-content">
       <div class="admin-grid">
         <div class="card">
           <h3>Finalize payout</h3>
@@ -2266,16 +2355,12 @@
         </div>
       </div>
       <p class="note" id="tx-note">Connect a wallet to unlock the settlement controls.</p>
-    </section>
-
-    <section id="treasury-admin-panel" class="admin-panel" data-visible="false" aria-label="Treasury admin panel">
-      <div class="admin-head">
-        <div>
-          <h2>Treasury Admin</h2>
-          <p class="muted">Create repository funds, publish their metadata, deposit tokens, and manage the token registry.</p>
-        </div>
-        <div class="status-pill">Owner only</div>
       </div>
+    </details>
+
+    <details id="treasury-admin-panel" class="admin-panel" data-visible="false" aria-label="Treasury admin panel">
+      <summary><span class="admin-panel-summary-copy"><strong>Treasury Admin</strong><small>Create funds, deposit tokens, and manage treasury settings.</small></span><span class="status-pill">Owner only</span></summary>
+      <div class="admin-panel-content">
       <div class="admin-grid">
         <div class="card">
           <h3>Create fund allocation</h3>
@@ -2304,7 +2389,7 @@
               <div class="field"><label for="fund-metadata-repository">Repository</label><input id="fund-metadata-repository" placeholder="owner/repository" /></div>
               <div class="field"><label for="fund-metadata-website">Website or Pages URL</label><input id="fund-metadata-website" placeholder="https://..." /></div>
               <div class="field"><label for="fund-metadata-ens">ENS name</label><input id="fund-metadata-ens" placeholder="project.eth" /></div>
-              <div class="field"><label for="fund-metadata-treasury">Treasury contract</label><input id="fund-metadata-treasury" value="0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5" placeholder="0x..." /></div>
+              <div class="field"><label for="fund-metadata-treasury">Treasury contract</label><input id="fund-metadata-treasury" value="0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5" placeholder="0x..." /><small id="fund-metadata-treasury-badge"></small></div>
               <div class="field"><label for="fund-metadata-projects">Artizen project URLs</label><textarea id="fund-metadata-projects" placeholder="One project URL per line"></textarea></div>
             </div>
             <div class="field"><label for="fund-metadata-field-select">Add metadata field</label><select id="fund-metadata-field-select"><option value="">Choose a field…</option><option value="repositoryUrl">Repository URL</option><option value="purpose">Purpose</option><option value="asset">Asset</option><option value="network">Network</option><option value="createdAt">Created at</option><option value="contact">Contact</option><option value="custom">Custom field</option></select></div>
@@ -2337,7 +2422,7 @@
           <div id="token-registry-editor" class="token-registry" hidden>
             <div class="token-registry-row">
               <input id="token-symbol-input" placeholder="BNUT" aria-label="Token symbol" />
-              <input id="token-address-input" placeholder="0x token contract" aria-label="Token contract" />
+              <div class="token-address-editor"><input id="token-address-input" placeholder="0x token contract" aria-label="Token contract" /><small id="token-address-badge"></small></div>
               <input id="token-decimals-input" value="18" inputmode="numeric" placeholder="18" aria-label="Token decimals" />
               <label class="btn secondary" for="token-image-input">Choose icon<input id="token-image-input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden /></label>
               <button id="save-token-button" class="btn secondary" type="button">Save token</button>
@@ -2360,7 +2445,47 @@
           <p id="sweep-status" class="note">Connect the owner wallet to read the selected fund balance.</p>
         </div>
       </div>
-    </section>
+      </div>
+    </details>
+
+    <details id="protocol-admin-panel" class="admin-panel" data-visible="false" aria-label="ArtFi protocol admin panel">
+      <summary><span class="admin-panel-summary-copy"><strong>ArtFi Protocol</strong><small>Inspect protocol state and call any protocol function.</small></span><span class="status-pill">Protocol contract</span></summary>
+      <div class="admin-panel-content">
+        <p class="muted">Advanced contract console. State-changing calls require your wallet and the roles enforced by the contract.</p>
+        <div id="protocol-admin-address" class="contract-address-display"></div>
+        <div id="protocol-admin-functions" class="contract-console-list"><div class="empty-state">Loading protocol ABI…</div></div>
+      </div>
+    </details>
+
+    <details id="network-registry-admin-panel" class="admin-panel" data-visible="false" aria-label="ArtFi network registry admin panel">
+      <summary><span class="admin-panel-summary-copy"><strong>ArtFi Network Registry</strong><small>Inspect publications, nodes, rewards, roles, and call registry functions.</small></span><span class="status-pill">Registry contract</span></summary>
+      <div class="admin-panel-content">
+        <p class="muted">Advanced contract console. State-changing calls require your wallet and the roles enforced by the contract.</p>
+        <div id="network-registry-admin-address" class="contract-address-display"></div>
+        <div class="card node-reward-admin-card">
+          <h3>Node reward payroll</h3>
+          <p class="muted">Configure rewards to draw from a dedicated Settlement Router fund. Eligible nodes can then be reviewed, queued, and paid individually from that fund.</p>
+          <div class="field-grid">
+            <div class="field"><label for="node-reward-fund">Reward fund</label><select id="node-reward-fund"></select></div>
+            <div class="field"><label for="node-reward-asset">Reward token</label><select id="node-reward-asset"></select></div>
+            <div class="field"><label for="node-reward-amount">Reward per month</label><input id="node-reward-amount" value="10" inputmode="decimal" /></div>
+            <div class="field"><label for="node-reward-month">Payroll month</label><input id="node-reward-month" inputmode="numeric" /></div>
+          </div>
+          <div class="admin-actions">
+            <button id="configure-node-reward-button" class="btn secondary" type="button">Configure reward fund</button>
+            <button id="refresh-node-rewards-button" class="btn secondary" type="button">Refresh eligible nodes</button>
+            <button id="queue-node-rewards-button" class="btn secondary" type="button">Queue selected nodes</button>
+            <button id="pay-node-rewards-button" class="btn" type="button">Pay queued rewards</button>
+          </div>
+          <div id="node-reward-summary" class="batch-summary">Connect an admin wallet to review node rewards.</div>
+          <div id="node-reward-eligible-list" class="queue-list"><div class="empty-state">Eligible nodes will appear here.</div></div>
+          <h4>Review queue</h4>
+          <div id="node-reward-queue" class="queue-list"><div class="empty-state">No node rewards queued.</div></div>
+          <p id="node-reward-admin-status" class="note">The Registry contract must support router-funded rewards. Configure PAYROLL_ROLE for the Registry on the Settlement Router, approve node operators as recipients, and fund the node-reward-fund before paying.</p>
+        </div>
+        <div id="network-registry-admin-functions" class="contract-console-list"><div class="empty-state">Loading registry ABI…</div></div>
+      </div>
+    </details>
   </main>
 
   <script type="importmap">
@@ -2374,7 +2499,7 @@
     }
   </script>
   <script type="module">
-    import { BrowserProvider, Contract, JsonRpcProvider, formatUnits, keccak256, parseUnits, solidityPackedKeccak256, toUtf8Bytes } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
+    import { BrowserProvider, Contract, Interface, JsonRpcProvider, formatUnits, keccak256, parseUnits, solidityPackedKeccak256, toUtf8Bytes } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
     import {
       consumeEmailAuthorizationFromLocation,
       createWalletAgentBinding,
@@ -2384,6 +2509,7 @@
       requestEmailAuthorization,
     } from "./scripts/ucanStorage.mjs";
     import { createDirectPinataUploader, createIpfsDesktopUploader, createPinataUploader } from "./scripts/ucanStorage.mjs";
+    import { networkRegistryAdminAbi, protocolAdminAbi } from "./scripts/adminContractAbis.mjs";
 
     const routerAbi = [
       "function createFund(bytes32 fundId, string metadataUri)",
@@ -2415,19 +2541,35 @@
       "event FundRecovered(bytes32 indexed fundId, address indexed asset, address indexed recipient, uint256 amount)",
       "event ContributorApprovalUpdated(address indexed wallet, bytes32 indexed githubIdHash, bool approved)"
     ];
+    const protocolAbi = [
+      "function supportedAssets(address asset) view returns (bool)",
+      "function profiles(address account) view returns (bytes32 emailHash, bytes32 agentDidHash, string profileUri)",
+      "function registerProfile(bytes32 emailHash, bytes32 agentDidHash, string profileUri)",
+      "function createRequest((address asset,uint256 principal,uint256 repaymentAmount,uint64 fundingDeadline,uint64 repaymentDueAt,bytes32 termsHash,string metadataUri,string artizenProjectUrl,string artizenFundUrl) terms) returns (uint256)",
+      "function requests(uint256) view returns (address creator,bytes32 creatorEmailHash,address asset,uint256 principal,uint256 repaymentAmount,uint64 createdAt,uint64 fundingDeadline,uint64 repaymentDueAt,bytes32 termsHash,string metadataUri,string artizenProjectUrl,string artizenFundUrl,uint256 advanceId)",
+      "function fundRequest(uint256 requestTokenId,string metadataUri) payable returns (uint256)",
+      "event AdvanceRequested(uint256 indexed requestTokenId,address indexed creator,address indexed asset,uint256 principal,uint256 repaymentAmount,uint256 fundingDeadline,uint256 repaymentDueAt,bytes32 termsHash,string metadataUri,string artizenProjectUrl,string artizenFundUrl)"
+    ];
+    const contentRegistryAbi = [
+      "function publishContent(uint8 kind,string cid,bytes32 contentHash,bytes32 agentDidHash,string artizenProjectUrl,string artizenFundUrl) returns (uint256)"
+    ];
+    const ARTFI_PROTOCOL_ADDRESS = "0xA90f10a2205f392b3d79382409475e66767588a4";
     const artTokenAddress = "0x44c4516768e47cd97cfF2561B81a74699F23f8Ec";
     const publicRouterAddress = "0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5";
     const SETTLEMENT_ROUTER_ADDRESS = publicRouterAddress;
+    const ARTFI_NETWORK_REGISTRY_ADDRESS = "0x4e70AC13Ea266D76d872411DA8b4E80460Af4423";
     const publicBaseRpc = "https://base-rpc.publicnode.com";
     const settlementFundId = keccak256(toUtf8Bytes("artfi-repo-dev"));
     // Fund options come from the router; these slugs only supply human-readable labels.
     const defaultFundRegistry = [
       { id: "artfi-repo-dev", uri: "" },
       { id: "bignuten-repo-dev", uri: "" },
+      { id: "node-reward-fund", uri: "" },
     ];
     const knownFundAliases = new Map([
       [keccak256(toUtf8Bytes("artfi-repo-dev")).toLowerCase(), "artfi-repo-dev"],
       [keccak256(toUtf8Bytes("bignuten-repo-dev")).toLowerCase(), "bignuten-repo-dev"],
+      [keccak256(toUtf8Bytes("node-reward-fund")).toLowerCase(), "node-reward-fund"],
     ]);
     // keccak256 is case sensitive, so every fund id is canonicalised before hashing.
     const FUND_SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
@@ -2500,6 +2642,11 @@
     const escapeHtml = value => String(value || "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
     const tokenForAddress = address => tokenRegistry.find(token => token.address && token.address.toLowerCase() === String(address || "").toLowerCase()) || { symbol: "TOKEN", image: "./Artizen_LOGO.png", decimals: 18 };
     const tokenBadge = (symbol, image) => `<span class="token-badge"><img src="${escapeHtml(image || "./Artizen_LOGO.png")}" alt="" aria-hidden="true">${escapeHtml(symbol)}</span>`;
+    const addressBadge = (address, { image = "./Ens_Eth_Breathe.gif", symbol = "" } = {}) => {
+      const value = String(address || "");
+      if (!/^0x[a-fA-F0-9]{40}$/.test(value)) return "";
+      return `<span class="contract-address-badge"><img src="${escapeHtml(image)}" alt="" aria-hidden="true">${symbol ? `<strong>${escapeHtml(symbol)}</strong>` : ""}<code>${escapeHtml(value.slice(0, 6))}</code><span class="address-network-icons" aria-label="Base network">🌐🌐🌐🌐</span><code>${escapeHtml(value.slice(-4))}</code></span>`;
+    };
     const tokenInfoForEntry = entry => tokenRegistry.find(token => token.symbol.toUpperCase() === String(entry.currency || "ART").toUpperCase()) || tokenForAddress(artTokenAddress);
 
     const renderTokenRegistryPicker = () => {
@@ -2510,10 +2657,9 @@
         return;
       }
       tokenRegistrySelectedSymbol = selected.symbol;
-      const addressShort = token => token.address ? `${token.address.slice(0, 6)}…${token.address.slice(-4)}` : "No address";
       tokenRegistryPicker.innerHTML = `
-        <button class="btn secondary token-picker-button" type="button" aria-expanded="${tokenRegistryPicker.dataset.open === "true"}">${tokenBadge(selected.symbol, selected.image)}<span class="token-picker-address">${escapeHtml(addressShort(selected))}</span></button>
-        <div class="token-picker-menu">${tokenRegistry.map(token => `<button class="btn secondary token-picker-option" type="button" data-symbol="${escapeHtml(token.symbol)}" aria-pressed="${token.symbol === selected.symbol}">${tokenBadge(token.symbol, token.image)}<span class="token-picker-address">${escapeHtml(addressShort(token))}</span></button>`).join("")}</div>`;
+        <button class="btn secondary token-picker-button" type="button" aria-expanded="${tokenRegistryPicker.dataset.open === "true"}">${addressBadge(selected.address, { image: selected.image, symbol: selected.symbol })}</button>
+        <div class="token-picker-menu">${tokenRegistry.map(token => `<button class="btn secondary token-picker-option" type="button" data-symbol="${escapeHtml(token.symbol)}" aria-pressed="${token.symbol === selected.symbol}">${addressBadge(token.address, { image: token.image, symbol: token.symbol })}</button>`).join("")}</div>`;
       tokenRegistryPicker.querySelector(".token-picker-button").addEventListener("click", () => {
         tokenRegistryPicker.dataset.open = tokenRegistryPicker.dataset.open === "true" ? "false" : "true";
         renderTokenRegistryPicker();
@@ -2530,15 +2676,15 @@
       const token = tokenRegistry.find(entry => entry.symbol === tokenRegistrySelectedSymbol);
       if (!token) return;
       if (!state.provider) {
-        tokenRegistryStatus.textContent = `${token.symbol} · ${token.address.slice(0, 6)}…${token.address.slice(-4)} · ${token.decimals} decimals`;
+        tokenRegistryStatus.innerHTML = `${addressBadge(token.address, { image: token.image, symbol: token.symbol })} · ${token.decimals} decimals`;
         return;
       }
       try {
         const router = new Contract(SETTLEMENT_ROUTER_ADDRESS, routerAbi, state.provider);
         const approved = await router.approvedAssets(token.address);
-        tokenRegistryStatus.textContent = `${token.symbol} · ${token.address.slice(0, 6)}…${token.address.slice(-4)} · ${token.decimals} decimals · ${approved ? "approved on router" : "not approved on router"}`;
+        tokenRegistryStatus.innerHTML = `${addressBadge(token.address, { image: token.image, symbol: token.symbol })} · ${token.decimals} decimals · ${approved ? "approved on router" : "not approved on router"}`;
       } catch (_) {
-        tokenRegistryStatus.textContent = `${token.symbol} · ${token.address.slice(0, 6)}…${token.address.slice(-4)} · ${token.decimals} decimals`;
+        tokenRegistryStatus.innerHTML = `${addressBadge(token.address, { image: token.image, symbol: token.symbol })} · ${token.decimals} decimals`;
       }
     };
 
@@ -2608,6 +2754,7 @@
       tokenRegistryEditor.hidden = true;
       tokenRegistryEditMode = "";
       renderTokenRegistry();
+      refreshSupportedAdvanceAssets();
       tokenRegistryStatus.innerHTML = `${tokenBadge(symbol, image)} ${previous ? "updated" : "added"}.`;
     };
 
@@ -2634,29 +2781,63 @@
     const tokenForSymbol = symbol => tokenRegistry.find(token => token.symbol.toUpperCase() === String(symbol || "").toUpperCase()) || defaultTokenRegistry[0];
     const tokenForPickerValue = select => {
       const value = String(select.value || "");
-      return select === requestAsset || select === offerAsset
-        ? tokenForSymbol(value)
-        : tokenForAddress(value);
+      return select === requestAsset ? tokenForSymbol(value) : tokenForAddress(value);
     };
     const setTokenPickerValue = (select, symbol) => {
       const token = tokenForSymbol(symbol);
-      select.value = select === requestAsset || select === offerAsset ? token.symbol : token.address;
+      select.value = select === requestAsset ? token.symbol : token.address;
       if (select === payoutTokenSelect) payoutAssetAddress.value = token.address;
       renderTokenPickers();
       if (select === sweepAsset) refreshSweepControls();
     };
     const renderTokenPicker = (select, basket) => {
       const selectedToken = tokenForPickerValue(select);
-      basket.innerHTML = tokenRegistry.map(token => `<button class="btn secondary token-picker-option" type="button" role="radio" aria-checked="${token.symbol === selectedToken.symbol}" data-symbol="${escapeHtml(token.symbol)}" data-selected="${token.symbol === selectedToken.symbol ? "true" : "false"}">${tokenBadge(token.symbol, token.image)}</button>`).join("");
+      if (select === requestAsset && !state.advanceSupportLoaded) {
+        basket.innerHTML = '<small class="muted">Checking enabled assets…</small>';
+        return;
+      }
+      const availableTokens = tokenRegistry.filter(token => token.address && (
+        select !== requestAsset || state.advanceSupportedAssets.has(token.address.toLowerCase())
+      ));
+      if (select === requestAsset && !availableTokens.some(token => token.symbol === selectedToken.symbol)) {
+        requestAsset.value = availableTokens[0]?.symbol || "";
+      }
+      if (!availableTokens.length) {
+        basket.innerHTML = '<small class="muted">No tokens are currently enabled for advances.</small>';
+        return;
+      }
+      basket.innerHTML = availableTokens.map(token => `<button class="btn secondary token-picker-option" type="button" role="radio" aria-checked="${token.symbol === selectedToken.symbol}" data-symbol="${escapeHtml(token.symbol)}" data-selected="${token.symbol === selectedToken.symbol ? "true" : "false"}">${tokenBadge(token.symbol, token.image)}</button>`).join("");
       basket.querySelectorAll(".token-picker-option").forEach(button => {
         button.addEventListener("click", () => setTokenPickerValue(select, button.dataset.symbol));
       });
     };
-    const renderTokenPickers = () => {
-      if (requestTokenPicker && offerTokenPicker) {
-        renderTokenPicker(requestAsset, requestTokenPicker);
-        renderTokenPicker(offerAsset, offerTokenPicker);
+
+    const refreshSupportedAdvanceAssets = async () => {
+      state.advanceSupportLoaded = false;
+      renderTokenPickers();
+      try {
+        const provider = new JsonRpcProvider(publicBaseRpc, EXPECTED_CHAIN_ID, { batchMaxCount: 1 });
+        const protocol = protocolAt(provider);
+        const supported = await Promise.all(tokenRegistry.filter(token => token.address).map(async token => [
+          token.address.toLowerCase(),
+          await protocol.supportedAssets(token.address),
+        ]));
+        state.advanceSupportedAssets = new Set(supported.filter(([, enabled]) => enabled).map(([address]) => address));
+        state.advanceSupportLoaded = true;
+        if (requestAssetStatus) {
+          requestAssetStatus.textContent = state.advanceSupportedAssets.size
+            ? "Only protocol-enabled tokens are shown."
+            : "No tokens are currently enabled for advances.";
+        }
+      } catch (_) {
+        state.advanceSupportedAssets = new Set();
+        state.advanceSupportLoaded = true;
+        if (requestAssetStatus) requestAssetStatus.textContent = "Could not check enabled assets. Refresh the page and try again.";
       }
+      renderTokenPickers();
+    };
+    const renderTokenPickers = () => {
+      if (requestTokenPicker) renderTokenPicker(requestAsset, requestTokenPicker);
       const depositPicker = document.getElementById("deposit-token-picker");
       const sweepPicker = document.getElementById("sweep-token-picker");
       if (depositPicker && sweepPicker) {
@@ -2670,8 +2851,8 @@
     const renderPayoutTokenPicker = picker => {
       const selectedToken = tokenForAddress(payoutTokenSelect.value);
       picker.innerHTML = `
-        <button class="btn secondary token-picker-button" type="button" aria-expanded="${picker.dataset.open === "true"}">${tokenBadge(selectedToken.symbol, selectedToken.image)}<span class="token-picker-address">${escapeHtml(selectedToken.address)}</span></button>
-        <div class="token-picker-menu">${tokenRegistry.filter(token => token.address).map(token => `<button class="btn secondary token-picker-option" type="button" data-symbol="${escapeHtml(token.symbol)}">${tokenBadge(token.symbol, token.image)}<span class="token-picker-address">${escapeHtml(token.address)}</span></button>`).join("")}</div>`;
+        <button class="btn secondary token-picker-button" type="button" aria-expanded="${picker.dataset.open === "true"}">${addressBadge(selectedToken.address, { image: selectedToken.image, symbol: selectedToken.symbol })}</button>
+        <div class="token-picker-menu">${tokenRegistry.filter(token => token.address).map(token => `<button class="btn secondary token-picker-option" type="button" data-symbol="${escapeHtml(token.symbol)}">${addressBadge(token.address, { image: token.image, symbol: token.symbol })}</button>`).join("")}</div>`;
       picker.querySelector(".token-picker-button").addEventListener("click", () => { picker.dataset.open = picker.dataset.open === "true" ? "false" : "true"; renderPayoutTokenPicker(picker); });
       picker.querySelectorAll(".token-picker-option").forEach(button => button.addEventListener("click", () => {
         setTokenPickerValue(payoutTokenSelect, button.dataset.symbol);
@@ -2689,6 +2870,27 @@
       return match ? match.id : null;
     };
 
+    const renderNodeRewardSelectors = () => {
+      if (nodeRewardFundSelect) {
+        const activeFunds = (state.chainFunds || []).filter(fund => fund.active && fund.slug);
+        const currentFund = nodeRewardFundSelect.value;
+        nodeRewardFundSelect.innerHTML = activeFunds.length
+          ? activeFunds.map(fund => `<option value="${escapeHtml(fund.slug)}">${escapeHtml(fund.slug)}</option>`).join("")
+          : '<option value="">Create node-reward-fund in Treasury Admin first</option>';
+        const defaultFund = activeFunds.find(fund => fund.slug === "node-reward-fund")?.slug || activeFunds[0]?.slug || "";
+        nodeRewardFundSelect.value = activeFunds.some(fund => fund.slug === currentFund) ? currentFund : defaultFund;
+      }
+      if (nodeRewardAssetSelect) {
+        const currentAsset = nodeRewardAssetSelect.value;
+        const assets = [
+          { symbol: "ETH", address: "native" },
+          ...tokenRegistry.filter(token => token.address),
+        ];
+        nodeRewardAssetSelect.innerHTML = assets.map(token => `<option value="${escapeHtml(token.address)}">${escapeHtml(token.symbol)}</option>`).join("");
+        nodeRewardAssetSelect.value = assets.some(token => token.address === currentAsset) ? currentAsset : artTokenAddress;
+      }
+    };
+
     const renderFundRegistry = () => {
       const funds = state.chainFunds || [];
       const options = funds.length
@@ -2701,7 +2903,10 @@
         select.value = values.includes(current) ? current : (fallback ?? values[0] ?? "");
       };
       applyOptions(manageFundId);
-      [selectedFundId, depositFundId, sweepFundId].forEach(select => applyOptions(select));
+      [selectedFundId, depositFundId, sweepFundId, nodeRewardFundSelect].forEach(select => {
+        if (select) applyOptions(select);
+      });
+      renderNodeRewardSelectors();
       if (depositFundStatus) depositFundStatus.textContent = depositFundId.value
         ? `Deposit target: ${depositFundId.value}`
         : "Create a named fund before depositing.";
@@ -2810,23 +3015,23 @@
     const requestName = document.getElementById("request-name");
     const requestWallet = document.getElementById("request-wallet");
     const requestAmount = document.getElementById("request-amount");
+    const requestRepaymentAmount = document.getElementById("request-repayment-amount");
+    const requestFundingDays = document.getElementById("request-funding-days");
+    const requestRepaymentDays = document.getElementById("request-repayment-days");
     const requestAsset = document.getElementById("request-asset");
     const requestTokenPicker = document.getElementById("request-token-picker");
+    const requestAssetStatus = document.getElementById("request-asset-status");
     const requestNote = document.getElementById("request-note");
-    const requestProjectUrls = document.getElementById("request-project-urls");
+    const requestProjectUrl = document.getElementById("request-project-url");
+    const requestFundUrl = document.getElementById("request-fund-url");
     const requestJsonButton = document.getElementById("request-json-button");
-    const requestIpfsButton = document.getElementById("request-ipfs-button");
     const requestMetadataStatus = document.getElementById("request-metadata-status");
     const offerName = document.getElementById("offer-name");
     const offerWallet = document.getElementById("offer-wallet");
-    const offerAmount = document.getElementById("offer-amount");
-    const offerAsset = document.getElementById("offer-asset");
-    const offerTokenPicker = document.getElementById("offer-token-picker");
     const offerNote = document.getElementById("offer-note");
-    const offerProjectUrls = document.getElementById("offer-project-urls");
-    const offerRequestCid = document.getElementById("offer-request-cid");
+    const offerRequestId = document.getElementById("offer-request-id");
+    const offerRequestSummary = document.getElementById("offer-request-summary");
     const offerJsonButton = document.getElementById("offer-json-button");
-    const offerIpfsButton = document.getElementById("offer-ipfs-button");
     const offerMetadataStatus = document.getElementById("offer-metadata-status");
     const ipfsButton = document.getElementById("ipfs-button");
     const ipfsPanel = document.getElementById("ipfs-panel");
@@ -2854,6 +3059,27 @@
     const nodeRewardOptin = document.getElementById("node-reward-optin");
     const nodeRewardPanel = document.getElementById("node-reward-panel");
     const networkRegistryAddress = document.getElementById("network-registry-address");
+    const networkRegistryAddressBadge = document.getElementById("network-registry-address-badge");
+    const fundMetadataTreasuryBadge = document.getElementById("fund-metadata-treasury-badge");
+    const tokenAddressBadge = document.getElementById("token-address-badge");
+    const protocolAdminPanel = document.getElementById("protocol-admin-panel");
+    const networkRegistryAdminPanel = document.getElementById("network-registry-admin-panel");
+    const protocolAdminFunctions = document.getElementById("protocol-admin-functions");
+    const networkRegistryAdminFunctions = document.getElementById("network-registry-admin-functions");
+    const protocolAdminAddress = document.getElementById("protocol-admin-address");
+    const networkRegistryAdminAddress = document.getElementById("network-registry-admin-address");
+    const nodeRewardFundSelect = document.getElementById("node-reward-fund");
+    const nodeRewardAssetSelect = document.getElementById("node-reward-asset");
+    const nodeRewardAmountInput = document.getElementById("node-reward-amount");
+    const nodeRewardMonthInput = document.getElementById("node-reward-month");
+    const configureNodeRewardButton = document.getElementById("configure-node-reward-button");
+    const refreshNodeRewardsButton = document.getElementById("refresh-node-rewards-button");
+    const queueNodeRewardsButton = document.getElementById("queue-node-rewards-button");
+    const payNodeRewardsButton = document.getElementById("pay-node-rewards-button");
+    const nodeRewardEligibleList = document.getElementById("node-reward-eligible-list");
+    const nodeRewardQueueView = document.getElementById("node-reward-queue");
+    const nodeRewardSummary = document.getElementById("node-reward-summary");
+    const nodeRewardAdminStatus = document.getElementById("node-reward-admin-status");
     const nodeDidHash = document.getElementById("node-did-hash");
     const nodePeerIdHash = document.getElementById("node-peer-id-hash");
     const nodeSoftwareVersion = document.getElementById("node-software-version");
@@ -2886,9 +3112,13 @@
       account: "",
       connected: false,
       browserBinding: null,
-      queue: []
-      ,ipfsProvider: "desktop"
-      ,lastCid: ""
+      queue: [],
+      nodeRewardQueue: [],
+      lastPostedRequestId: null,
+      advanceSupportedAssets: new Set(),
+      advanceSupportLoaded: false,
+      ipfsProvider: "desktop",
+      lastCid: ""
     };
 
     const canopyState = {
@@ -2971,6 +3201,337 @@
       return error?.shortMessage || error?.reason || error?.message || "Contract call reverted.";
     };
 
+    const stringifyContractValue = value => JSON.stringify(value, (_, item) => typeof item === "bigint" ? item.toString() : item, 2);
+
+    const renderAdminContractConsole = (container, address, abi, label) => {
+      if (!container) return;
+      const iface = new Interface(abi);
+      const functions = iface.fragments.filter(fragment => fragment.type === "function");
+      container.innerHTML = "";
+
+      for (const fragment of functions) {
+        const signature = fragment.format("sighash");
+        const readOnly = fragment.stateMutability === "view" || fragment.stateMutability === "pure";
+        const panel = document.createElement("details");
+        panel.className = "contract-console-function";
+        const summary = document.createElement("summary");
+        const code = document.createElement("code");
+        code.textContent = fragment.format("full");
+        const mode = document.createElement("span");
+        mode.className = "canopy-badge";
+        mode.textContent = readOnly ? "Read" : fragment.stateMutability === "payable" ? "Payable" : "Write";
+        summary.append(code, mode);
+        panel.appendChild(summary);
+
+        const form = document.createElement("form");
+        form.className = "contract-console-form";
+        fragment.inputs.forEach((input, index) => {
+          const field = document.createElement("div");
+          field.className = "contract-console-arg";
+          const labelNode = document.createElement("label");
+          labelNode.textContent = `${input.name || `Argument ${index + 1}`} · ${input.type}`;
+          field.appendChild(labelNode);
+          let control;
+          if (input.baseType === "bool") {
+            control = document.createElement("select");
+            control.innerHTML = '<option value="false">false</option><option value="true">true</option>';
+          } else if (input.baseType === "array" || input.baseType === "tuple") {
+            control = document.createElement("textarea");
+            control.placeholder = input.baseType === "tuple" ? 'JSON tuple, e.g. ["0x…", "1", "…"]' : "JSON array, e.g. [1, 2, 3]";
+          } else {
+            control = document.createElement("input");
+            control.type = "text";
+            control.placeholder = input.type === "address" ? "0x…" : input.type;
+            if (input.type.startsWith("uint") || input.type.startsWith("int")) control.inputMode = "numeric";
+          }
+          control.dataset.argumentIndex = String(index);
+          control.dataset.argumentType = input.type;
+          field.appendChild(control);
+          if (input.type === "address") {
+            const addressPreview = document.createElement("small");
+            addressPreview.className = "contract-console-address-preview";
+            const updateAddressPreview = () => {
+              const token = tokenRegistry.find(entry => entry.address.toLowerCase() === control.value.trim().toLowerCase());
+              addressPreview.innerHTML = addressBadge(control.value, token
+                ? { image: token.image, symbol: token.symbol }
+                : {});
+            };
+            control.addEventListener("input", updateAddressPreview);
+            updateAddressPreview();
+            field.appendChild(addressPreview);
+          }
+          form.appendChild(field);
+        });
+
+        let valueInput = null;
+        if (fragment.stateMutability === "payable") {
+          const field = document.createElement("div");
+          field.className = "contract-console-arg";
+          field.innerHTML = '<label>Native value · ETH</label>';
+          valueInput = document.createElement("input");
+          valueInput.type = "text";
+          valueInput.inputMode = "decimal";
+          valueInput.value = "0";
+          field.appendChild(valueInput);
+          form.appendChild(field);
+        }
+
+        const action = document.createElement("button");
+        action.className = readOnly ? "btn secondary" : "btn";
+        action.type = "submit";
+        action.textContent = readOnly ? "Read value" : "Send transaction";
+        const output = document.createElement("pre");
+        output.className = "contract-console-output";
+        output.setAttribute("aria-live", "polite");
+        form.append(action, output);
+        form.addEventListener("submit", async event => {
+          event.preventDefault();
+          action.disabled = true;
+          try {
+            const args = [...form.querySelectorAll("[data-argument-index]")].map(control => {
+              const type = control.dataset.argumentType;
+              const text = control.value.trim();
+              if (type === "bool") return text === "true";
+              if (type.includes("[") || type === "tuple") return JSON.parse(text);
+              if (!text) throw new Error(`${type} argument is required.`);
+              return text;
+            });
+            const overrides = {};
+            if (valueInput) overrides.value = parseUnits(valueInput.value.trim() || "0", 18);
+            if (readOnly) {
+              const provider = state.provider || new JsonRpcProvider(publicBaseRpc, EXPECTED_CHAIN_ID, { batchMaxCount: 1 });
+              const contract = new Contract(address, abi, provider);
+              const result = await contract.getFunction(signature)(...args);
+              const values = fragment.outputs.length === 1 ? result[0] : [...result];
+              output.textContent = stringifyContractValue(values);
+            } else {
+              if (!state.connected || !state.signer) throw new Error("Connect your wallet to call this function.");
+              await assertBaseNetwork();
+              const contract = new Contract(address, abi, state.signer);
+              const method = contract.getFunction(signature);
+              output.textContent = "Waiting for wallet confirmation…";
+              const tx = Object.keys(overrides).length
+                ? await method(...args, overrides)
+                : await method(...args);
+              output.textContent = `Transaction sent: ${tx.hash}`;
+              const receipt = await tx.wait();
+              output.textContent = `Confirmed in block ${receipt.blockNumber}\n${tx.hash}`;
+            }
+          } catch (error) {
+            output.textContent = readableContractError(error);
+          } finally {
+            action.disabled = false;
+          }
+        });
+        panel.appendChild(form);
+        container.appendChild(panel);
+      }
+      return functions.length;
+    };
+
+    const updateContractAddressBadges = () => {
+      if (networkRegistryAddressBadge) networkRegistryAddressBadge.innerHTML = addressBadge(networkRegistryAddress.value);
+      if (fundMetadataTreasuryBadge) fundMetadataTreasuryBadge.innerHTML = addressBadge(fundMetadataTreasury.value);
+      if (tokenAddressBadge) {
+        const token = tokenRegistry.find(entry => entry.symbol === tokenSymbolInput.value.trim().toUpperCase());
+        tokenAddressBadge.innerHTML = addressBadge(tokenAddressInput.value, { image: token?.image || "./Ens_Eth_Breathe.gif", symbol: tokenSymbolInput.value.trim().toUpperCase() });
+      }
+      if (protocolAdminAddress) protocolAdminAddress.innerHTML = addressBadge(ARTFI_PROTOCOL_ADDRESS);
+      if (networkRegistryAdminAddress) networkRegistryAdminAddress.innerHTML = addressBadge(networkRegistryAddress.value);
+    };
+
+    const nodeRewardQueueStorageKey = () => `artfi-node-reward-queue:${networkRegistryAddress.value.trim().toLowerCase()}`;
+
+    const readNodeRewardConfiguration = async registry => {
+      try {
+        const [router, fundId, asset, amount] = await Promise.all([
+          registry.nodeRewardRouter(),
+          registry.nodeRewardFundId(),
+          registry.nodeRewardAsset(),
+          registry.nodeRewardAmount(),
+        ]);
+        if (router === "0x0000000000000000000000000000000000000000") return null;
+        return { router, fundId, asset, amount };
+      } catch (_) {
+        throw new Error("This deployed Network Registry does not support router-funded node rewards yet; it needs the updated Registry contract deployed.");
+      }
+    };
+
+    const readRewardMonth = () => {
+      const value = nodeRewardMonthInput.value.trim();
+      if (!/^\d{6}$/.test(value) || Number(value.slice(4)) < 1 || Number(value.slice(4)) > 12) {
+        throw new Error("Enter the reward month as YYYYMM.");
+      }
+      return BigInt(value);
+    };
+
+    const getNodeRewardQueue = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(nodeRewardQueueStorageKey()) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) { return []; }
+    };
+
+    const saveNodeRewardQueue = queue => {
+      state.nodeRewardQueue = queue;
+      localStorage.setItem(nodeRewardQueueStorageKey(), JSON.stringify(queue));
+      renderNodeRewardQueue();
+    };
+
+    const renderNodeRewardQueue = () => {
+      const queue = state.nodeRewardQueue || getNodeRewardQueue();
+      state.nodeRewardQueue = queue;
+      nodeRewardQueueView.innerHTML = queue.length ? queue.map(entry => `
+        <div class="queue-item">
+          <span><strong>Node #${escapeHtml(entry.nodeId)} · ${escapeHtml(entry.month)}</strong><small>${addressBadge(entry.operator)} · ${escapeHtml(entry.amount)} ${escapeHtml(entry.symbol)} · fund ${escapeHtml(entry.fundSlug)}</small></span>
+          <button class="btn secondary" type="button" data-remove-node-reward="${escapeHtml(entry.key)}">Remove</button>
+        </div>`).join("") : '<div class="empty-state">No node rewards queued for review.</div>';
+      nodeRewardQueueView.querySelectorAll("[data-remove-node-reward]").forEach(button => button.addEventListener("click", () => {
+        saveNodeRewardQueue(queue.filter(entry => entry.key !== button.dataset.removeNodeReward));
+      }));
+      payNodeRewardsButton.disabled = !(state.connected && state.account === ADMIN_WALLET && queue.length);
+    };
+
+    const refreshNodeRewardCandidates = async () => {
+      refreshNodeRewardsButton.disabled = true;
+      nodeRewardAdminStatus.textContent = "Checking Registry support and node eligibility…";
+      try {
+        await assertBaseNetwork();
+        const registry = new Contract(networkRegistryAddress.value.trim(), networkRegistryAdminAbi, state.provider);
+        let config = null;
+        let configError = "";
+        try { config = await readNodeRewardConfiguration(registry); }
+        catch (error) { configError = error.message; }
+        const month = readRewardMonth();
+        const count = Number(await registry.nodeCount());
+        const rows = [];
+        for (let id = 1; id <= count; id += 1) {
+          const [node, stats, eligible] = await Promise.all([
+            registry.nodes(id),
+            registry.monthStats(id, month),
+            registry.rewardEligible(id, month),
+          ]);
+          if (node.operator === "0x0000000000000000000000000000000000000000") continue;
+          rows.push({ id, operator: node.operator, approved: node.approved, active: node.active, checks: Number(stats.checks), rewardPaid: stats.rewardPaid, eligible });
+        }
+        state.nodeRewardCandidates = rows;
+        renderNodeRewardCandidates();
+        nodeRewardAdminStatus.textContent = configError
+          ? `${configError} Eligibility is still readable; payout settings require the updated Registry.`
+          : config
+            ? `Loaded ${rows.length} registered node${rows.length === 1 ? "" : "s"} for ${month}. Eligible rewards are not paid until queued and confirmed here.`
+            : `Loaded ${rows.length} registered node${rows.length === 1 ? "" : "s"} for ${month}. Configure the reward fund before queuing payouts.`;
+      } catch (error) {
+        nodeRewardAdminStatus.textContent = error?.shortMessage || error?.message || "Could not load node reward eligibility.";
+        nodeRewardEligibleList.innerHTML = '<div class="empty-state">Node eligibility is unavailable.</div>';
+      } finally {
+        refreshNodeRewardsButton.disabled = !(state.connected && state.account === ADMIN_WALLET);
+      }
+    };
+
+    const renderNodeRewardCandidates = () => {
+      const rows = state.nodeRewardCandidates || [];
+      const queuedKeys = new Set(getNodeRewardQueue().map(entry => entry.key));
+      nodeRewardEligibleList.innerHTML = rows.length ? rows.map(node => {
+        const key = `${node.id}:${nodeRewardMonthInput.value.trim()}`;
+        const canQueue = node.eligible && !queuedKeys.has(key);
+        return `<label class="queue-item"><input type="checkbox" data-node-reward-id="${node.id}" ${canQueue ? "" : "disabled"}><span><strong>Node #${node.id} · ${node.approved && node.active ? node.eligible ? "Eligible" : node.rewardPaid ? "Paid this month" : "Not yet eligible" : "Not approved or inactive"}</strong><small>${addressBadge(node.operator)} · ${node.checks}/25 checks</small></span></label>`;
+      }).join("") : '<div class="empty-state">No nodes are registered yet.</div>';
+      nodeRewardSummary.textContent = `${rows.filter(node => node.eligible).length} eligible node${rows.filter(node => node.eligible).length === 1 ? "" : "s"} · ${getNodeRewardQueue().length} queued for review`;
+    };
+
+    const configureNodeRewardPayout = async () => {
+      configureNodeRewardButton.disabled = true;
+      try {
+        await assertBaseNetwork();
+        const fundSlug = nodeRewardFundSelect.value;
+        if (!fundSlug) throw new Error("Create the node-reward-fund in Treasury Admin before configuring rewards.");
+        const token = nodeRewardAssetSelect.value === "native"
+          ? { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 }
+          : tokenForAddress(nodeRewardAssetSelect.value);
+        const amount = parseUnits(nodeRewardAmountInput.value.trim(), token.decimals);
+        if (amount <= 0n) throw new Error("Enter a reward amount greater than zero.");
+        const router = new Contract(SETTLEMENT_ROUTER_ADDRESS, routerAbi, state.provider);
+        if (!(await router.hasRole(await router.PAYROLL_ROLE(), ARTFI_NETWORK_REGISTRY_ADDRESS))) {
+          throw new Error("Grant PAYROLL_ROLE to the Network Registry on the Settlement Router first.");
+        }
+        if (!(await router.approvedAssets(token.address))) throw new Error(`${token.symbol} is not approved on the Settlement Router.`);
+        const fundId = fundIdFor(fundSlug);
+        if (!(await router.funds(fundId)).active) throw new Error(`Fund ${fundSlug} is not active on the Settlement Router.`);
+        const registry = new Contract(networkRegistryAddress.value.trim(), networkRegistryAdminAbi, state.signer);
+        await readNodeRewardConfiguration(new Contract(networkRegistryAddress.value.trim(), networkRegistryAdminAbi, state.provider));
+        const tx = await registry.setNodeRewardPayout(SETTLEMENT_ROUTER_ADDRESS, fundId, token.address, amount);
+        nodeRewardAdminStatus.textContent = "Confirming node reward fund configuration…";
+        await tx.wait();
+        nodeRewardAdminStatus.textContent = `Node rewards configured: ${nodeRewardAmountInput.value} ${token.symbol} from ${fundSlug}.`;
+        await refreshNodeRewardCandidates();
+      } catch (error) {
+        nodeRewardAdminStatus.textContent = error?.shortMessage || error?.message || "Could not configure node rewards.";
+      } finally {
+        configureNodeRewardButton.disabled = !(state.connected && state.account === ADMIN_WALLET);
+      }
+    };
+
+    const queueSelectedNodeRewards = async () => {
+      try {
+        const month = readRewardMonth().toString();
+        const selectedIds = [...nodeRewardEligibleList.querySelectorAll("[data-node-reward-id]:checked")].map(input => Number(input.dataset.nodeRewardId));
+        if (!selectedIds.length) throw new Error("Select at least one eligible node.");
+        const registry = new Contract(networkRegistryAddress.value.trim(), networkRegistryAdminAbi, state.provider);
+        const config = await readNodeRewardConfiguration(registry);
+        if (!config) throw new Error("Configure the node reward payout fund first.");
+        const fundSlug = fundSlugForId(config.fundId) || config.fundId;
+        const token = config.asset === "0x0000000000000000000000000000000000000000"
+          ? { symbol: "ETH", decimals: 18 }
+          : tokenForAddress(config.asset);
+        const queue = getNodeRewardQueue();
+        for (const nodeId of selectedIds) {
+          const node = state.nodeRewardCandidates.find(entry => entry.id === nodeId);
+          if (!node?.eligible) continue;
+          const key = `${nodeId}:${month}`;
+          if (queue.some(entry => entry.key === key)) continue;
+          queue.push({ key, nodeId, operator: node.operator, month, fundId: config.fundId, fundSlug, asset: config.asset, amount: formatUnits(config.amount, token.decimals), decimals: token.decimals, symbol: token.symbol });
+        }
+        saveNodeRewardQueue(queue);
+        renderNodeRewardCandidates();
+        nodeRewardAdminStatus.textContent = `Queued ${selectedIds.length} node reward${selectedIds.length === 1 ? "" : "s"}. Review the list before paying.`;
+      } catch (error) {
+        nodeRewardAdminStatus.textContent = error?.shortMessage || error?.message || "Could not queue selected nodes.";
+      }
+    };
+
+    const payQueuedNodeRewards = async () => {
+      payNodeRewardsButton.disabled = true;
+      try {
+        await assertBaseNetwork();
+        const registry = new Contract(networkRegistryAddress.value.trim(), networkRegistryAdminAbi, state.signer);
+        const config = await readNodeRewardConfiguration(new Contract(networkRegistryAddress.value.trim(), networkRegistryAdminAbi, state.provider));
+        if (!config) throw new Error("Configure the node reward payout fund first.");
+        const router = new Contract(SETTLEMENT_ROUTER_ADDRESS, routerAbi, state.provider);
+        const queue = getNodeRewardQueue();
+        if (!queue.length) throw new Error("There are no node rewards queued.");
+        for (const [index, entry] of queue.entries()) {
+          if (entry.fundId.toLowerCase() !== config.fundId.toLowerCase() || entry.asset.toLowerCase() !== config.asset.toLowerCase() || parseUnits(entry.amount, entry.decimals) !== config.amount) {
+            throw new Error(`Reward configuration changed since node #${entry.nodeId} was queued. Refresh eligibility and queue it again.`);
+          }
+          const node = await registry.nodes(entry.nodeId);
+          if (node.operator.toLowerCase() !== entry.operator.toLowerCase()) throw new Error(`Node #${entry.nodeId} operator changed. Refresh and review the queue.`);
+          if (!(await router.isApprovedRecipient(node.operator))) throw new Error(`Node #${entry.nodeId} operator needs approval on the Settlement Router before payout.`);
+          const eligible = await registry.rewardEligible(entry.nodeId, entry.month);
+          if (!eligible) throw new Error(`Node #${entry.nodeId} is no longer eligible for ${entry.month}. Refresh the queue.`);
+          nodeRewardAdminStatus.textContent = `Paying node #${entry.nodeId} (${index + 1}/${queue.length})… Confirm the transaction in your wallet.`;
+          await (await registry.markMonthlyRewardPaid(entry.nodeId, entry.month)).wait();
+          saveNodeRewardQueue(getNodeRewardQueue().filter(item => item.key !== entry.key));
+        }
+        nodeRewardAdminStatus.textContent = "All queued node rewards were paid from the configured Settlement Router fund.";
+        await refreshNodeRewardCandidates();
+      } catch (error) {
+        nodeRewardAdminStatus.textContent = error?.shortMessage || error?.message || "Node reward payout stopped; unprocessed rewards remain queued.";
+      } finally {
+        payNodeRewardsButton.disabled = !(state.connected && state.account === ADMIN_WALLET && getNodeRewardQueue().length);
+      }
+    };
+
     const refreshAfterWalletTransaction = (message = "Transaction confirmed. Refreshing ArtFi…") => {
       txNote.textContent = message;
       window.setTimeout(() => window.location.reload(), 2000);
@@ -3049,6 +3610,12 @@
       sweepExcessButton.disabled = !isAdmin || !sweepUnallocatedCheckbox.checked;
       adminPanel.dataset.visible = isAdmin ? "true" : "false";
       treasuryAdminPanel.dataset.visible = isAdmin ? "true" : "false";
+      protocolAdminPanel.dataset.visible = isAdmin ? "true" : "false";
+      networkRegistryAdminPanel.dataset.visible = isAdmin ? "true" : "false";
+      configureNodeRewardButton.disabled = !isAdmin;
+      refreshNodeRewardsButton.disabled = !isAdmin;
+      queueNodeRewardsButton.disabled = !isAdmin;
+      payNodeRewardsButton.disabled = !isAdmin || !getNodeRewardQueue().length;
       adminStatus.textContent = connected ? (isAdmin ? `Owner ${shortAccount(state.account).join(" • ")}` : "Wallet connected") : "Wallet disconnected";
       txNote.textContent = connected ? (isAdmin ? "Owner connected. You can now queue and finalize payroll settlements." : "Wallet connected.") : "Connect a wallet to unlock the settlement controls.";
       if (browserLinkButton) browserLinkButton.disabled = !connected;
@@ -3458,104 +4025,238 @@
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "") || "artfi";
 
-    const downloadJson = (filename, data) => {
-      const blob = new Blob([`${JSON.stringify(data, null, 2)}\n`], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+    const protocolAt = signer => new Contract(ARTFI_PROTOCOL_ADDRESS, protocolAbi, signer);
+
+    const publishToCanopy = async ({ kind, uri, bytes, profileAgentDidHash, projectUrl, fundUrl }) => {
+      const registryAddress = networkRegistryAddress.value.trim() || ARTFI_NETWORK_REGISTRY_ADDRESS;
+      const registry = new Contract(registryAddress, contentRegistryAbi, state.signer);
+      const tx = await registry.publishContent(
+        kind,
+        uri,
+        keccak256(bytes),
+        profileAgentDidHash,
+        projectUrl,
+        fundUrl
+      );
+      await tx.wait();
     };
 
-    const prepareRequestMetadata = () => {
-      const projectUrls = parseUrlList(requestProjectUrls.value);
-      const creatorWallet = requestWallet.value.trim();
-      const invalidUrl = projectUrls.find(url => !isHttpsUrl(url));
-      if (!requestName.value.trim() || !/^0x[a-fA-F0-9]{40}$/.test(creatorWallet) || !requestAmount.value.trim() || !requestNote.value.trim() || !projectUrls.length || invalidUrl) {
-        requestMetadataStatus.textContent = "Add a name, creator wallet, amount, request, and at least one project URL.";
-        if (invalidUrl) requestMetadataStatus.textContent = `Invalid project URL: ${invalidUrl}. Use https://... links.`;
+    const postDecentRequest = async () => {
+      if (!state.connected || !state.signer) {
+        requestMetadataStatus.textContent = "Connect your wallet to post a request.";
         return;
       }
-      const metadata = {
-        schema: "artfi.request.v1",
-        type: "creator-liquidity-request",
-        title: `${requestName.value.trim()} ArtFi request`,
-        creator: {
-          name: requestName.value.trim(),
-          wallet: creatorWallet,
-        },
-        amount: {
-          value: requestAmount.value.trim(),
-          currency: requestAsset.value,
-        },
-        purpose: requestNote.value.trim(),
-        projectUrls,
-        primaryProjectUrl: projectUrls[0],
-        status: "draft",
-        createdAt: new Date().toISOString(),
-      };
-      const filename = `${slugify(requestName.value)}-artfi-request-${requestAmount.value.trim()}-${requestAsset.value.toLowerCase()}.json`;
-      downloadJson(filename, metadata);
-      requestMetadataStatus.textContent = `Downloaded ${filename}. Upload it with IPFS storage, then publish the returned CID.`;
-    };
-
-    const prepareOfferMetadata = () => {
-      const projectUrls = parseUrlList(offerProjectUrls.value);
-      const invalidUrl = projectUrls.find(url => !isHttpsUrl(url));
-      if (!offerName.value.trim() || !/^0x[a-fA-F0-9]{40}$/.test(offerWallet.value.trim()) || !offerAmount.value.trim() || !offerNote.value.trim() || !projectUrls.length || invalidUrl) {
-        offerMetadataStatus.textContent = "Add a name, wallet, amount, offer, and at least one project/fund URL.";
-        if (invalidUrl) offerMetadataStatus.textContent = `Invalid project URL: ${invalidUrl}. Use https://... links.`;
-        return;
-      }
-      const metadata = {
-        schema: "artfi.offer.v1",
-        type: "creator-liquidity-offer",
-        lender: {
-          name: offerName.value.trim(),
-          wallet: offerWallet.value.trim(),
-        },
-        amount: {
-          value: offerAmount.value.trim(),
-          currency: offerAsset.value,
-        },
-        terms: offerNote.value.trim(),
-        projectUrls,
-        relatedRequestCid: offerRequestCid.value.trim(),
-        status: "draft",
-        createdAt: new Date().toISOString(),
-      };
-      const filename = `artfi-offer-${offerAmount.value.trim()}-${offerAsset.value.toLowerCase()}.json`;
-      downloadJson(filename, metadata);
-      offerMetadataStatus.textContent = `Downloaded ${filename}. Upload it with IPFS storage, then publish it as an offer.`;
-    };
-
-    const uploadPreparedMetadata = async (kind) => {
-      const isRequest = kind === "request";
-      const status = isRequest ? requestMetadataStatus : offerMetadataStatus;
-      const button = isRequest ? requestIpfsButton : offerIpfsButton;
+      requestJsonButton.disabled = true;
+      let createdRequestId = "";
       try {
-        button.disabled = true;
-        status.textContent = "Preparing metadata for IPFS…";
-        const urls = parseUrlList(isRequest ? requestProjectUrls.value : offerProjectUrls.value);
-        const wallet = isRequest ? requestWallet.value.trim() : offerWallet.value.trim();
-        const amount = isRequest ? requestAmount.value.trim() : offerAmount.value.trim();
-        const note = isRequest ? requestNote.value.trim() : offerNote.value.trim();
-        const name = isRequest ? requestName.value.trim() : offerName.value.trim();
-        if (!name) throw new Error("Enter your name before uploading metadata.");
-        if (!/^0x[a-fA-F0-9]{40}$/.test(wallet) || !amount || !note || !urls.length || urls.some(url => !isHttpsUrl(url))) {
-          throw new Error("Complete the wallet, amount, description, and valid https:// project URL fields first.");
+        await assertBaseNetwork();
+        const projectUrl = requestProjectUrl.value.trim();
+        const fundUrl = requestFundUrl.value.trim();
+        if (!requestName.value.trim() || !requestNote.value.trim() || !requestAmount.value.trim() || !requestRepaymentAmount.value.trim()) {
+          throw new Error("Complete your name, request, requested amount, and repayment amount.");
         }
-        const metadata = isRequest
-          ? { schema: "artfi.request.v1", type: "creator-liquidity-request", title: `${requestName.value.trim()} ArtFi request`, creator: { name: requestName.value.trim(), wallet }, amount: { value: amount, currency: requestAsset.value }, purpose: note, projectUrls: urls, primaryProjectUrl: urls[0], status: "draft", createdAt: new Date().toISOString() }
-          : { schema: "artfi.offer.v1", type: "creator-liquidity-offer", lender: { name, wallet }, amount: { value: amount, currency: offerAsset.value }, terms: note, projectUrls: urls, relatedRequestCid: offerRequestCid.value.trim(), status: "draft", createdAt: new Date().toISOString() };
-        const uri = await uploadJsonBytes({ bytes: new TextEncoder().encode(`${JSON.stringify(metadata, null, 2)}\n`), name: `${slugify(isRequest ? requestName.value : "artfi-offer")}-${kind}.json` });
-        status.textContent = `IPFS upload complete: ${uri}`;
+        if (!isHttpsUrl(projectUrl) || !isHttpsUrl(fundUrl)) {
+          throw new Error("Enter valid https:// links for the Artizen project and fund.");
+        }
+        const token = tokenForSymbol(requestAsset.value);
+        const protocol = protocolAt(state.signer);
+        await assertContractAtAddress(ARTFI_PROTOCOL_ADDRESS, "ArtFi advance contract");
+        if (!(await protocol.supportedAssets(token.address))) {
+          throw new Error(`${token.symbol} is not currently enabled for ArtFi advances. Choose an enabled asset.`);
+        }
+
+        const principal = parseUnits(requestAmount.value.trim(), token.decimals);
+        const repaymentAmount = parseUnits(requestRepaymentAmount.value.trim(), token.decimals);
+        const fundingDays = Number(requestFundingDays.value);
+        const repaymentDays = Number(requestRepaymentDays.value);
+        if (fundingDays < 1 || !Number.isInteger(fundingDays) || repaymentDays <= fundingDays || !Number.isInteger(repaymentDays)) {
+          throw new Error("Set a positive request window and a repayment due date after that window.");
+        }
+        const maxFee = principal * 500n / 10000n;
+        if (repaymentAmount < principal || repaymentAmount - principal > maxFee) {
+          throw new Error("Repayment must be at least the requested amount and no more than 5% above it.");
+        }
+
+        requestMetadataStatus.textContent = "Checking your ArtFi profile…";
+        const profileAgentDidHash = await ensureProtocolProfile(protocol, requestName.value, requestMetadataStatus);
+        const now = Math.floor(Date.now() / 1000);
+        const fundingDeadline = BigInt(now + fundingDays * 86400);
+        const repaymentDueAt = BigInt(now + repaymentDays * 86400);
+        const metadata = {
+          schema: "artfi.request.v1",
+          type: "creator-liquidity-request",
+          title: `${requestName.value.trim()} ArtFi request`,
+          creator: { name: requestName.value.trim(), wallet: state.account },
+          amount: { value: requestAmount.value.trim(), currency: token.symbol },
+          repaymentAmount: { value: requestRepaymentAmount.value.trim(), currency: token.symbol },
+          purpose: requestNote.value.trim(),
+          projectUrls: [projectUrl, fundUrl],
+          primaryProjectUrl: projectUrl,
+          artizenProjectUrl: projectUrl,
+          artizenFundUrl: fundUrl,
+          fundingDays,
+          repaymentDays,
+          createdAt: new Date().toISOString(),
+        };
+        const bytes = jsonBytes(metadata);
+        requestMetadataStatus.textContent = "Posting your request…";
+        const metadataUri = await uploadJsonBytes({
+          bytes,
+          name: `${slugify(requestName.value)}-decent-request.json`,
+        });
+        const terms = {
+          asset: token.address,
+          principal,
+          repaymentAmount,
+          fundingDeadline,
+          repaymentDueAt,
+          termsHash: keccak256(toUtf8Bytes(JSON.stringify({ metadata, metadataUri }))),
+          metadataUri,
+          artizenProjectUrl: projectUrl,
+          artizenFundUrl: fundUrl,
+        };
+        const tx = await protocol.createRequest(terms);
+        requestMetadataStatus.textContent = "Confirming your request on Base…";
+        const receipt = await tx.wait();
+        const event = receipt.logs.map(log => {
+          try { return protocol.interface.parseLog(log); } catch (_) { return null; }
+        }).find(log => log?.name === "AdvanceRequested");
+        createdRequestId = event?.args.requestTokenId?.toString() || "";
+        state.lastPostedRequestId = createdRequestId;
+
+        if (!createdRequestId) {
+          requestMetadataStatus.textContent = "Your request was posted on Base. Share its transaction with a lender to continue.";
+          return;
+        }
+        try {
+          await publishToCanopy({ kind: 1, uri: metadataUri, bytes, profileAgentDidHash, projectUrl, fundUrl });
+          requestMetadataStatus.textContent = `Your request #${createdRequestId} is posted and listed in the Decent ArtFi Canopy.`;
+        } catch (error) {
+          requestMetadataStatus.textContent = `Your request #${createdRequestId} is posted on Base, but could not be added to the public Decent ArtFi Canopy: ${error?.shortMessage || error?.message || "publication failed"}`;
+        }
       } catch (error) {
-        status.textContent = error?.message || "IPFS upload failed.";
-      } finally { button.disabled = false; }
+        requestMetadataStatus.textContent = error?.shortMessage || error?.message || "Could not post your request.";
+      } finally {
+        requestJsonButton.disabled = Boolean(createdRequestId);
+      }
+    };
+
+    const loadOfferRequest = async () => {
+      const rawId = offerRequestId.value.trim();
+      if (!rawId || !/^\d+$/.test(rawId) || BigInt(rawId) === 0n) {
+        offerRequestSummary.textContent = "Enter a valid request number.";
+        return null;
+      }
+      const provider = state.provider || new JsonRpcProvider(publicBaseRpc, EXPECTED_CHAIN_ID, { batchMaxCount: 1 });
+      const protocol = protocolAt(provider);
+      const request = await protocol.requests(BigInt(rawId));
+      if (request.creator === "0x0000000000000000000000000000000000000000") {
+        throw new Error(`Request #${rawId} was not found on ArtFi.`);
+      }
+      const token = request.asset === "0x0000000000000000000000000000000000000000"
+        ? { symbol: "ETH", decimals: 18 }
+        : tokenForAddress(request.asset);
+      const now = Math.floor(Date.now() / 1000);
+      const available = request.advanceId === 0n && BigInt(now) <= request.fundingDeadline;
+      offerRequestSummary.textContent = `Request #${rawId} · ${formatUnits(request.principal, token.decimals)} ${token.symbol} · repayment ${formatUnits(request.repaymentAmount, token.decimals)} ${token.symbol} · ${available ? "open" : request.advanceId !== 0n ? "already funded" : "expired"}`;
+      return { request, token, id: BigInt(rawId), available };
+    };
+
+    const fillDecentOffer = async () => {
+      if (!state.connected || !state.signer) {
+        offerMetadataStatus.textContent = "Connect your wallet to fund a request.";
+        return;
+      }
+      offerJsonButton.disabled = true;
+      let funded = false;
+      try {
+        await assertBaseNetwork();
+        if (!offerName.value.trim() || !offerNote.value.trim()) {
+          throw new Error("Add your name and a short note for the creator.");
+        }
+        const requestInfo = await loadOfferRequest();
+        if (!requestInfo) throw new Error("Enter a request number first.");
+        const { request, token, id: requestId, available } = requestInfo;
+        if (!available) throw new Error(`Request #${requestId} is no longer open for funding.`);
+        if (request.creator.toLowerCase() === state.account.toLowerCase()) {
+          throw new Error("You cannot fund your own request.");
+        }
+        const protocol = protocolAt(state.signer);
+        await assertContractAtAddress(ARTFI_PROTOCOL_ADDRESS, "ArtFi advance contract");
+        if (!(await protocol.supportedAssets(request.asset))) {
+          throw new Error(`${token.symbol} is no longer enabled for ArtFi advances.`);
+        }
+
+        offerMetadataStatus.textContent = "Checking your ArtFi profile…";
+        const profileAgentDidHash = await ensureProtocolProfile(protocol, offerName.value, offerMetadataStatus);
+        const metadata = {
+          schema: "artfi.offer.v1",
+          type: "creator-liquidity-offer",
+          lender: { name: offerName.value.trim(), wallet: state.account },
+          amount: { value: formatUnits(request.principal, token.decimals), currency: token.symbol },
+          terms: offerNote.value.trim(),
+          relatedRequestId: requestId.toString(),
+          relatedRequestUri: request.metadataUri,
+          projectUrls: [request.artizenProjectUrl, request.artizenFundUrl],
+          createdAt: new Date().toISOString(),
+        };
+        const bytes = jsonBytes(metadata);
+        offerMetadataStatus.textContent = "Preparing your offer…";
+        const metadataUri = await uploadJsonBytes({ bytes, name: `decent-offer-${requestId}.json` });
+
+        if (request.asset === "0x0000000000000000000000000000000000000000") {
+          if (await state.provider.getBalance(state.account) < request.principal) {
+            throw new Error(`You need ${formatUnits(request.principal, token.decimals)} ETH plus network fees to fund this request.`);
+          }
+        } else {
+          const asset = new Contract(request.asset, [
+            "function balanceOf(address) view returns (uint256)",
+            "function allowance(address,address) view returns (uint256)",
+            "function approve(address,uint256) returns (bool)",
+          ], state.signer);
+          const balance = await asset.balanceOf(state.account);
+          if (balance < request.principal) throw new Error(`You need ${formatUnits(request.principal, token.decimals)} ${token.symbol} to fund this request.`);
+          const allowance = await asset.allowance(state.account, ARTFI_PROTOCOL_ADDRESS);
+          if (allowance < request.principal) {
+            offerMetadataStatus.textContent = `Approve ${token.symbol} for this request in your wallet…`;
+            await (await asset.approve(ARTFI_PROTOCOL_ADDRESS, request.principal)).wait();
+          }
+        }
+
+        offerMetadataStatus.textContent = `Confirm funding request #${requestId} in your wallet…`;
+        const tx = request.asset === "0x0000000000000000000000000000000000000000"
+          ? await protocol.fundRequest(requestId, metadataUri, { value: request.principal })
+          : await protocol.fundRequest(requestId, metadataUri);
+        const receipt = await tx.wait();
+        funded = true;
+        const event = receipt.logs.map(log => {
+          try { return protocol.interface.parseLog(log); } catch (_) { return null; }
+        }).find(log => log?.name === "AdvanceFunded");
+        const advanceId = event?.args.advanceId?.toString() || "";
+        try {
+          await publishToCanopy({
+            kind: 2,
+            uri: metadataUri,
+            bytes,
+            profileAgentDidHash,
+            projectUrl: request.artizenProjectUrl,
+            fundUrl: request.artizenFundUrl,
+          });
+          offerMetadataStatus.textContent = `Your offer funded Request #${requestId}${advanceId ? ` (advance #${advanceId})` : ""}. The creator can now review and accept it.`;
+        } catch (error) {
+          offerMetadataStatus.textContent = `Your offer funded Request #${requestId}, but could not be added to the public Canopy: ${error?.shortMessage || error?.message || "publication failed"}`;
+        }
+      } catch (error) {
+        offerMetadataStatus.textContent = error?.shortMessage || error?.message || "Could not fill this offer.";
+      } finally {
+        offerJsonButton.disabled = funded;
+      }
+    };
+
+    const refreshOfferRequestSummary = () => {
+      loadOfferRequest().catch(error => {
+        offerRequestSummary.textContent = error?.shortMessage || error?.message || "Could not load this request.";
+      });
     };
 
     const fundMetadataFieldDefinitions = {
@@ -3615,7 +4316,46 @@
               signingEndpoint: document.querySelector('meta[name="artfi-pinata-endpoint"]')?.content,
               serviceDid: document.querySelector('meta[name="artfi-ucan-service-did"]')?.content,
             });
-      return uploader({ bytes, name });
+      return uploader({
+        bytes,
+        name,
+        wallet: state.account,
+        signer: state.signer,
+        binding: state.browserBinding,
+        authorization: await loadEmailAuthorization(),
+      });
+    };
+
+    const jsonBytes = value => new TextEncoder().encode(`${JSON.stringify(value, null, 2)}\n`);
+
+    const ensureProtocolProfile = async (protocol, displayName, status) => {
+      const current = await protocol.profiles(state.account);
+      if (current.emailHash !== `0x${"0".repeat(64)}`) return current.agentDidHash;
+
+      const binding = state.browserBinding;
+      const authorization = await loadEmailAuthorization();
+      if (!binding || binding.wallet?.toLowerCase() !== state.account.toLowerCase() || !authorization) {
+        throw new Error("Connect your wallet and complete the verified email link before your first request or offer.");
+      }
+      if (!binding.agentDid || !binding.emailHash) {
+        throw new Error("Your wallet profile link is incomplete. Link your verified email again, then retry.");
+      }
+
+      status.textContent = "Setting up your ArtFi profile…";
+      const agentDidHash = keccak256(toUtf8Bytes(binding.agentDid));
+      const profileMetadata = {
+        schema: "artfi.profile.v1",
+        displayName: String(displayName || "").trim(),
+        wallet: state.account,
+        createdAt: new Date().toISOString(),
+      };
+      const profileUri = await uploadJsonBytes({
+        bytes: jsonBytes(profileMetadata),
+        name: `${slugify(displayName || "artfi-profile")}-profile.json`,
+      });
+      const tx = await protocol.registerProfile(binding.emailHash, agentDidHash, profileUri);
+      await tx.wait();
+      return agentDidHash;
     };
 
     const uploadFundMetadata = async () => {
@@ -3857,13 +4597,14 @@
           const item = document.createElement("article");
           item.className = "network-record";
           const gatewayUrl = cidGatewayUrl(publication.cid);
-          const offerButton = Number(publication.kind) === 1 && publication.cid ? `<button class="btn secondary network-offer-button" type="button">Offer against this request</button>` : "";
-          item.innerHTML = `<strong>${networkKindLabel(publication.kind)} #${publication.publicationId}</strong><small>${publication.cid || "CID unknown"}</small>${gatewayUrl ? `<small><a href="${gatewayUrl}" target="_blank" rel="noreferrer">Open IPFS content</a></small>` : ""}<small>${publication.active === false ? "Inactive" : "Active"} • publisher ${publication.publisher || "unknown"}</small>${offerButton}`;
+          const offerButton = Number(publication.kind) === 1 && publication.requestTokenId ? `<button class="btn secondary network-offer-button" type="button">Offer against Request #${escapeHtml(publication.requestTokenId)}</button>` : "";
+          item.innerHTML = `<strong>${networkKindLabel(publication.kind)} #${publication.publicationId}</strong>${publication.requestTokenId ? `<small>Request #${escapeHtml(publication.requestTokenId)}</small>` : ""}<small>${publication.cid || "CID unknown"}</small>${gatewayUrl ? `<small><a href="${gatewayUrl}" target="_blank" rel="noreferrer">Open IPFS content</a></small>` : ""}<small>${publication.active === false ? "Inactive" : "Active"} • publisher ${publication.publisher || "unknown"}</small>${offerButton}`;
           item.querySelector(".network-offer-button")?.addEventListener("click", () => {
-            offerRequestCid.value = publication.cid;
+            offerRequestId.value = publication.requestTokenId;
+            refreshOfferRequestSummary();
             document.querySelector('[aria-label="Loan requests and offers"]')?.scrollIntoView({ behavior: "smooth", block: "start" });
-            offerRequestCid.focus();
-            offerMetadataStatus.textContent = "Request CID linked. Add terms and upload the offer JSON.";
+            offerRequestId.focus();
+            offerMetadataStatus.textContent = `Request #${publication.requestTokenId} selected. Review the amount and confirm your funding offer.`;
           });
           networkPublications.appendChild(item);
         }
@@ -4087,13 +4828,14 @@
         ${gateway ? `<p><a href="${gateway}" target="_blank" rel="noreferrer">Open IPFS content</a></p>` : ""}
         ${related}
         ${links ? `<p><strong>Project URLs</strong></p><ul>${links}</ul>` : ""}
-        ${publication?.cid && canopyKind(publication) === "request" ? `<button id="canopy-offer-button" class="btn secondary" type="button">Offer against this request</button>` : ""}
+        ${publication?.requestTokenId && canopyKind(publication) === "request" ? `<button id="canopy-offer-button" class="btn secondary" type="button">Offer against Request #${escapeHtml(publication.requestTokenId)}</button>` : ""}
       `;
       canopyDetails.querySelector("#canopy-offer-button")?.addEventListener("click", () => {
-        offerRequestCid.value = publication.cid;
+        offerRequestId.value = publication.requestTokenId;
+        refreshOfferRequestSummary();
         document.querySelector('[aria-label="Loan requests and offers"]')?.scrollIntoView({ behavior: "smooth", block: "start" });
-        offerRequestCid.focus();
-        offerMetadataStatus.textContent = "Request CID linked. Add terms and upload the offer JSON.";
+        offerRequestId.focus();
+        offerMetadataStatus.textContent = `Request #${publication.requestTokenId} selected. Review the amount and confirm your funding offer.`;
       });
     };
 
@@ -4316,7 +5058,20 @@
       await navigator.clipboard.writeText(keeperCommandPreview.textContent);
       nodeRewardStatus.textContent = "Checker command copied. Run it from the ArtFi repo on an approved checker machine after challenge setup.";
     });
-    networkRegistryAddress.addEventListener("input", refreshKeeperCommand);
+    networkRegistryAddress.addEventListener("input", () => {
+      refreshKeeperCommand();
+      updateContractAddressBadges();
+      renderAdminContractConsole(networkRegistryAdminFunctions, networkRegistryAddress.value.trim(), networkRegistryAdminAbi, "ArtFi Network Registry");
+    });
+    nodeRewardMonthInput.value = new Date().toISOString().slice(0, 7).replace("-", "");
+    configureNodeRewardButton.addEventListener("click", configureNodeRewardPayout);
+    refreshNodeRewardsButton.addEventListener("click", refreshNodeRewardCandidates);
+    queueNodeRewardsButton.addEventListener("click", queueSelectedNodeRewards);
+    payNodeRewardsButton.addEventListener("click", payQueuedNodeRewards);
+    renderNodeRewardSelectors();
+    renderNodeRewardQueue();
+    fundMetadataTreasury.addEventListener("input", updateContractAddressBadges);
+    tokenAddressInput.addEventListener("input", updateContractAddressBadges);
     refreshKeeperCommand();
 
     const connectWallet = async () => {
@@ -4642,10 +5397,10 @@
       await refreshTreasuryStatus();
     });
     browserLinkButton?.addEventListener("click", linkBrowser);
-    requestJsonButton.addEventListener("click", prepareRequestMetadata);
-    offerJsonButton.addEventListener("click", prepareOfferMetadata);
-    requestIpfsButton.addEventListener("click", () => uploadPreparedMetadata("request"));
-    offerIpfsButton.addEventListener("click", () => uploadPreparedMetadata("offer"));
+    requestJsonButton.addEventListener("click", postDecentRequest);
+    offerJsonButton.addEventListener("click", fillDecentOffer);
+    offerRequestId.addEventListener("change", refreshOfferRequestSummary);
+    offerRequestId.addEventListener("blur", refreshOfferRequestSummary);
     const setIpfsPanelOpen = (open) => {
       ipfsPanel.dataset.open = open ? "true" : "false";
       ipfsButton.setAttribute("aria-expanded", String(open));
@@ -4701,6 +5456,10 @@
     setWalletUI(false);
     renderFundRegistry();
     renderTokenRegistry();
+    updateContractAddressBadges();
+    renderAdminContractConsole(protocolAdminFunctions, ARTFI_PROTOCOL_ADDRESS, protocolAdminAbi, "ArtFi Protocol");
+    renderAdminContractConsole(networkRegistryAdminFunctions, networkRegistryAddress.value.trim(), networkRegistryAdminAbi, "ArtFi Network Registry");
+    refreshSupportedAdvanceAssets();
     publicTreasuryRefresh.addEventListener("click", refreshPublicTreasury);
     loadOrCreateBrowserAgent()
       .then(agent => consumeEmailAuthorizationFromLocation({ signer: agent }))
