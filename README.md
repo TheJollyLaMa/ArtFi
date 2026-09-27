@@ -1,4 +1,4 @@
-# ArtFi
+# ArtFi 
 
 ![ArtFi branding](https://github.com/user-attachments/assets/58069599-d5d0-4bf3-a066-a2ac34234ff8)
 
