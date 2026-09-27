@@ -275,8 +275,8 @@ test('parses per-creator transaction hashes for batch settlement', () => {
   });
 });
 
-test('queues one entry per currency with fund and legacy router routing', () => {
-  const router = '0xCe53017Fe1A0edBAb6146f2556e988498F0f9905';
+test('queues one entry per currency with fund and router routing', () => {
+  const router = '0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5';
   const result = createBountyEntries(fixture({
     issue: {
       number: 55,

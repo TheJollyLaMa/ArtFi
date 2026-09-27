@@ -1504,6 +1504,13 @@
     .treasury-fund[data-funded="false"] { border-color: rgba(255, 107, 107, 0.2); }
     .treasury-fund[data-funded="true"] { border-color: rgba(255, 214, 109, 0.52); box-shadow: 0 0 22px rgba(255, 214, 109, 0.1), inset 0 1px 0 rgba(255, 231, 161, 0.16); }
     .treasury-status { display: inline-block; margin-top: 10px; color: var(--accent); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .treasury-fund-balances, .treasury-fund-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+    .treasury-fund-balances { margin: 8px 0; }
+    .treasury-fund-balances small { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .treasury-fund-balances .token-badge img, .treasury-fund-links img { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
+    .treasury-fund-links { margin-top: 9px; }
+    .treasury-fund-links a { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-size: 0.82rem; text-decoration: none; }
+    .treasury-fund-links a:hover { text-decoration: underline; }
     .token-badge { display: inline-flex; align-items: center; gap: 5px; vertical-align: middle; color: #ffe39a; white-space: nowrap; }
     .token-badge img { width: 18px; height: 18px; object-fit: contain; border-radius: 50%; filter: drop-shadow(0 0 6px rgba(255, 214, 109, 0.45)); }
     .cid-help { position: relative; }
@@ -1540,6 +1547,7 @@
     }
     .token-picker-option[data-selected="true"] { border-color: rgba(255, 214, 109, 0.6); color: #ffe39a; box-shadow: 0 0 12px rgba(255, 214, 109, 0.25); }
     .token-registry { display: grid; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(122, 240, 198, 0.14); }
+    .token-registry[hidden] { display: none; }
     .token-registry-row { display: grid; grid-template-columns: 0.7fr 1.4fr 0.6fr auto auto auto; gap: 8px; align-items: center; }
     .token-registry-row input { min-width: 0; }
     .token-image-preview { width: 30px; height: 30px; object-fit: contain; border-radius: 50%; background: rgba(255,255,255,0.08); }
@@ -2213,12 +2221,6 @@
         <div class="card">
           <h3>Finalize payout</h3>
           <p class="muted">Use the connected MetaMask account to call the settlement router and complete a payout.</p>
-          <div class="field-grid">
-            <div class="field">
-              <label for="router-address">Settlement router</label>
-              <input id="router-address" value="0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5" placeholder="0x..." />
-            </div>
-          </div>
           <div class="field-grid" style="margin-top:12px;">
             <div class="field">
               <label for="selected-fund-id">Selected fund id</label>
@@ -2280,7 +2282,7 @@
           <div class="field-grid">
             <div class="field">
               <label for="new-fund-id">Fund id</label>
-              <input id="new-fund-id" value="bignuten-repo-dev" placeholder="repo-slug-or-name" />
+              <input id="new-fund-id" value="" placeholder="Enter a fund slug" />
             </div>
             <div class="field">
               <label for="new-fund-uri">Fund metadata URI</label>
@@ -2325,16 +2327,24 @@
         </div>
         <div class="card">
           <h3>Token registry</h3>
-          <p class="muted">Update contract addresses, decimals, or icons for every supported payout token.</p>
-          <div id="token-registry-list"></div>
-          <div class="token-registry-row">
-            <input id="token-symbol-input" placeholder="BNUT" aria-label="Token symbol" />
-            <input id="token-address-input" placeholder="0x token contract" aria-label="Token contract" />
-            <input id="token-decimals-input" value="18" inputmode="numeric" placeholder="18" aria-label="Token decimals" />
-            <label class="btn secondary" for="token-image-input">Choose icon<input id="token-image-input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden /></label>
+          <p class="muted">Choose a token, then approve it or edit its registry details.</p>
+          <div id="token-registry-picker" class="token-picker" data-open="false"></div>
+          <div class="admin-actions">
+            <button id="token-registry-approve-button" class="btn secondary" type="button" disabled>Approve token</button>
+            <button id="token-registry-edit-button" class="btn secondary" type="button" disabled>Edit token</button>
+            <button id="add-token-button" class="btn secondary" type="button" disabled>Add token</button>
           </div>
-          <div class="admin-actions"><button id="add-token-button" class="btn secondary" type="button" disabled>Add token</button></div>
-          <p id="token-registry-status" class="note">Update an existing token above or add a new supported token.</p>
+          <div id="token-registry-editor" class="token-registry" hidden>
+            <div class="token-registry-row">
+              <input id="token-symbol-input" placeholder="BNUT" aria-label="Token symbol" />
+              <input id="token-address-input" placeholder="0x token contract" aria-label="Token contract" />
+              <input id="token-decimals-input" value="18" inputmode="numeric" placeholder="18" aria-label="Token decimals" />
+              <label class="btn secondary" for="token-image-input">Choose icon<input id="token-image-input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden /></label>
+              <button id="save-token-button" class="btn secondary" type="button">Save token</button>
+              <button id="cancel-token-edit-button" class="btn secondary" type="button">Cancel</button>
+            </div>
+          </div>
+          <p id="token-registry-status" class="note">Select a token to approve or edit it, or add a new token.</p>
         </div>
         <div class="card">
           <h3>Recover treasury funds</h3>
@@ -2407,21 +2417,32 @@
     ];
     const artTokenAddress = "0x44c4516768e47cd97cfF2561B81a74699F23f8Ec";
     const publicRouterAddress = "0x8ecca903e2a6Daa8CCbB933700e4F2C58C44A4B5";
+    const SETTLEMENT_ROUTER_ADDRESS = publicRouterAddress;
     const publicBaseRpc = "https://base-rpc.publicnode.com";
     const settlementFundId = keccak256(toUtf8Bytes("artfi-repo-dev"));
+    // Fund options come from the router; these slugs only supply human-readable labels.
     const defaultFundRegistry = [
-      { id: "artfi-repo-dev", uri: "ipfs://bafyartfirepodevfundmetadata000000000000000001" },
-      { id: "bignuten-repo-dev", uri: "ipfs://bafkreib6tsoxhmjrl6etnf6t2rt2swwgptrvjtcvrnh2uozjnqxafagzzy" },
+      { id: "artfi-repo-dev", uri: "" },
+      { id: "bignuten-repo-dev", uri: "" },
     ];
     const knownFundAliases = new Map([
       [keccak256(toUtf8Bytes("artfi-repo-dev")).toLowerCase(), "artfi-repo-dev"],
       [keccak256(toUtf8Bytes("bignuten-repo-dev")).toLowerCase(), "bignuten-repo-dev"],
     ]);
+    // keccak256 is case sensitive, so every fund id is canonicalised before hashing.
+    const FUND_SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
+    const BYTES32_RE = /^0x[a-fA-F0-9]{64}$/;
+    const normalizeFundSlug = value => String(value || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+    const fundIdFor = value => {
+      const raw = String(value || "").trim();
+      return BYTES32_RE.test(raw) ? raw : keccak256(toUtf8Bytes(normalizeFundSlug(raw)));
+    };
+
     const normalizeFundRegistry = funds => {
       const unique = new Map();
       for (const fund of Array.isArray(funds) ? funds : []) {
         const rawId = String(fund?.id || "").trim();
-        const id = knownFundAliases.get(rawId.toLowerCase()) || rawId;
+        const id = knownFundAliases.get(rawId.toLowerCase()) || normalizeFundSlug(rawId);
         if (!id) continue;
         unique.set(id.toLowerCase(), { id, uri: String(fund.uri || "") });
       }
@@ -2469,6 +2490,8 @@
     };
 
     let tokenRegistry = loadTokenRegistry();
+    let tokenRegistrySelectedSymbol = tokenRegistry[0]?.symbol || "";
+    let tokenRegistryEditMode = "";
     const saveTokenRegistry = () => {
       tokenRegistry = normalizeTokenRegistry(tokenRegistry);
       localStorage.setItem("artfi-token-registry", JSON.stringify(tokenRegistry));
@@ -2479,34 +2502,48 @@
     const tokenBadge = (symbol, image) => `<span class="token-badge"><img src="${escapeHtml(image || "./Artizen_LOGO.png")}" alt="" aria-hidden="true">${escapeHtml(symbol)}</span>`;
     const tokenInfoForEntry = entry => tokenRegistry.find(token => token.symbol.toUpperCase() === String(entry.currency || "ART").toUpperCase()) || tokenForAddress(artTokenAddress);
 
+    const renderTokenRegistryPicker = () => {
+      if (!tokenRegistryPicker) return;
+      const selected = tokenRegistry.find(token => token.symbol === tokenRegistrySelectedSymbol) || tokenRegistry[0];
+      if (!selected) {
+        tokenRegistryPicker.innerHTML = '<span class="muted">No tokens registered.</span>';
+        return;
+      }
+      tokenRegistrySelectedSymbol = selected.symbol;
+      const addressShort = token => token.address ? `${token.address.slice(0, 6)}…${token.address.slice(-4)}` : "No address";
+      tokenRegistryPicker.innerHTML = `
+        <button class="btn secondary token-picker-button" type="button" aria-expanded="${tokenRegistryPicker.dataset.open === "true"}">${tokenBadge(selected.symbol, selected.image)}<span class="token-picker-address">${escapeHtml(addressShort(selected))}</span></button>
+        <div class="token-picker-menu">${tokenRegistry.map(token => `<button class="btn secondary token-picker-option" type="button" data-symbol="${escapeHtml(token.symbol)}" aria-pressed="${token.symbol === selected.symbol}">${tokenBadge(token.symbol, token.image)}<span class="token-picker-address">${escapeHtml(addressShort(token))}</span></button>`).join("")}</div>`;
+      tokenRegistryPicker.querySelector(".token-picker-button").addEventListener("click", () => {
+        tokenRegistryPicker.dataset.open = tokenRegistryPicker.dataset.open === "true" ? "false" : "true";
+        renderTokenRegistryPicker();
+      });
+      tokenRegistryPicker.querySelectorAll("[data-symbol]").forEach(button => button.addEventListener("click", () => {
+        tokenRegistrySelectedSymbol = button.dataset.symbol;
+        tokenRegistryPicker.dataset.open = "false";
+        renderTokenRegistryPicker();
+        updateTokenRegistryStatus();
+      }));
+    };
+
+    const updateTokenRegistryStatus = async () => {
+      const token = tokenRegistry.find(entry => entry.symbol === tokenRegistrySelectedSymbol);
+      if (!token) return;
+      if (!state.provider) {
+        tokenRegistryStatus.textContent = `${token.symbol} · ${token.address.slice(0, 6)}…${token.address.slice(-4)} · ${token.decimals} decimals`;
+        return;
+      }
+      try {
+        const router = new Contract(SETTLEMENT_ROUTER_ADDRESS, routerAbi, state.provider);
+        const approved = await router.approvedAssets(token.address);
+        tokenRegistryStatus.textContent = `${token.symbol} · ${token.address.slice(0, 6)}…${token.address.slice(-4)} · ${token.decimals} decimals · ${approved ? "approved on router" : "not approved on router"}`;
+      } catch (_) {
+        tokenRegistryStatus.textContent = `${token.symbol} · ${token.address.slice(0, 6)}…${token.address.slice(-4)} · ${token.decimals} decimals`;
+      }
+    };
+
     const renderTokenRegistry = () => {
-      tokenRegistryList.innerHTML = tokenRegistry.map(token => `
-        <div class="token-registry-row" data-token-address="${escapeHtml(token.address)}">
-          <strong>${tokenBadge(token.symbol, token.image)}</strong>
-          <input data-token-address-input value="${escapeHtml(token.address)}" placeholder="0x token contract" aria-label="${escapeHtml(token.symbol)} contract address" />
-          <input data-token-decimals-input value="${token.decimals}" inputmode="numeric" aria-label="${escapeHtml(token.symbol)} decimals" />
-          <label class="btn secondary" for="token-image-${escapeHtml(token.symbol)}">Icon<input id="token-image-${escapeHtml(token.symbol)}" data-token-image-input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden /></label>
-          <span data-token-approval class="muted">Checking…</span>
-          <button class="btn secondary" type="button" data-token-approve="${escapeHtml(token.symbol)}">Approve</button>
-          <button class="btn secondary" type="button" data-token-save="${escapeHtml(token.symbol)}">Update</button>
-        </div>
-      `).join("");
-      tokenRegistryList.querySelectorAll("[data-token-save]").forEach(button => {
-        button.addEventListener("click", () => updateRegisteredToken(button.dataset.tokenSave, button.closest(".token-registry-row")));
-      });
-      tokenRegistryList.querySelectorAll("[data-token-approve]").forEach(button => {
-        button.addEventListener("click", () => approveRegisteredToken(button.dataset.tokenApprove));
-      });
-      tokenRegistryList.querySelectorAll("[data-token-approval]").forEach(async status => {
-        const address = status.closest(".token-registry-row")?.dataset.tokenAddress;
-        if (!address || !state.provider) return;
-        try {
-          const router = new Contract(routerAddress.value.trim(), routerAbi, state.provider);
-          const approved = await router.approvedAssets(address);
-          status.textContent = approved ? "Approved" : "Not approved";
-          status.className = approved ? "treasury-status" : "muted";
-        } catch (_) { status.textContent = "Unknown"; }
-      });
+      renderTokenRegistryPicker();
       const previousPayoutAsset = payoutAssetAddress.value;
       payoutTokenSelect.innerHTML = tokenRegistry.filter(token => token.address).map(token => `<option value="${escapeHtml(token.address)}">${escapeHtml(token.symbol)}</option>`).join("");
       payoutTokenSelect.value = tokenRegistry.some(token => token.address && token.address.toLowerCase() === previousPayoutAsset.toLowerCase()) ? previousPayoutAsset : artTokenAddress;
@@ -2519,33 +2556,64 @@
       const selectedToken = tokenRegistry.find(token => token.address && token.address.toLowerCase() === payoutAssetAddress.value.trim().toLowerCase());
       payoutTokenSelect.value = selectedToken?.address || "";
       renderTokenPickers();
+      updateTokenRegistryStatus();
     };
 
-    const updateRegisteredToken = async (symbol, row) => {
-      const token = tokenRegistry.find(entry => entry.symbol === symbol);
-      if (!token) return;
-      const address = row.querySelector("[data-token-address-input]").value.trim();
-      const decimals = Number(row.querySelector("[data-token-decimals-input]").value.trim());
+    const openTokenEditor = mode => {
+      const token = tokenRegistry.find(entry => entry.symbol === tokenRegistrySelectedSymbol);
+      tokenRegistryEditMode = mode;
+      tokenRegistryEditor.hidden = false;
+      tokenSymbolInput.value = mode === "edit" ? token?.symbol || "" : "";
+      tokenAddressInput.value = mode === "edit" ? token?.address || "" : "";
+      tokenDecimalsInput.value = mode === "edit" ? String(token?.decimals ?? 18) : "18";
+      tokenImageInput.value = "";
+      tokenSymbolInput.readOnly = false;
+      saveTokenButton.textContent = mode === "edit" ? "Save changes" : "Add token";
+      tokenSymbolInput.focus();
+    };
+
+    const saveTokenRegistryEntry = async () => {
+      const previous = tokenRegistryEditMode === "edit"
+        ? tokenRegistry.find(entry => entry.symbol === tokenRegistrySelectedSymbol)
+        : null;
+      const symbol = tokenSymbolInput.value.trim().toUpperCase();
+      const address = tokenAddressInput.value.trim();
+      const decimals = Number(tokenDecimalsInput.value.trim());
+      if (!symbol) {
+        tokenRegistryStatus.textContent = "Enter a token symbol.";
+        return;
+      }
       if (address && !/^0x[a-fA-F0-9]{40}$/.test(address)) {
-        tokenRegistryStatus.textContent = `Enter a valid ${symbol} token address.`;
+        tokenRegistryStatus.textContent = `Enter a valid token address for ${symbol}.`;
         return;
       }
       if (!Number.isInteger(decimals) || decimals < 0 || decimals > 36) {
         tokenRegistryStatus.textContent = `Enter valid ${symbol} decimals from 0 to 36.`;
         return;
       }
-      const file = row.querySelector("[data-token-image-input]").files?.[0];
-      if (file) token.image = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
-      token.address = address;
-      token.decimals = decimals;
+      const collision = tokenRegistry.find(entry => entry !== previous && (entry.symbol === symbol || (address && entry.address.toLowerCase() === address.toLowerCase())));
+      if (collision) {
+        tokenRegistryStatus.textContent = `A token with symbol ${collision.symbol} or this address is already registered.`;
+        return;
+      }
+      let image = previous?.image || "./Artizen_LOGO.png";
+      const file = tokenImageInput.files?.[0];
+      if (file) image = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
+      const updated = { symbol, address, decimals, image };
+      tokenRegistry = previous
+        ? tokenRegistry.map(entry => entry === previous ? updated : entry)
+        : [...tokenRegistry, updated];
+      tokenRegistrySelectedSymbol = symbol;
       saveTokenRegistry();
+      tokenRegistryEditor.hidden = true;
+      tokenRegistryEditMode = "";
       renderTokenRegistry();
-      tokenRegistryStatus.innerHTML = `${tokenBadge(symbol, token.image)} updated everywhere.`;
+      tokenRegistryStatus.innerHTML = `${tokenBadge(symbol, image)} ${previous ? "updated" : "added"}.`;
     };
 
     const approveRegisteredToken = async symbol => {
       const token = tokenRegistry.find(entry => entry.symbol === symbol);
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       if (!token?.address || !state.connected || state.account !== ADMIN_WALLET || !router) {
         tokenRegistryStatus.textContent = "Connect the owner wallet before approving a token.";
         return;
@@ -2612,41 +2680,65 @@
       }));
     };
 
-    const addRegisteredToken = async () => {
-      const symbol = tokenSymbolInput.value.trim().toUpperCase();
-      const address = tokenAddressInput.value.trim();
-      const decimals = Number(tokenDecimalsInput.value.trim());
-      if (!symbol || !/^0x[a-fA-F0-9]{40}$/.test(address) || !Number.isInteger(decimals) || decimals < 0 || decimals > 36) {
-        tokenRegistryStatus.textContent = "Enter a symbol, valid token address, and decimals from 0 to 36.";
-        return;
-      }
-      let image = "./Artizen_LOGO.png";
-      const file = tokenImageInput.files?.[0];
-      if (file) image = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
-      tokenRegistry = [...tokenRegistry.filter(token => token.symbol !== symbol && token.address.toLowerCase() !== address.toLowerCase()), { symbol, address, decimals, image }];
-      saveTokenRegistry();
-      renderTokenRegistry();
-      tokenRegistryStatus.innerHTML = `${tokenBadge(symbol, image)} registered for payouts and treasury labels.`;
-      tokenSymbolInput.value = "";
-      tokenAddressInput.value = "";
-      tokenImageInput.value = "";
+    const addRegisteredToken = () => openTokenEditor("add");
+
+    const fundSlugForId = fundId => {
+      const key = String(fundId || "").toLowerCase();
+      if (knownFundAliases.has(key)) return knownFundAliases.get(key);
+      const match = fundRegistry.find(fund => keccak256(toUtf8Bytes(fund.id)).toLowerCase() === key);
+      return match ? match.id : null;
     };
 
     const renderFundRegistry = () => {
-      const options = fundRegistry.map(fund => `<option value="${escapeHtml(fund.id)}">${escapeHtml(fund.id)}</option>`).join("");
-      manageFundId.innerHTML = options;
-      const managedFund = manageFundId.value;
-      manageFundId.value = fundRegistry.some(fund => fund.id === managedFund) ? managedFund : fundRegistry[0]?.id || "";
-      [selectedFundId, depositFundId, sweepFundId].forEach(select => {
-        const currentValue = select.value || "artfi-repo-dev";
+      const funds = state.chainFunds || [];
+      const options = funds.length
+        ? funds.map(fund => `<option value="${escapeHtml(fund.slug)}">${escapeHtml(fund.slug)}${fund.active ? "" : " — inactive"}</option>`).join("")
+        : '<option value="">No funds created on this router yet</option>';
+      const applyOptions = (select, fallback) => {
+        const current = select.value;
         select.innerHTML = options;
-        select.value = fundRegistry.some(fund => fund.id === currentValue) ? currentValue : fundRegistry[0]?.id || "";
-      });
-      if (depositFundStatus) depositFundStatus.textContent = `Deposit target: ${depositFundId.value || "none selected"}`;
+        const values = funds.map(fund => fund.slug);
+        select.value = values.includes(current) ? current : (fallback ?? values[0] ?? "");
+      };
+      applyOptions(manageFundId);
+      [selectedFundId, depositFundId, sweepFundId].forEach(select => applyOptions(select));
+      if (depositFundStatus) depositFundStatus.textContent = depositFundId.value
+        ? `Deposit target: ${depositFundId.value}`
+        : "Create a named fund before depositing.";
+    };
+
+    const loadChainFunds = async (provider) => {
+      try {
+        const contract = new Contract(SETTLEMENT_ROUTER_ADDRESS, routerAbi, provider);
+        const ids = await contract.allFundIds();
+        const funds = [];
+        let unnamedCount = 0;
+        for (const fundId of ids) {
+          const record = await contract.funds(fundId);
+          if (!record.exists) continue;
+          const slug = fundSlugForId(fundId);
+          if (!slug) {
+            unnamedCount += 1;
+            continue;
+          }
+          funds.push({
+            fundId,
+            slug,
+            uri: record.metadataUri,
+            active: record.active,
+          });
+        }
+        state.chainFunds = funds;
+        state.unnamedChainFundCount = unnamedCount;
+      } catch (_) {
+        state.chainFunds = [];
+        state.unnamedChainFundCount = 0;
+      }
+      renderFundRegistry();
     };
 
     const registerFundLocally = (id, uri = "") => {
-      const normalizedId = String(id || "").trim();
+      const normalizedId = normalizeFundSlug(id);
       if (!normalizedId) return;
       fundRegistry = [...fundRegistry.filter(fund => fund.id.toLowerCase() !== normalizedId.toLowerCase()), { id: normalizedId, uri }];
       saveFundRegistry();
@@ -2663,7 +2755,6 @@
     const adminStatus = document.getElementById("admin-status");
     const queueList = document.getElementById("queue-list");
     const selectAllPending = document.getElementById("select-all-pending");
-    const routerAddress = document.getElementById("router-address");
     const createFundButton = document.getElementById("create-fund-button");
     const manageFundId = document.getElementById("manage-fund-id");
     const finishFundButton = document.getElementById("finish-fund-button");
@@ -2690,12 +2781,17 @@
     const payoutMode = document.getElementById("payout-mode");
     const payoutTokenSelect = document.getElementById("payout-token-select");
     const payoutAssetAddress = document.getElementById("payout-asset-address");
-    const tokenRegistryList = document.getElementById("token-registry-list");
+    const tokenRegistryPicker = document.getElementById("token-registry-picker");
+    const tokenRegistryEditor = document.getElementById("token-registry-editor");
     const tokenSymbolInput = document.getElementById("token-symbol-input");
     const tokenAddressInput = document.getElementById("token-address-input");
     const tokenDecimalsInput = document.getElementById("token-decimals-input");
     const tokenImageInput = document.getElementById("token-image-input");
     const addTokenButton = document.getElementById("add-token-button");
+    const tokenRegistryApproveButton = document.getElementById("token-registry-approve-button");
+    const tokenRegistryEditButton = document.getElementById("token-registry-edit-button");
+    const saveTokenButton = document.getElementById("save-token-button");
+    const cancelTokenEditButton = document.getElementById("cancel-token-edit-button");
     const tokenRegistryStatus = document.getElementById("token-registry-status");
     const treasuryBalance = document.getElementById("treasury-balance");
     const treasuryAllocated = document.getElementById("treasury-allocated");
@@ -2942,6 +3038,8 @@
       updateFundUriButton.disabled = !isAdmin;
       depositFundButton.disabled = !isAdmin;
       addTokenButton.disabled = !isAdmin;
+      tokenRegistryApproveButton.disabled = !isAdmin || !tokenRegistrySelectedSymbol;
+      tokenRegistryEditButton.disabled = !isAdmin || !tokenRegistrySelectedSymbol;
       fundMetadataUploadButton.disabled = !isAdmin;
       if (!isAdmin && fundMetadataStatus) fundMetadataStatus.textContent = connected
         ? "Connect the owner wallet to upload fund metadata."
@@ -2981,7 +3079,7 @@
 
     const refreshSweepControls = async () => {
       const isAdmin = state.connected && state.account === ADMIN_WALLET;
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       const asset = sweepAsset.value.trim();
       if (sweepFundButton) sweepFundButton.disabled = !isAdmin;
       if (sweepExcessButton) sweepExcessButton.disabled = !isAdmin || !sweepUnallocatedCheckbox.checked;
@@ -2996,7 +3094,7 @@
         const token = new Contract(asset, [
           "function balanceOf(address who) view returns (uint256)"
         ], provider);
-        const fundId = keccak256(toUtf8Bytes(sweepFundId.value || "artfi-repo-dev"));
+        const fundId = fundIdFor(sweepFundId.value);
         const [held, allocated, fundAvailable] = await Promise.all([
           token.balanceOf(router),
           routerContract.totalFundBalances(asset),
@@ -3015,7 +3113,7 @@
     };
 
     const refreshTreasuryStatus = async () => {
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       if (!router || !window.ethereum) {
         if (treasuryBalance) treasuryBalance.textContent = "ART: --";
         if (treasuryAllocated) treasuryAllocated.textContent = "Allocated: --";
@@ -3037,7 +3135,7 @@
           "function balanceOf(address who) view returns (uint256)"
         ], provider);
 
-        const fundId = keccak256(toUtf8Bytes(selectedFundId.value || "artfi-repo-dev"));
+        const fundId = fundIdFor(selectedFundId.value);
         const [held, allocated, fundAvailable] = await Promise.all([
           token.balanceOf(router),
           routerContract.totalFundBalances(selectedAsset),
@@ -3048,6 +3146,11 @@
         if (treasuryBalance) treasuryBalance.innerHTML = `${badge} held: ${formatUnits(held, selectedToken.decimals)}`;
         if (treasuryAllocated) treasuryAllocated.innerHTML = `${badge} available in ${escapeHtml(selectedFundId.value)}: ${formatUnits(fundAvailable, selectedToken.decimals)}`;
         if (treasuryExcess) treasuryExcess.innerHTML = `${badge} unallocated: ${formatUnits(excess, selectedToken.decimals)}`;
+
+        const onChainFunds = new Set();
+        await loadChainFunds(provider);
+        for (const fund of state.chainFunds || []) if (fund.slug) onChainFunds.add(fund.slug.toLowerCase());
+        state.onChainFunds = onChainFunds;
 
         await refreshSweepControls();
       } catch (_) {
@@ -3077,14 +3180,15 @@
         publicTreasuryAllocated.innerHTML = `${artBadge} allocated: ${formatUnits(allocated, 18)}`;
         publicTreasuryUnallocated.innerHTML = `${artBadge} unallocated: ${formatUnits(unallocated, 18)}`;
 
-        const discoveredFunds = new Map(fundRegistry.map(fund => [
-          keccak256(toUtf8Bytes(fund.id)).toLowerCase(),
-          { fundId: keccak256(toUtf8Bytes(fund.id)), displayId: fund.id, metadataUri: fund.uri || "" },
+        await loadChainFunds(provider);
+        const discoveredFunds = new Map((state.chainFunds || []).map(fund => [
+          fund.fundId.toLowerCase(),
+          { fundId: fund.fundId, displayId: fund.slug, metadataUri: fund.uri || "" },
         ]));
         const funds = await Promise.all([...discoveredFunds.values()].map(async discovered => {
           const fundId = discovered.fundId;
           const metadataUri = discovered.metadataUri;
-          const metadataPromise = metadataUri.includes("bafyartfirepodevfundmetadata000000000000000001")
+          const metadataPromise = !metadataUri
             ? Promise.resolve(null)
             : Promise.race([
                 fetchIpfsJson(metadataUri),
@@ -3099,10 +3203,9 @@
             }))),
           ]);
           const fund = fundResult.fund;
-          const knownName = knownFundAliases.get(fundId.toLowerCase()) || "";
           return {
             fundId,
-            label: discovered.displayId || knownName || `${fundId.slice(0, 10)}…${fundId.slice(-8)}`,
+            label: discovered.displayId,
             metadataUri,
             balances,
             balance: balances.reduce((sum, entry) => sum + entry.balance, 0n),
@@ -3116,15 +3219,17 @@
         publicTreasuryFunds.innerHTML = visibleFunds.length ? visibleFunds.map(fund => `
           <article class="treasury-fund" data-funded="${fund.balance > 0n ? "true" : "false"}">
             <strong>${fund.label}</strong>
-            <div class="treasury-token-balances">${fund.balances.map(entry => `<small>${tokenBadge(entry.token.symbol, entry.token.image)} ${formatUnits(entry.balance, entry.token.decimals)} allocated</small>`).join("")}</div>
-            <span class="treasury-status">${!fund.created ? "Not created on-chain" : fund.active ? (fund.balance > 0n ? "Funded" : "Awaiting allocation") : "Inactive"}</span>
-            ${fund.metadata?.websiteUrl ? `<small><a href="${escapeHtml(fund.metadata.websiteUrl)}" target="_blank" rel="noreferrer">Open website / Pages</a></small>` : ""}
-            ${fund.metadata?.ens ? `<small>ENS: ${escapeHtml(fund.metadata.ens)}</small>` : ""}
-            ${fund.metadata?.artizenProjects?.length ? `<small>${fund.metadata.artizenProjects.map(url => `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">Artizen project</a>`).join(" • ")}</small>` : ""}
-            ${fund.metadataUri ? `<small>${fund.metadataUri}</small>` : ""}
+            <div class="treasury-fund-balances">${fund.balances.filter(entry => entry.balance > 0n).map(entry => `<small>${tokenBadge(entry.token.symbol, entry.token.image)} ${formatUnits(entry.balance, entry.token.decimals)} allocated</small>`).join("") || '<small>No token allocations yet</small>'}</div>
+            <span class="treasury-status">${fund.balance > 0n ? "Funded" : "Awaiting allocation"}</span>
+            <div class="treasury-fund-links">
+              ${fund.metadata?.websiteUrl && isHttpsUrl(fund.metadata.websiteUrl) ? `<a href="${escapeHtml(fund.metadata.websiteUrl)}" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🌐</span> website</a>` : ""}
+              ${fund.metadata?.ens ? `<a href="https://app.ens.domains/${encodeURIComponent(fund.metadata.ens)}" target="_blank" rel="noopener noreferrer"><img src="./Ens_Eth_Breathe.gif" alt="" aria-hidden="true"> ENS: ${escapeHtml(fund.metadata.ens)}</a>` : ""}
+              ${fund.metadata?.artizenProjects?.filter(isHttpsUrl).map(url => `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><img src="./Artizen_LOGO.png" alt="" aria-hidden="true"> Artizen project</a>`).join("") || ""}
+              ${fund.metadataUri && cidGatewayUrl(fund.metadataUri) ? `<a href="${escapeHtml(cidGatewayUrl(fund.metadataUri))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(fund.metadataUri)}"><img src="./IPFS_Logo.png" alt="" aria-hidden="true"> Content Hash</a>` : ""}
+            </div>
           </article>
         `).join("") : '<div class="empty-state">No active repository funds have been created yet.</div>';
-        publicTreasuryStatus.textContent = `Updated from Base. ${visibleFunds.length} active fund${visibleFunds.length === 1 ? "" : "s"} shown.`;
+        publicTreasuryStatus.textContent = `Updated from Base. ${visibleFunds.length} active named fund${visibleFunds.length === 1 ? "" : "s"} shown.`;
       } catch (error) {
         publicTreasuryFunds.innerHTML = '<div class="empty-state">Treasury holdings are temporarily unavailable.</div>';
         publicTreasuryStatus.textContent = error?.message || "Could not read public treasury holdings.";
@@ -3132,24 +3237,33 @@
     };
 
     const createFund = async () => {
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       if (!state.connected || state.account !== ADMIN_WALLET || !router) {
         txNote.textContent = "Connect the owner wallet before creating a treasury fund.";
         return;
       }
 
-      const fundIdText = newFundId.value.trim();
+      const fundIdText = normalizeFundSlug(newFundId.value);
       const fundUri = newFundUri.value.trim();
       if (!fundIdText || !fundUri) {
         txNote.textContent = "Enter both a fund id and a metadata URI before creating the fund.";
         return;
       }
+      if (!FUND_SLUG_RE.test(fundIdText)) {
+        txNote.textContent = `"${newFundId.value.trim()}" is not a valid fund id. Use lowercase letters, numbers, and hyphens.`;
+        return;
+      }
+      newFundId.value = fundIdText;
 
       try {
         createFundButton.disabled = true;
-        txNote.textContent = `Creating a new settlement fund: ${fundIdText}…`;
         const contract = new Contract(router, routerAbi, state.signer);
         const fundHash = keccak256(toUtf8Bytes(fundIdText));
+        const existing = await contract.funds(fundHash);
+        if (existing.exists) {
+          throw new Error(`Fund ${fundIdText} already exists on this router (${fundHash}).`);
+        }
+        txNote.textContent = `Creating a new settlement fund: ${fundIdText} (${fundHash})…`;
         const tx = await contract.createFund(fundHash, fundUri);
         await tx.wait();
         registerFundLocally(fundIdText, fundUri);
@@ -3162,13 +3276,17 @@
     };
 
     const depositToFund = async () => {
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       if (!state.connected || state.account !== ADMIN_WALLET || !router) {
         txNote.textContent = "Connect the owner wallet before depositing to the treasury.";
         return;
       }
 
-      const fundIdText = (depositFundId.value.trim() || newFundId.value.trim() || "artfi-repo-dev");
+      const fundIdText = depositFundId.value.trim();
+      if (!fundIdText) {
+        txNote.textContent = "Create a fund on the settlement router before depositing.";
+        return;
+      }
       const asset = depositAsset.value.trim();
       const rawAmount = depositAmount.value.trim();
       if (!asset || !/^0x[a-fA-F0-9]{40}$/.test(asset) || !rawAmount || Number(rawAmount) <= 0) {
@@ -3181,9 +3299,9 @@
         await assertContractAtAddress(router, "Settlement Router");
         await assertContractAtAddress(asset, "Token contract");
         const contract = new Contract(router, routerAbi, state.signer);
-        const fundHash = keccak256(toUtf8Bytes(fundIdText));
+        const fundHash = fundIdFor(fundIdText);
         const fundState = await contract.funds(fundHash);
-        if (!fundState[1]) {
+        if (!fundState.active) {
           throw new Error(`Fund ${fundIdText} is not active on this settlement router. Create or reactivate it before depositing.`);
         }
         const token = new Contract(asset, [
@@ -3217,13 +3335,13 @@
     };
 
     const setManagedFundActive = async active => {
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       const fundIdText = manageFundId.value.trim();
       if (!state.connected || state.account !== ADMIN_WALLET || !router || !fundIdText) return;
       try {
         await assertBaseNetwork();
         const contract = new Contract(router, routerAbi, state.signer);
-        const transaction = await contract.setFundActive(keccak256(toUtf8Bytes(fundIdText)), active);
+        const transaction = await contract.setFundActive(fundIdFor(fundIdText), active);
         txNote.textContent = `${active ? "Reactivating" : "Marking finished"} ${fundIdText}…`;
         await transaction.wait();
         refreshAfterWalletTransaction(`${fundIdText} ${active ? "reactivated" : "marked finished"}. Refreshing ArtFi…`);
@@ -3233,7 +3351,7 @@
     };
 
     const updateManagedFundUri = async () => {
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       const fundIdText = manageFundId.value.trim();
       const metadataUri = newFundUri.value.trim();
       if (!state.connected || state.account !== ADMIN_WALLET || !router || !fundIdText || !metadataUri) return;
@@ -3241,7 +3359,7 @@
         await assertBaseNetwork();
         await assertRouterMethodAvailable(router, "setFundMetadataUri(bytes32,string)", "Fund URI updates");
         const contract = new Contract(router, routerAbi, state.signer);
-        const transaction = await contract.setFundMetadataUri(keccak256(toUtf8Bytes(fundIdText)), metadataUri);
+        const transaction = await contract.setFundMetadataUri(fundIdFor(fundIdText), metadataUri);
         await transaction.wait();
         registerFundLocally(fundIdText, metadataUri);
         refreshAfterWalletTransaction(`Updated metadata URI for ${fundIdText}. Refreshing ArtFi…`);
@@ -3251,7 +3369,7 @@
     };
 
     const sweepFundToWallet = async () => {
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       if (!state.connected || state.account !== ADMIN_WALLET || !router) {
         setSweepStatus("Connect the owner wallet before sweeping a fund allocation.");
         return;
@@ -3269,7 +3387,7 @@
         }
         await assertContractAtAddress(asset, "Sweep token");
         const contract = new Contract(router, routerAbi, state.signer);
-        const fundId = keccak256(toUtf8Bytes(fundIdText));
+        const fundId = fundIdFor(fundIdText);
         const sweepToken = tokenForAddress(asset);
         const amount = parseUnits(rawAmount, sweepToken.decimals);
         const balance = await contract.fundBalances(fundId, asset);
@@ -3289,7 +3407,7 @@
     };
 
     const sweepUnallocatedToWallet = async () => {
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       if (!state.connected || state.account !== ADMIN_WALLET || !router) {
         setSweepStatus("Connect the owner wallet before sweeping unallocated funds.");
         return;
@@ -3548,11 +3666,11 @@
 
     const entryRouter = entry => /^0x[a-fA-F0-9]{40}$/.test(String(entry.router || ""))
       ? String(entry.router)
-      : routerAddress.value.trim();
+      : SETTLEMENT_ROUTER_ADDRESS;
 
     const entryFundSlug = entry => String(entry.fund || selectedFundId?.value.trim() || "artfi-repo-dev");
 
-    const isLegacyRouterEntry = entry => entryRouter(entry).toLowerCase() !== routerAddress.value.trim().toLowerCase();
+    const isLegacyRouterEntry = entry => entryRouter(entry).toLowerCase() !== SETTLEMENT_ROUTER_ADDRESS.toLowerCase();
 
     const tokenForCurrency = currency => {
       const symbol = String(currency || "ART").toUpperCase();
@@ -3648,7 +3766,7 @@
       batchSummary.innerHTML = entries.length
         ? `${entries.length} job${entries.length === 1 ? "" : "s"} selected • ${creators.length} creator${creators.length === 1 ? "" : "s"} • ${formatCurrencyTotals(entries)}`
         : "No jobs selected.";
-      finalizeButton.disabled = !(state.connected && state.account === ADMIN_WALLET && entries.length && routerAddress.value.trim());
+      finalizeButton.disabled = !(state.connected && state.account === ADMIN_WALLET && entries.length && SETTLEMENT_ROUTER_ADDRESS);
       if (selectAllPending) {
         const allQueueSelected = state.queue.length > 0 && state.queue.every(entry => {
           const item = queueList.querySelector(`input[data-entry-key="${CSS.escape(queueEntryKey(entry))}"]`);
@@ -3686,12 +3804,12 @@
       try {
         const response = await fetch("./payroll-queue.json", { cache: "no-store" });
         const queue = await response.json();
-        const settled = locallySettledQueueEntries(routerAddress.value.trim());
+        const settled = locallySettledQueueEntries(SETTLEMENT_ROUTER_ADDRESS);
         let pending = Array.isArray(queue.pending)
           ? queue.pending.filter(entry => !settled.has(queueEntryKey(entry)))
           : [];
 
-        if (pending.length && state.provider && routerAddress.value.trim()) {
+        if (pending.length && state.provider && SETTLEMENT_ROUTER_ADDRESS) {
           try {
             await assertBaseNetwork();
             const settledOnChain = await Promise.all(pending.map(async entry => {
@@ -4132,6 +4250,7 @@
     });
     [fundMetadataTitle, fundMetadataRepository, fundMetadataWebsite, fundMetadataEns, fundMetadataTreasury, fundMetadataProjects, newFundId].forEach(input => input.addEventListener("input", updateFundMetadataPreview));
     fundMetadataUploadButton.addEventListener("click", uploadFundMetadata);
+    newFundId.addEventListener("blur", () => { newFundId.value = normalizeFundSlug(newFundId.value) || newFundId.value; });
     updateFundMetadataPreview();
 
     nodeRewardOptin.addEventListener("change", () => {
@@ -4312,7 +4431,7 @@
       await assertContractAtAddress(router, legacy ? "Legacy settlement router" : "Settlement Router");
       await assertContractAtAddress(token.address, `${token.symbol} token`);
       const contract = new Contract(router, routerAbi, state.signer);
-      const selectedFund = keccak256(toUtf8Bytes(fundSlug));
+      const selectedFund = fundIdFor(fundSlug);
       const erc20 = new Contract(token.address, [
         "function allowance(address owner, address spender) view returns (uint256)",
         "function approve(address spender, uint256 amount) returns (bool)",
@@ -4387,7 +4506,7 @@
         }
         txNote.textContent = `Submitting ${label} in one transaction…`;
         await (await contract.payoutBatch(...batchArgs)).wait();
-        entries.forEach(entry => markQueueEntrySettled(routerAddress.value.trim(), entry));
+        entries.forEach(entry => markQueueEntrySettled(SETTLEMENT_ROUTER_ADDRESS, entry));
         return entries.length;
       }
 
@@ -4404,7 +4523,7 @@
         }
         txNote.textContent = `Submitting @${job.contributorGithub} ${token.symbol} (${index + 1}/${jobs.length})…`;
         await (await contract[payoutMethod](...payoutArgs)).wait();
-        markQueueEntrySettled(routerAddress.value.trim(), entries[index]);
+        markQueueEntrySettled(SETTLEMENT_ROUTER_ADDRESS, entries[index]);
         settledCount += 1;
       }
       return settledCount;
@@ -4413,7 +4532,7 @@
     const finalizePayout = async () => {
       if (!state.connected || !state.signer) return;
 
-      const router = routerAddress.value.trim();
+      const router = SETTLEMENT_ROUTER_ADDRESS;
       const entries = selectedEntries();
 
       if (!router || !entries.length) {
@@ -4481,6 +4600,14 @@
 
     walletButton.addEventListener("click", connectWallet);
     addTokenButton.addEventListener("click", addRegisteredToken);
+    tokenRegistryApproveButton.addEventListener("click", () => approveRegisteredToken(tokenRegistrySelectedSymbol));
+    tokenRegistryEditButton.addEventListener("click", () => openTokenEditor("edit"));
+    saveTokenButton.addEventListener("click", saveTokenRegistryEntry);
+    cancelTokenEditButton.addEventListener("click", () => {
+      tokenRegistryEditor.hidden = true;
+      tokenRegistryEditMode = "";
+      tokenImageInput.value = "";
+    });
     depositAsset.addEventListener("change", renderTokenPickers);
     sweepAsset.addEventListener("change", () => {
       renderTokenPickers();
@@ -4548,10 +4675,6 @@
       drawCanopy();
     });
     canopyResetView?.addEventListener("click", resetCanopyCamera);
-    routerAddress.addEventListener("input", () => {
-      updateBatchSummary();
-      refreshTreasuryStatus();
-    });
 
     if (window.ethereum) {
       window.ethereum.on?.("accountsChanged", (accounts) => {

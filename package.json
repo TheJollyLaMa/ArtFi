@@ -25,7 +25,8 @@
     "compile": "hardhat compile",
     "whitelist:verify": "node scripts/syncContributorWhitelist.js verify",
     "whitelist:plan": "node scripts/syncContributorWhitelist.js plan",
-    "deploy:base": "hardhat run scripts/deploy.js --network base"
+    "deploy:base": "hardhat run scripts/deploy.js --network base",
+    "router:setup": "hardhat run scripts/setupSettlementRouter.js --network base"
   },
   "repository": {
     "type": "git",
