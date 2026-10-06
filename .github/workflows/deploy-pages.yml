@@ -18,6 +18,7 @@ on:
       - scripts/ucanStorage.mjs
       - scripts/adminContractAbis.mjs
       - scripts/indexNetwork.mjs
+      - scripts/networkLogs.mjs
       - package.json
       - package-lock.json
       - .github/workflows/deploy-pages.yml

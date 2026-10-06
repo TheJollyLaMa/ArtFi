@@ -11,6 +11,9 @@ on:
       - scripts/ipfsMetadata.mjs
       - scripts/ucanStorage.mjs
       - scripts/deploy.js
+      - scripts/indexNetwork.mjs
+      - scripts/networkLogs.mjs
+      - test/networkLogs.test.mjs
       - test/ArtFiProtocol.test.js
       - test/browserEmailAuth.test.mjs
       - test/ipfsStorage.test.mjs
@@ -28,6 +31,9 @@ on:
       - scripts/ipfsMetadata.mjs
       - scripts/ucanStorage.mjs
       - scripts/deploy.js
+      - scripts/indexNetwork.mjs
+      - scripts/networkLogs.mjs
+      - test/networkLogs.test.mjs
       - test/ArtFiProtocol.test.js
       - test/browserEmailAuth.test.mjs
       - test/ipfsStorage.test.mjs

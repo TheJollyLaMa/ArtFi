@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Contract, Interface, JsonRpcProvider } from "ethers";
 import { writeFile } from "node:fs/promises";
+import { fetchNetworkLogs } from "./networkLogs.mjs";
 
 const ABI = [
   "event ContentPublished(uint256 indexed publicationId,address indexed publisher,uint8 indexed kind,string cid,bytes32 contentHash,bytes32 agentDidHash,bytes32 statusHash,uint256 publishedAt,string artizenProjectUrl,string artizenFundUrl)",
@@ -28,48 +29,13 @@ const protocolInterface = new Interface(PROTOCOL_ABI);
 const latestBlock = await provider.getBlockNumber();
 const fromBlock = Number(process.env.ARTFI_NETWORK_FROM_BLOCK || 51430773);
 const toBlock = Number(process.env.ARTFI_NETWORK_TO_BLOCK || latestBlock);
-const fetchLogs = async address => {
-  const chunkSize = Number(process.env.ARTFI_NETWORK_CHUNK_SIZE || 20000);
-  const logs = [];
-  const fetchRange = async (start, end, attempt = 0) => {
-    const response = await fetch(rpcUrl, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "eth_getLogs",
-        params: [{ address, fromBlock: `0x${start.toString(16)}`, toBlock: `0x${end.toString(16)}` }],
-      }),
-    });
-    if (response.status === 413 && end - start > 1000) {
-      const midpoint = Math.floor((start + end) / 2);
-      const [left, right] = await Promise.all([fetchRange(start, midpoint), fetchRange(midpoint + 1, end)]);
-      return [...left, ...right];
-    }
-    if ((response.status === 429 || response.status >= 500) && attempt < 5) {
-      await new Promise(resolve => setTimeout(resolve, Math.min(15000, 500 * (2 ** attempt))));
-      return fetchRange(start, end, attempt + 1);
-    }
-    if (!response.ok) throw new Error(`Base RPC log query failed (${response.status}) for blocks ${start}-${end}`);
-    const result = await response.json();
-    if (result.error) {
-      if (end - start > 1000) {
-        const midpoint = Math.floor((start + end) / 2);
-        const [left, right] = await Promise.all([fetchRange(start, midpoint), fetchRange(midpoint + 1, end)]);
-        return [...left, ...right];
-      }
-      throw new Error(`Base RPC log query failed for blocks ${start}-${end}: ${result.error.message}`);
-    }
-    return result.result || [];
-  };
-
-  for (let start = fromBlock; start <= toBlock; start += chunkSize) {
-    const end = Math.min(toBlock, start + chunkSize - 1);
-    logs.push(...await fetchRange(start, end));
-  }
-  return logs;
-};
+const fetchLogs = address => fetchNetworkLogs({
+  rpcUrl,
+  address,
+  fromBlock,
+  toBlock,
+  chunkSize: Number(process.env.ARTFI_NETWORK_CHUNK_SIZE || 20000),
+});
 
 const decodeEvents = (logs, iface) => logs.flatMap(log => {
   try {

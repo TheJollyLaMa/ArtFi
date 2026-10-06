@@ -8,8 +8,23 @@ The deployment publishes only:
 - public branding images
 - `payroll-queue.json`
 - the browser-side UCAN client
+- browser-side contract ABIs
+- `artizen-network-index.json`, rebuilt from Base events before deployment
 
 Contracts, tests, npm files, `.env` values, the Pinata JWT, SMTP credentials, and the browser-auth server are never copied into the Pages artifact.
+
+## Scheduled refresh and deployment failures
+
+The workflow also runs hourly (at minute 17) to refresh the public Canopy index.
+GitHub can email a failure notification for each scheduled run, even when the
+commit on `main` has not changed.
+
+The indexer splits rejected log queries into smaller, sequential block ranges,
+down to a single block if needed, and retries rate limits and server errors.
+If Base RPC still rejects a single-block query or retries are exhausted, the
+workflow fails before uploading or deploying; the last successful site remains
+published. Check the **Rebuild public Canopy index from Base events** step for
+the HTTP status and affected block range.
 
 ## Browser authorization
 
