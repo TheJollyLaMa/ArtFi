@@ -19,6 +19,13 @@ The workflow also runs hourly (at minute 17) to refresh the public Canopy index.
 GitHub can email a failure notification for each scheduled run, even when the
 commit on `main` has not changed.
 
+The index rebuild uses PublicNode's public Base endpoint by default. The former
+`https://mainnet.base.org` endpoint repeatedly returned HTTP 429 (`request limit
+reached`), including for single-block queries, so smaller block ranges did not
+resolve those failures. Set the repository Actions secret `BASE_RPC_URL` to use
+a dedicated Base mainnet RPC endpoint instead. This secret is used only by the
+indexer and is not included in the published site.
+
 The indexer splits rejected log queries into smaller, sequential block ranges,
 down to a single block if needed, and retries rate limits and server errors.
 If Base RPC still rejects a single-block query or retries are exhausted, the
