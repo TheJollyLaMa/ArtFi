@@ -1,4 +1,14 @@
 {
+  "_invitationComment": "Wallet-only trial invitations are not GitHub payroll registrations or payout approvals. Verify identity and wallet ownership before promoting an invitation into contributors; no admin role or automatic reward is granted.",
+  "invitedParticipants": [
+    {
+      "displayName": "GrannyLyn",
+      "github": null,
+      "walletAddress": "0xF18E19c537a7A99571Bc3F8cef81DCBCaea7c3AE",
+      "status": "pending-github-registration",
+      "invitedBy": "TheJollyLaMa"
+    }
+  ],
   "contributors": [
     {
       "github": "TheJollyLaMa",
